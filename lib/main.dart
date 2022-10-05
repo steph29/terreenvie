@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized;
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  MyApp({Key? key}) : super(key: key);
+
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp(
+    options: FirebaseOptions(
+      apiKey: "AIzaSyA3TfCMtvxlJRFt9ibeBmyjt46hX_VKiUY",
+      appId: "1:1094407773095:web:4259b1ba7d80d1ee2df482",
+      messagingSenderId: "1094407773095",
+      projectId: "terre-en-vie-766c7",
+    ),
+  );
 
   static const String _title = 'Le coin des bénévoles';
 
@@ -11,9 +24,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+      home: FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print(snapshot.error);
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Scaffold(
+                appBar: AppBar(title: const Text(_title)),
+                body: const MyStatefulWidget());
+          }
+          return CircularProgressIndicator();
+        },
       ),
       debugShowCheckedModeBanner: false,
     );
