@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized;
-  Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -14,13 +14,15 @@ class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
 
   final Future<FirebaseApp> _initialization = Firebase.initializeApp(
-      // options: FirebaseOptions(
-      //   apiKey: "AIzaSyA3TfCMtvxlJRFt9ibeBmyjt46hX_VKiUY",
-      //   appId: "1:1094407773095:web:4259b1ba7d80d1ee2df482",
-      //   messagingSenderId: "1094407773095",
-      //   projectId: "terre-en-vie-766c7",
-      // ),
-      );
+    options: FirebaseOptions(
+        apiKey: "AIzaSyA3TfCMtvxlJRFt9ibeBmyjt46hX_VKiUY",
+        authDomain: "terre-en-vie-766c7.firebaseapp.com",
+        projectId: "terre-en-vie-766c7",
+        storageBucket: "terre-en-vie-766c7.appspot.com",
+        messagingSenderId: "1094407773095",
+        appId: "1:1094407773095:web:4259b1ba7d80d1ee2df482",
+        measurementId: "G-LMM3Z2WHNL"),
+  );
 
   static const String _title = 'Le coin des bénévoles';
 
@@ -37,7 +39,12 @@ class MyApp extends StatelessWidget {
             return LogController();
           }
           if (snapshot.hasData) {
-            return LogController();
+            try {
+              return MainAppController();
+              // return LogController();
+            } catch (e) {
+              print(e);
+            }
           }
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
