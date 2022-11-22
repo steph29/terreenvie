@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
+import 'package:terreenvie/controller/DashboardPage.dart';
 import 'AdminPage.dart';
 import 'ContactPage.dart';
 import 'comptePage.dart';
@@ -99,6 +100,7 @@ class MainAppController extends StatelessWidget {
                           child: Card(
                             elevation: 8,
                             child: Container(
+                              padding: EdgeInsets.all(20.0),
                               child: Text("Choississez vos créneaux !"),
                             ),
                           ),
@@ -106,21 +108,14 @@ class MainAppController extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Container(
-                              height: MediaQuery.of(context).size.height / 2,
-                              width: MediaQuery.of(context).size.width / 4,
-                              child: RightColumn(),
-                            ),
-                            Container(
-                              height: MediaQuery.of(context).size.height / 2,
-                              width: MediaQuery.of(context).size.width / 4,
-                              child: RightColumn(),
-                            ),
-                            Container(
-                              height: MediaQuery.of(context).size.height / 2,
-                              width: MediaQuery.of(context).size.width / 4,
-                              child: RightColumn(),
-                            ),
+                            Expanded(
+                                flex: 1,
+                                child: Container(
+                                  height:
+                                      MediaQuery.of(context).size.height / 1.7,
+                                  padding: EdgeInsets.all(20.0),
+                                  child: DashboardPage(),
+                                )),
                           ],
                         ),
                       ],
@@ -157,32 +152,7 @@ class MainAppController extends StatelessWidget {
   }
 
   Widget RightColumn() {
-    return Card(
-      elevation: 8,
-      child: Container(
-        child: Column(
-          children: [
-            Text("Bonjour Stéphane"),
-            Text(
-                "tu es connecté(e) avec l'adresse email : s.verardo29@gmail.com"),
-            Spacer(),
-            Text(
-                "Tu peux retrouver un récapitulatif de tes créneaux sélectionnés et de les modifier sur la page :"),
-            TextButton(
-              onPressed: () => {},
-              style: ButtonStyle(
-                overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                    (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.focused)) return Colors.red;
-                  return null; // Defer to the widget's default.
-                }),
-              ),
-              child: Text("Mon Compte"),
-            ),
-          ],
-        ),
-      ),
-    );
+    return DashboardPage();
   }
 
   Widget CenterColumn() {
