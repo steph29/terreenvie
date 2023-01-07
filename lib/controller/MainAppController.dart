@@ -112,7 +112,7 @@ class MainAppController extends StatelessWidget {
                                 flex: 1,
                                 child: Container(
                                   height:
-                                      MediaQuery.of(context).size.height / 1.7,
+                                      MediaQuery.of(context).size.height / 2,
                                   padding: EdgeInsets.all(20.0),
                                   child: DashboardPage(),
                                 )),

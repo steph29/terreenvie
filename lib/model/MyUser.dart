@@ -5,7 +5,7 @@ class MyUser {
   String? prenom;
   String? nom;
 
-  MyUser(DataSnapshot snapshot) {
+  MyUser(DataSnapshot snapshot, {required String uid}) {
     uid = snapshot.key!;
     Object map = snapshot.value!;
     prenom = (snapshot.value! as Map)['prenom'];

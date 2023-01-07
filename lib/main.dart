@@ -4,72 +4,31 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:get/get.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized;
+  await Firebase.initializeApp(
+      options: FirebaseOptions(
+    apiKey: "AIzaSyAqqA8Y1qLDP0YR0Cm0oiiLEx5dELhdwgk",
+    appId: "1:1078182509252:web:a8bd648f93bd27522b2791",
+    messagingSenderId: "1078182509252",
+    projectId: "terreenvie-6723d",
+  ));
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
 
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp(
-    options: FirebaseOptions(
-        apiKey: "AIzaSyA3TfCMtvxlJRFt9ibeBmyjt46hX_VKiUY",
-        authDomain: "terre-en-vie-766c7.firebaseapp.com",
-        projectId: "terre-en-vie-766c7",
-        storageBucket: "terre-en-vie-766c7.appspot.com",
-        messagingSenderId: "1094407773095",
-        appId: "1:1094407773095:web:4259b1ba7d80d1ee2df482",
-        measurementId: "G-LMM3Z2WHNL"),
-  );
-
   static const String _title = 'Le coin des bénévoles';
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: _title,
-      home: //_handleAuth(),
-          FutureBuilder(
-        future: _initialization,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            print(snapshot.error);
-            return LogController();
-          }
-          if (snapshot.hasData) {
-            try {
-              return MainAppController();
-              // return LogController();
-            } catch (e) {
-              print(e);
-            }
-          }
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-            ],
-          );
-        },
-      ),
+      home: LogController(),
       debugShowCheckedModeBanner: false,
     );
-  }
-
-  Widget _handleAuth() {
-    return StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.hasData) {
-            // acces a l'app
-            return MainAppController();
-          } else {
-// retourne vers log
-            return LogController();
-          }
-        });
   }
 }

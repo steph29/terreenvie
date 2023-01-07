@@ -1,23 +1,24 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:terreenvie/controller/DashboardPage.dart';
 import 'package:lottie/lottie.dart';
-import 'package:terreenvie/controller/SignUpPage.dart';
+import 'package:get/get.dart';
+import 'package:terreenvie/controller/Logcontroller.dart';
 
-class LogController extends StatefulWidget {
-  const LogController({Key? key}) : super(key: key);
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({Key? key}) : super(key: key);
 
   @override
-  State<LogController> createState() => _LogControllerState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _LogControllerState extends State<LogController> {
+class _SignUpPageState extends State<SignUpPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController prenomController = TextEditingController();
@@ -30,6 +31,9 @@ class _LogControllerState extends State<LogController> {
   String _name = "";
   String _tel = "";
   var _obscureText = true;
+
+  User? currentUser = FirebaseAuth.instance.currentUser;
+
   allowAdminToLogin() async {
     SnackBar snackbar = const SnackBar(
       content: Text(
@@ -85,13 +89,6 @@ class _LogControllerState extends State<LogController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Authentification")),
-      body: AuthLog(),
-    );
-  }
-
-  Widget AuthLog() {
-    return Scaffold(
       body: SingleChildScrollView(
           child: Column(
         children: [
@@ -104,6 +101,67 @@ class _LogControllerState extends State<LogController> {
             margin: EdgeInsets.symmetric(horizontal: 30.0),
             // textfields(),
             child: TextFormField(
+              controller: nameController,
+              obscureText: false,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person),
+                labelText: 'Votre  Nom',
+                labelStyle: TextStyle(
+                  color: Colors.grey[400],
+                ),
+              ),
+              onChanged: (string) {
+                setState(() {
+                  string = _adresseMail;
+                });
+              },
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 30.0),
+            // textfields(),
+            child: TextFormField(
+              controller: prenomController,
+              obscureText: false,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person),
+                labelText: 'Votre  Prénom',
+                labelStyle: TextStyle(
+                  color: Colors.grey[400],
+                ),
+              ),
+              onChanged: (string) {
+                setState(() {
+                  string = _adresseMail;
+                });
+              },
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 30.0),
+            // textfields(),
+            child: TextFormField(
+              controller: telController,
+              obscureText: false,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.phone),
+                labelText: 'Votre  Téléphone',
+                labelStyle: TextStyle(
+                  color: Colors.grey[400],
+                ),
+              ),
+              onChanged: (string) {
+                setState(() {
+                  string = _adresseMail;
+                });
+              },
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 30.0),
+            // textfields(),
+            child: TextFormField(
+              controller: emailController,
               obscureText: false,
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.email),
@@ -112,6 +170,11 @@ class _LogControllerState extends State<LogController> {
                   color: Colors.grey[400],
                 ),
               ),
+              onChanged: (string) {
+                setState(() {
+                  string = _adresseMail;
+                });
+              },
             ),
           ),
           SizedBox(
@@ -121,6 +184,7 @@ class _LogControllerState extends State<LogController> {
             margin: EdgeInsets.symmetric(horizontal: 30.0),
             // textfields(),
             child: TextFormField(
+              controller: passwordController,
               obscureText: _obscureText,
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.password),
@@ -140,6 +204,11 @@ class _LogControllerState extends State<LogController> {
                   },
                 ),
               ),
+              onChanged: (string) {
+                setState(() {
+                  string = _motDePasse;
+                });
+              },
             ),
           ),
           SizedBox(
@@ -151,51 +220,46 @@ class _LogControllerState extends State<LogController> {
               onPressed: () async {
                 var userEmail = emailController.text.trim();
                 var userPassword = passwordController.text.trim();
-                allowAdminToLogin();
+                var userName = nameController.text.trim();
+                var userPrenom = prenomController.text.trim();
+                var userPhone = telController.text.trim();
+
+                FirebaseAuth.instance
+                    .createUserWithEmailAndPassword(
+                        email: userEmail, password: userPassword)
+                    .then((value) => {
+                          log("User created"),
+                          FirebaseFirestore.instance
+                              .collection("benevoles")
+                              .doc()
+                              .set({
+                            'nom': userName,
+                            'prenom': userPrenom,
+                            'tel': userPhone,
+                            'email': userEmail,
+                            'createdAt': DateTime.now(),
+                            'UserId': currentUser!.uid,
+                          }),
+                          log("Data added"),
+                        });
               },
-              child: Text("Authentification"),
+              child: Text("Inscription"),
             ),
           ),
           SizedBox(
             height: 10.0,
           ),
-          Container(
-              child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Text("Mot de passe oublié ?"),
-            ),
-          )),
           SizedBox(
             height: 10.0,
           ),
           ElevatedButton(
             onPressed: () {
-              Get.to(() => SignUpPage());
+              Get.to(() => LogController());
             },
-            child: Text("Pas encore de compte, inscrivez-vous !"),
+            child: Text("Vous avez déjà un compte, connectez-vous !"),
           ),
         ],
       )),
     );
-  }
-
-  Future<void> alerte(String message) async {
-    Text title = Text("Erreur");
-    Text msg = Text(message);
-    FloatingActionButton okButton = FloatingActionButton(
-      onPressed: () => Navigator.of(context).pop(),
-      child: Text("ok"),
-    );
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext ctx) {
-          return AlertDialog(
-            title: title,
-            content: msg,
-            actions: <Widget>[okButton],
-          );
-        });
   }
 }
