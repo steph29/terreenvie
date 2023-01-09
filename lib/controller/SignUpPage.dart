@@ -231,7 +231,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           log("User created"),
                           FirebaseFirestore.instance
                               .collection("benevoles")
-                              .doc()
+                              .doc(currentUser!.uid)
                               .set({
                             'nom': userName,
                             'prenom': userPrenom,
