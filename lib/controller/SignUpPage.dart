@@ -35,58 +35,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   User? currentUser = FirebaseAuth.instance.currentUser;
 
-  allowAdminToLogin() async {
-    SnackBar snackbar = const SnackBar(
-      content: Text(
-        "Loading ... ",
-        style: const TextStyle(fontSize: 36, color: Colors.black),
-      ),
-      backgroundColor: Colors.pinkAccent,
-      duration: Duration(seconds: 1),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackbar);
-    User? currentnUser;
-    await FirebaseAuth.instance
-        .signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim())
-        .then((fAuth) {
-      currentnUser = fAuth.user;
-    }).catchError((onError) {
-      final snackbar = SnackBar(
-        content: Text(
-          "Erreur " + onError.toString() + emailController.toString(),
-          style: const TextStyle(fontSize: 36, color: Colors.black),
-        ),
-        backgroundColor: Colors.pinkAccent,
-        duration: const Duration(seconds: 15),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackbar);
-    });
-
-    if (currentnUser != null) {
-      // Check if that admin exists in the admin collection friestore  database
-      await FirebaseFirestore.instance
-          .collection("admins")
-          .doc(currentnUser!.uid)
-          .get()
-          .then((snap) {
-        if (snap.exists) {
-          Get.to(DashboardPage());
-        } else {
-          SnackBar snackbar = const SnackBar(
-            content: Text(
-              "Pas de compte trouvé !",
-              style: const TextStyle(fontSize: 36, color: Colors.black),
-            ),
-            backgroundColor: Colors.pinkAccent,
-            duration: Duration(seconds: 5),
-          );
-        }
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +48,6 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
-            // textfields(),
             child: TextFormField(
               controller: nameController,
               obscureText: false,
@@ -111,16 +58,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   color: Colors.grey[400],
                 ),
               ),
-              onChanged: (string) {
-                setState(() {
-                  string = _adresseMail;
-                });
-              },
             ),
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
-            // textfields(),
             child: TextFormField(
               controller: prenomController,
               obscureText: false,
@@ -131,16 +72,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   color: Colors.grey[400],
                 ),
               ),
-              onChanged: (string) {
-                setState(() {
-                  string = _adresseMail;
-                });
-              },
             ),
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
-            // textfields(),
             child: TextFormField(
               controller: telController,
               obscureText: false,
@@ -151,16 +86,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   color: Colors.grey[400],
                 ),
               ),
-              onChanged: (string) {
-                setState(() {
-                  string = _adresseMail;
-                });
-              },
             ),
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
-            // textfields(),
             child: TextFormField(
               controller: emailController,
               obscureText: false,
@@ -171,11 +100,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   color: Colors.grey[400],
                 ),
               ),
-              onChanged: (string) {
-                setState(() {
-                  string = _adresseMail;
-                });
-              },
             ),
           ),
           SizedBox(
@@ -183,7 +107,6 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
-            // textfields(),
             child: TextFormField(
               controller: passwordController,
               obscureText: _obscureText,
@@ -205,11 +128,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   },
                 ),
               ),
-              onChanged: (string) {
-                setState(() {
-                  string = _motDePasse;
-                });
-              },
             ),
           ),
           SizedBox(

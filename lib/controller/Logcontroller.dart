@@ -24,9 +24,6 @@ class LogController extends StatefulWidget {
 class _LogControllerState extends State<LogController> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool _log = true;
-  String _adresseMail = "";
-  String _motDePasse = "";
 
   var _obscureText = true;
 
