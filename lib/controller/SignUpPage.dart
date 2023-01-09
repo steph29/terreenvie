@@ -10,6 +10,7 @@ import 'package:terreenvie/controller/DashboardPage.dart';
 import 'package:lottie/lottie.dart';
 import 'package:get/get.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
+import 'package:terreenvie/model/SignUpServices.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -224,23 +225,13 @@ class _SignUpPageState extends State<SignUpPage> {
                 var userPrenom = prenomController.text.trim();
                 var userPhone = telController.text.trim();
 
-                FirebaseAuth.instance
+                await FirebaseAuth.instance
                     .createUserWithEmailAndPassword(
                         email: userEmail, password: userPassword)
                     .then((value) => {
                           log("User created"),
-                          FirebaseFirestore.instance
-                              .collection("benevoles")
-                              .doc(currentUser!.uid)
-                              .set({
-                            'nom': userName,
-                            'prenom': userPrenom,
-                            'tel': userPhone,
-                            'email': userEmail,
-                            'createdAt': DateTime.now(),
-                            'UserId': currentUser!.uid,
-                          }),
-                          log("Data added"),
+                          signUpserv(userEmail, userPassword, userName,
+                              userPrenom, userPhone),
                         });
               },
               child: Text("Inscription"),

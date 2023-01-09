@@ -2,9 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
-import 'package:terreenvie/controller/MainAppController.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
+import 'package:terreenvie/controller/MainAppController.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized;
@@ -18,16 +17,30 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   MyApp({Key? key}) : super(key: key);
 
   static const String _title = 'Le coin des bénévoles';
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  User? user;
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+    // ignore: avoid_print
+    print(user?.uid.toString());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: _title,
-      home: LogController(),
+      title: MyApp._title,
+      home: user != null ? MainAppController() : const LogController(),
       debugShowCheckedModeBanner: false,
     );
   }

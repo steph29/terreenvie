@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +10,8 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:terreenvie/controller/DashboardPage.dart';
 import 'package:lottie/lottie.dart';
+import 'package:terreenvie/controller/ForgotPwdPage.dart';
+import 'package:terreenvie/controller/MainAppController.dart';
 import 'package:terreenvie/controller/SignUpPage.dart';
 
 class LogController extends StatefulWidget {
@@ -18,69 +22,13 @@ class LogController extends StatefulWidget {
 }
 
 class _LogControllerState extends State<LogController> {
-  TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController prenomController = TextEditingController();
-  TextEditingController telController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _log = true;
   String _adresseMail = "";
   String _motDePasse = "";
-  String _prenom = "";
-  String _name = "";
-  String _tel = "";
-  var _obscureText = true;
-  allowAdminToLogin() async {
-    SnackBar snackbar = const SnackBar(
-      content: Text(
-        "Loading ... ",
-        style: const TextStyle(fontSize: 36, color: Colors.black),
-      ),
-      backgroundColor: Colors.pinkAccent,
-      duration: Duration(seconds: 1),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackbar);
-    User? currentnUser;
-    await FirebaseAuth.instance
-        .signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim())
-        .then((fAuth) {
-      currentnUser = fAuth.user;
-    }).catchError((onError) {
-      final snackbar = SnackBar(
-        content: Text(
-          "Erreur " + onError.toString() + emailController.toString(),
-          style: const TextStyle(fontSize: 36, color: Colors.black),
-        ),
-        backgroundColor: Colors.pinkAccent,
-        duration: const Duration(seconds: 15),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackbar);
-    });
 
-    if (currentnUser != null) {
-      // Check if that admin exists in the admin collection friestore  database
-      await FirebaseFirestore.instance
-          .collection("admins")
-          .doc(currentnUser!.uid)
-          .get()
-          .then((snap) {
-        if (snap.exists) {
-          Get.to(DashboardPage());
-        } else {
-          SnackBar snackbar = const SnackBar(
-            content: Text(
-              "Pas de compte trouvé !",
-              style: const TextStyle(fontSize: 36, color: Colors.black),
-            ),
-            backgroundColor: Colors.pinkAccent,
-            duration: Duration(seconds: 5),
-          );
-        }
-      });
-    }
-  }
+  var _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +50,8 @@ class _LogControllerState extends State<LogController> {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
-            // textfields(),
             child: TextFormField(
+              controller: emailController,
               obscureText: false,
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.email),
@@ -119,8 +67,8 @@ class _LogControllerState extends State<LogController> {
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
-            // textfields(),
             child: TextFormField(
+              controller: passwordController,
               obscureText: _obscureText,
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.password),
@@ -151,7 +99,21 @@ class _LogControllerState extends State<LogController> {
               onPressed: () async {
                 var userEmail = emailController.text.trim();
                 var userPassword = passwordController.text.trim();
-                allowAdminToLogin();
+
+                try {
+                  final User? firebaseUser = (await FirebaseAuth.instance
+                          .signInWithEmailAndPassword(
+                              email: userEmail, password: userPassword))
+                      .user;
+                  if (firebaseUser != null) {
+                    Get.to(() => MainAppController());
+                  } else {
+                    print("Check email and password");
+                  }
+                } on FirebaseAuthException catch (e) {
+                  // ignore: avoid_print
+                  print("Erreur $e");
+                }
               },
               child: Text("Authentification"),
             ),
@@ -161,8 +123,10 @@ class _LogControllerState extends State<LogController> {
           ),
           Container(
               child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
+            child: ElevatedButton(
+              onPressed: () {
+                Get.to(() => ForgotPwdPage());
+              },
               child: Text("Mot de passe oublié ?"),
             ),
           )),
@@ -178,24 +142,5 @@ class _LogControllerState extends State<LogController> {
         ],
       )),
     );
-  }
-
-  Future<void> alerte(String message) async {
-    Text title = Text("Erreur");
-    Text msg = Text(message);
-    FloatingActionButton okButton = FloatingActionButton(
-      onPressed: () => Navigator.of(context).pop(),
-      child: Text("ok"),
-    );
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext ctx) {
-          return AlertDialog(
-            title: title,
-            content: msg,
-            actions: <Widget>[okButton],
-          );
-        });
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:developer';
 import 'dart:html';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
+import 'package:get/get.dart';
 import 'package:terreenvie/controller/DashboardPage.dart';
 import 'AdminPage.dart';
 import 'ContactPage.dart';
@@ -48,7 +50,8 @@ class MainAppController extends StatelessWidget {
         priority: 4,
         title: 'Deconnexion',
         onTap: () {
-          page.jumpToPage(4);
+          FirebaseAuth.instance.signOut();
+          Get.off(() => LogController());
         },
         icon: Icon(Icons.exit_to_app),
       ),
