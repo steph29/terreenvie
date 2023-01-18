@@ -1,12 +1,15 @@
 import 'dart:developer';
 import 'dart:html';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:get/get.dart';
 import 'package:terreenvie/controller/DashboardPage.dart';
+import 'package:terreenvie/model/create.dart';
 import 'AdminPage.dart';
 import 'ContactPage.dart';
 import 'comptePage.dart';
@@ -16,6 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 class MainAppController extends StatelessWidget {
   MainAppController({Key? key}) : super(key: key);
   PageController page = PageController();
+  User? userId = FirebaseAuth.instance.currentUser;
   late final String title;
   @override
   Widget build(BuildContext context) {
@@ -51,7 +55,7 @@ class MainAppController extends StatelessWidget {
         title: 'Deconnexion',
         onTap: () {
           FirebaseAuth.instance.signOut();
-          Get.off(() => LogController());
+          Get.to(() => LogController());
         },
         icon: Icon(Icons.exit_to_app),
       ),
@@ -74,13 +78,7 @@ class MainAppController extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SideMenu(
-            // Page controller to manage a PageView
             controller: page,
-            // Will shows on top of all items, it can be a logo or a Title text
-            // title: Image.asset('/assets/logoTEV.png'),
-            // Will show on bottom of SideMenu when displayMode was SideMenuDisplayMode.open
-            // footer: Text('demo'),
-            // Notify when display mode changed
             onDisplayModeChanged: (mode) {
               print(mode);
             },
@@ -117,7 +115,55 @@ class MainAppController extends StatelessWidget {
                                   height:
                                       MediaQuery.of(context).size.height / 2,
                                   padding: EdgeInsets.all(20.0),
-                                  child: DashboardPage(),
+                                  child: StreamBuilder(
+                                    stream: FirebaseFirestore.instance
+                                        .collection("pos_ben")
+                                        .where("ben_id", isEqualTo: userId?.uid)
+                                        .snapshots(),
+                                    builder: (context,
+                                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                                      if (snapshot.hasError) {
+                                        return Text("Something went wrong");
+                                      }
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                            child:
+                                                CupertinoActivityIndicator());
+                                      }
+                                      if (snapshot.data!.docs.isEmpty) {
+                                        return Center(
+                                            child: Text("No data found"));
+                                      }
+                                      if (snapshot != null &&
+                                          snapshot.data != null) {
+                                        return ListView.builder(
+                                            itemCount:
+                                                snapshot.data!.docs.length,
+                                            itemBuilder: ((context, index) {
+                                              var poste = snapshot.data!
+                                                  .docs[index]['pos_hor_id'];
+                                              var desc = snapshot
+                                                  .data!.docs[index]['ben_id'];
+                                              return Card(
+                                                child: ListTile(
+                                                  title: Text(poste),
+                                                  subtitle: Text(desc),
+                                                  trailing: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(Icons.delete)
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            }));
+                                      }
+
+                                      return Container();
+                                    },
+                                  ),
                                 )),
                           ],
                         ),
@@ -150,6 +196,17 @@ class MainAppController extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(() => Create());
+        },
+        child: Text(
+          "Je choisi",
+          textAlign: TextAlign.center,
+        ),
+        elevation: 8,
+        hoverElevation: 15,
       ),
     );
   }
