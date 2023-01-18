@@ -9,13 +9,14 @@ signUpserv(String userEmail, String userPassword, String userName,
   User? userid = FirebaseAuth.instance.currentUser;
 
   try {
-    FirebaseFirestore.instance.collection("benevoles").doc(userid!.uid).set({
+    FirebaseFirestore.instance.collection("users").doc(userid!.uid).set({
       'nom': userName,
       'prenom': userPrenom,
       'tel': userPhone,
       'email': userEmail,
       'createdAt': DateTime.now(),
       'UserId': userid.uid,
+      'role': 'ben'
     }).then((value) => {
           FirebaseAuth.instance.signOut(),
           // ignore: prefer_const_constructors
