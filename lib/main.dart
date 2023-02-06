@@ -42,6 +42,7 @@ class _MyAppState extends State<MyApp> {
       title: MyApp._title,
       home: user != null ? MainAppController() : const LogController(),
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(primaryColor: Color(0xFFf2f0e7)),
     );
   }
 }
