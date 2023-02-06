@@ -94,18 +94,8 @@ class MainAppController extends StatelessWidget {
                   child: Center(
                     child: Container(
                         child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height / 3,
-                          width: MediaQuery.of(context).size.width,
-                          child: Card(
-                            elevation: 8,
-                            child: Container(
-                              padding: EdgeInsets.all(20.0),
-                              child: Text("Choississez vos créneaux !"),
-                            ),
-                          ),
-                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -117,8 +107,9 @@ class MainAppController extends StatelessWidget {
                                   padding: EdgeInsets.all(20.0),
                                   child: StreamBuilder(
                                     stream: FirebaseFirestore.instance
-                                        .collection("pos_ben")
-                                        .where("ben_id", isEqualTo: userId?.uid)
+                                        .collection("pos_hor")
+                                        .where("jour", isEqualTo: "5")
+                                        .where("ben_id", isEqualTo: userId!.uid)
                                         .snapshots(),
                                     builder: (context,
                                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -137,28 +128,106 @@ class MainAppController extends StatelessWidget {
                                       }
                                       if (snapshot != null &&
                                           snapshot.data != null) {
-                                        return ListView.builder(
+                                        return Center(
+                                          child: GridView.builder(
+                                            controller: ScrollController(),
+                                            shrinkWrap: true,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 30),
                                             itemCount:
                                                 snapshot.data!.docs.length,
-                                            itemBuilder: ((context, index) {
-                                              var poste = snapshot.data!
-                                                  .docs[index]['pos_hor_id'];
-                                              var desc = snapshot
-                                                  .data!.docs[index]['ben_id'];
+                                            itemBuilder: (ctx, i) {
+                                              var poste = snapshot.data!.docs[i]
+                                                  ['poste'];
+                                              var desc = snapshot.data!.docs[i]
+                                                  ['desc'];
+                                              var hor = snapshot.data!.docs[i]
+                                                  ['debut'];
+
                                               return Card(
-                                                child: ListTile(
-                                                  title: Text(poste),
-                                                  subtitle: Text(desc),
-                                                  trailing: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
+                                                color: Color(0xFFf2f0e7),
+                                                child: Container(
+                                                  height: 290,
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20)),
+                                                  margin: EdgeInsets.all(5),
+                                                  padding: EdgeInsets.all(5),
+                                                  child: Stack(
                                                     children: [
-                                                      Icon(Icons.delete)
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .stretch,
+                                                        children: [
+                                                          Expanded(
+                                                            child: Text(
+                                                              poste,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 25,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          // Text(poste),
+                                                          Row(
+                                                            children: [
+                                                              Flexible(
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Text(
+                                                                      desc,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        fontSize:
+                                                                            15,
+                                                                      ),
+                                                                    ),
+                                                                    Text(
+                                                                      hor,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        fontSize:
+                                                                            15,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        ],
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
                                               );
-                                            }));
+                                            },
+                                            gridDelegate:
+                                                SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 3,
+                                              childAspectRatio: 1.0,
+                                              crossAxisSpacing: 0.0,
+                                              mainAxisSpacing: 5,
+                                              mainAxisExtent: 264,
+                                            ),
+                                          ),
+                                        );
                                       }
 
                                       return Container();
@@ -166,6 +235,25 @@ class MainAppController extends StatelessWidget {
                                   ),
                                 )),
                           ],
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        OutlinedButton(
+                          onPressed: () {
+                            Get.to(() => Create());
+                          },
+                          child: Text(
+                            "Je choisi un nouveau créneau",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromRGBO(43, 90, 114, 1)),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Color.fromRGBO(242, 240, 231, 1),
+                          ),
                         ),
                       ],
                     )),
@@ -183,7 +271,7 @@ class MainAppController extends StatelessWidget {
                 Container(
                   color: Colors.white,
                   child: Center(
-                    child: const AdminPage(),
+                    child: AdminPage(),
                   ),
                 ),
                 Container(
@@ -196,17 +284,6 @@ class MainAppController extends StatelessWidget {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(() => Create());
-        },
-        child: Text(
-          "Je choisi",
-          textAlign: TextAlign.center,
-        ),
-        elevation: 8,
-        hoverElevation: 15,
       ),
     );
   }
