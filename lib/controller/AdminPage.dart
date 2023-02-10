@@ -202,7 +202,12 @@ class _AdminPageState extends State<AdminPage> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             ElevatedButton(
-                                              onPressed: () {},
+                                              onPressed: () async {
+                                                await FirebaseFirestore.instance
+                                                    .collection("pos_hor")
+                                                    .doc(posteId)
+                                                    .delete();
+                                              },
                                               child: Icon(Icons.delete),
                                               style: ElevatedButton.styleFrom(
                                                 primary: Color(0xFF2b5a72),
@@ -264,27 +269,5 @@ class _AdminPageState extends State<AdminPage> {
         ],
       ),
     ));
-  }
-
-  Widget cardPlus() {
-    return Card(
-      elevation: 8,
-      child: Container(
-          height: 290,
-          width: 300,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-          margin: EdgeInsets.all(5),
-          padding: EdgeInsets.all(5),
-          child: Center(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: CircleBorder(),
-                padding: EdgeInsets.all(24),
-              ),
-              child: Icon(Icons.add),
-              onPressed: () {},
-            ),
-          )),
-    );
   }
 }
