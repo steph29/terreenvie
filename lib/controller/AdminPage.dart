@@ -99,6 +99,12 @@ class _AdminPageState extends State<AdminPage> {
                 ),
                 OutlinedButton(
                   onPressed: () {
+                    // FirebaseFirestore.instance
+                    //     .collection("pos_hor")
+                    //     .doc()
+                    //     .set(
+                    //       "poste":
+                    //     );
                     print("J'ajoute un créneau");
                   },
                   child: Text(
