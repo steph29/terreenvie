@@ -9,6 +9,7 @@ import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:terreenvie/controller/EditPoste.dart';
+import 'package:terreenvie/model/create.dart';
 import 'MainAppController.dart';
 
 const List<String> list = <String>[
@@ -99,12 +100,7 @@ class _AdminPageState extends State<AdminPage> {
                 ),
                 OutlinedButton(
                   onPressed: () {
-                    // FirebaseFirestore.instance
-                    //     .collection("pos_hor")
-                    //     .doc()
-                    //     .set(
-                    //       "poste":
-                    //     );
+                    Get.to(() => Create());
                     print("J'ajoute un créneau");
                   },
                   child: Text(
@@ -125,7 +121,6 @@ class _AdminPageState extends State<AdminPage> {
                 StreamBuilder(
                   stream: FirebaseFirestore.instance
                       .collection("pos_hor")
-                      .where("jour", isEqualTo: "5")
                       .where("ben_id", isEqualTo: userId!.uid)
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -148,9 +143,9 @@ class _AdminPageState extends State<AdminPage> {
                           itemBuilder: (ctx, i) {
                             var poste = snapshot.data!.docs[i]['poste'];
                             var desc = snapshot.data!.docs[i]['desc'];
-                            var hor = snapshot.data!.docs[i]['debut'];
-                            var nbBen = snapshot.data!.docs[i]['nbBen'];
-                            var posteId = snapshot.data!.docs[i].id;
+                            var hor = snapshot.data?.docs[i]['debut'];
+                            var nbBen = snapshot.data?.docs[i]['nbBen'];
+                            var posteId = snapshot.data?.docs[i].id;
                             return Card(
                               color: Color(0xFFf2f0e7),
                               child: Container(
