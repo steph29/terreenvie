@@ -34,6 +34,7 @@ class _MyAppState extends State<MyApp> {
     user = FirebaseAuth.instance.currentUser;
     // ignore: avoid_print
     print(user?.uid.toString());
+    // Ceci est un test de branche
   }
 
   @override
