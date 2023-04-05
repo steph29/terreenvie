@@ -6,14 +6,14 @@ import 'package:get/get.dart';
 import 'package:terreenvie/controller/AdminPage.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
 
-class EditPoste extends StatefulWidget {
-  const EditPoste({Key? key}) : super(key: key);
+class AddPoste extends StatefulWidget {
+  const AddPoste({Key? key}) : super(key: key);
 
   @override
-  State<EditPoste> createState() => _EditPosteState();
+  State<AddPoste> createState() => _AddPosteState();
 }
 
-class _EditPosteState extends State<EditPoste> {
+class _AddPosteState extends State<AddPoste> {
   TextEditingController posteContoller = TextEditingController();
   TextEditingController descContoller = TextEditingController();
   TextEditingController debutContoller = TextEditingController();
@@ -66,27 +66,27 @@ class _EditPosteState extends State<EditPoste> {
                                   ),
                                 ),
                                 TextFormField(
-                                  controller: debutContoller
-                                    ..text =
-                                        "${Get.arguments['debut'].toString()}",
+                                  controller: debutContoller,
+                                  // ..text =
+                                  //     "${Get.arguments['debut'].toString()}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
                                   ),
                                 ),
                                 TextFormField(
-                                  controller: finContoller
-                                    ..text =
-                                        "${Get.arguments['fin'].toString()}",
+                                  controller: finContoller,
+                                  // ..text =
+                                  //     "${Get.arguments['fin'].toString()}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
                                   ),
                                 ),
                                 TextFormField(
-                                  controller: nbBenContoller
-                                    ..text =
-                                        "${Get.arguments['nbBen'].toString()}",
+                                  controller: nbBenContoller,
+                                  // ..text =
+                                  //     "${Get.arguments['nbBen'].toString()}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
@@ -115,33 +115,15 @@ class _EditPosteState extends State<EditPoste> {
                 {
                   "poste": posteContoller.text.trim(),
                   "desc": descContoller.text.trim(),
-                  // Suppression de l'ancienne valeur
-                  "hor": FieldValue.arrayRemove([
+                  "hor": FieldValue.arrayUnion([
                     {
-                      "debut": Get.arguments['debut'].toString(),
-                      "fin": Get.arguments['fin'].toString(),
-                      "nbBen": Get.arguments['nbBen'].toString()
+                      "debut": debutContoller.text.trim(),
+                      "fin": finContoller.text.trim(),
+                      "nbBen": nbBenContoller.text.trim()
                     }
                   ]),
                 },
               ).then((value) => {
-                        // Ajout de la nouvelle valeur
-                        FirebaseFirestore.instance
-                            .collection("pos_hor")
-                            .doc(Get.arguments['posteId'].toString())
-                            .update(
-                          {
-                            "poste": posteContoller.text.trim(),
-                            "desc": descContoller.text.trim(),
-                            "hor": FieldValue.arrayUnion([
-                              {
-                                "debut": debutContoller.text.trim(),
-                                "fin": finContoller.text.trim(),
-                                "nbBen": nbBenContoller.text.trim()
-                              }
-                            ])
-                          },
-                        ),
                         Get.back(),
                       });
             },

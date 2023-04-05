@@ -8,6 +8,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:terreenvie/controller/AddPoste.dart';
+import 'package:terreenvie/controller/EditHoraire.dart';
 import 'package:terreenvie/controller/EditPoste.dart';
 import 'package:terreenvie/model/create.dart';
 import 'MainAppController.dart';
@@ -33,56 +35,7 @@ class _AdminPageState extends State<AdminPage> {
   TextEditingController heureContoller = TextEditingController();
   TextEditingController nbBenContoller = TextEditingController();
 
-  String dropdownValue = list.first;
-
-  DateTime currentDate = DateTime.now();
-  TimeOfDay currentTimeBegin = TimeOfDay.now();
-  TimeOfDay currentTimeEnd = TimeOfDay.now();
-
-  final List<String> postes = [
-    'Buvette principale',
-    'Electricité',
-    'Bénévoles volants'
-  ];
   User? userId = FirebaseAuth.instance.currentUser;
-  Future<void> _selectTimeBegin(BuildContext context) async {
-    final TimeOfDay? pickerTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (pickerTime != null && pickerTime != currentTimeBegin) {
-      setState(() {
-        currentTimeBegin = pickerTime;
-      });
-    }
-  }
-
-  Future<void> _selectTimeEnd(BuildContext context) async {
-    final TimeOfDay? pickerTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (pickerTime != null && pickerTime != currentTimeEnd) {
-      setState(() {
-        currentTimeEnd = pickerTime;
-      });
-    }
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-        context: context,
-        initialDate: DateTime(2023, 9, 18),
-        firstDate: DateTime(2023, 9, 18),
-        lastDate: DateTime(2023, 9, 25));
-    if (pickedDate != null && pickedDate != currentDate)
-      setState(() {
-        currentDate = pickedDate;
-      });
-  }
-
-  bool _checked2 = false;
-  PageController page = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +48,10 @@ class _AdminPageState extends State<AdminPage> {
               flex: 1,
               child:
                   Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                SizedBox(
+                  height: 30,
+                ),
+                SingleChoice(),
                 SizedBox(
                   height: 30,
                 ),
@@ -121,7 +78,7 @@ class _AdminPageState extends State<AdminPage> {
                 StreamBuilder(
                   stream: FirebaseFirestore.instance
                       .collection("pos_hor")
-                      .where("ben_id", isEqualTo: userId!.uid)
+                      // .where("ben_id", isEqualTo: userId!.uid)
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                     if (snapshot.hasError) {
@@ -143,13 +100,13 @@ class _AdminPageState extends State<AdminPage> {
                           itemBuilder: (ctx, i) {
                             var poste = snapshot.data!.docs[i]['poste'];
                             var desc = snapshot.data!.docs[i]['desc'];
-                            var hor = snapshot.data?.docs[i]['debut'];
-                            var nbBen = snapshot.data?.docs[i]['nbBen'];
+                            var hor = snapshot.data?.docs[i]['hor'];
                             var posteId = snapshot.data?.docs[i].id;
                             return Card(
                               color: Color(0xFFf2f0e7),
                               child: Container(
-                                height: 290,
+                                constraints: const BoxConstraints(
+                                    minHeight: 0, maxHeight: 500.0),
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20)),
                                 margin: EdgeInsets.all(5),
@@ -157,94 +114,151 @@ class _AdminPageState extends State<AdminPage> {
                                 child: Stack(
                                   children: [
                                     Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
-                                        Expanded(
-                                          child: Text(
-                                            poste,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontSize: 25,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Flexible(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: <Widget>[
-                                                  Text(
-                                                    desc,
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    hor,
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            ElevatedButton(
-                                              onPressed: () async {
-                                                await FirebaseFirestore.instance
-                                                    .collection("pos_hor")
-                                                    .doc(posteId)
-                                                    .delete();
-                                              },
-                                              child: Icon(Icons.delete),
-                                              style: ElevatedButton.styleFrom(
-                                                primary: Color(0xFF2b5a72),
-                                                shape: CircleBorder(),
-                                                padding: EdgeInsets.all(24),
+                                            // Bouton Ajouter
+                                            Expanded(
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  Get.to(() => AddPoste(),
+                                                      arguments: {
+                                                        "poste": poste,
+                                                        "desc": desc,
+                                                        "posteId": posteId,
+                                                      });
+                                                },
+                                                icon: Icon(Icons.edit),
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: Color(0xFF2b5a72),
+                                                ),
                                               ),
                                             ),
-                                            ElevatedButton(
-                                              onPressed: () {},
-                                              child: Icon(Icons.add),
-                                              style: ElevatedButton.styleFrom(
-                                                primary: Color(0xFF2b5a72),
-                                                shape: CircleBorder(),
-                                                padding: EdgeInsets.all(24),
-                                              ),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                Get.to(() => EditPoste(),
-                                                    arguments: {
-                                                      "poste": poste,
-                                                      "desc": desc,
-                                                      "hor": hor,
-                                                      "nbBen": nbBen,
-                                                      "posteId": posteId,
-                                                    });
-                                              },
-                                              child: Icon(Icons.edit),
-                                              style: ElevatedButton.styleFrom(
-                                                primary: Color(0xFF2b5a72),
-                                                shape: CircleBorder(),
-                                                padding: EdgeInsets.all(24),
+                                            Text(
+                                              poste,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontSize: 25,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ],
-                                        )
+                                        ),
+                                        Text(
+                                          desc,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Column(
+                                          children: [
+                                            ListView.builder(
+                                                shrinkWrap: true,
+                                                itemCount: hor.length,
+                                                itemBuilder: (context, j) {
+                                                  var horId = snapshot
+                                                      .data?.docs[i]['hor'][j];
+                                                  var hord =
+                                                      snapshot.data?.docs[i]
+                                                          ['hor'][j]["debut"];
+                                                  var horf =
+                                                      snapshot.data?.docs[i]
+                                                          ['hor'][j]["fin"];
+                                                  var nben =
+                                                      snapshot.data?.docs[i]
+                                                          ['hor'][j]['nbBen'];
+                                                  return Card(
+                                                    child: ListTile(
+                                                      title: Text(
+                                                        hord +
+                                                            ' - ' +
+                                                            horf +
+                                                            ' avec ' +
+                                                            nben +
+                                                            ' benevoles',
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 15,
+                                                        ),
+                                                      ),
+                                                      trailing: Container(
+                                                        width: 70,
+                                                        child: Row(children: [
+                                                          // Bouton DELETE
+                                                          Expanded(
+                                                            child: IconButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                await FirebaseFirestore
+                                                                    .instance
+                                                                    .collection(
+                                                                        "pos_hor")
+                                                                    .doc(Get
+                                                                        .arguments[
+                                                                            'posteId']
+                                                                        .toString())
+                                                                    .update({});
+                                                              },
+                                                              icon: Icon(
+                                                                  Icons.delete),
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                primary: Color(
+                                                                    0xFF2b5a72),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          // Bouton MODIFIER
+                                                          Expanded(
+                                                            child: IconButton(
+                                                              onPressed: () {
+                                                                print(hor[j]);
+                                                                Get.to(
+                                                                    () =>
+                                                                        EditPoste(),
+                                                                    arguments: {
+                                                                      "poste":
+                                                                          poste,
+                                                                      "desc":
+                                                                          desc,
+                                                                      "horId":
+                                                                          horId,
+                                                                      "debut":
+                                                                          hord,
+                                                                      "fin":
+                                                                          horf,
+                                                                      "nbBen":
+                                                                          nben,
+                                                                      "posteId":
+                                                                          posteId,
+                                                                    });
+                                                              },
+                                                              icon: Icon(
+                                                                  Icons.edit),
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                primary: Color(
+                                                                    0xFF2b5a72),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ]),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -258,7 +272,7 @@ class _AdminPageState extends State<AdminPage> {
                             childAspectRatio: 1.0,
                             crossAxisSpacing: 0.0,
                             mainAxisSpacing: 5,
-                            mainAxisExtent: 264,
+                            mainAxisExtent: 500,
                           ),
                         ),
                       );
@@ -266,9 +280,70 @@ class _AdminPageState extends State<AdminPage> {
                     return Container();
                   },
                 ),
+                SizedBox(
+                  height: 30,
+                ),
               ])),
         ],
       ),
     ));
+  }
+}
+
+enum Calendar { Mardi, Mercredi, Jeudi, Vendredi, Samedi, Diamnche, Lundi }
+
+class SingleChoice extends StatefulWidget {
+  const SingleChoice({super.key});
+
+  @override
+  State<SingleChoice> createState() => _SingleChoiceState();
+}
+
+class _SingleChoiceState extends State<SingleChoice> {
+  Calendar calendarView = Calendar.Samedi;
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<Calendar>(
+      segments: const <ButtonSegment<Calendar>>[
+        ButtonSegment<Calendar>(
+            value: Calendar.Mardi,
+            label: Text('Mardi'),
+            icon: Icon(Icons.calendar_view_week)),
+        ButtonSegment<Calendar>(
+            value: Calendar.Mercredi,
+            label: Text('Mercredi'),
+            icon: Icon(Icons.calendar_view_month)),
+        ButtonSegment<Calendar>(
+            value: Calendar.Jeudi,
+            label: Text('Jeudi'),
+            icon: Icon(Icons.calendar_today)),
+        ButtonSegment<Calendar>(
+            value: Calendar.Vendredi,
+            label: Text('Vendredi'),
+            icon: Icon(Icons.calendar_today)),
+        ButtonSegment<Calendar>(
+            value: Calendar.Samedi,
+            label: Text('Samedi'),
+            icon: Icon(Icons.calendar_today)),
+        ButtonSegment<Calendar>(
+            value: Calendar.Diamnche,
+            label: Text('Diamnche'),
+            icon: Icon(Icons.calendar_today)),
+        ButtonSegment<Calendar>(
+            value: Calendar.Lundi,
+            label: Text('Lundi'),
+            icon: Icon(Icons.calendar_today)),
+      ],
+      selected: <Calendar>{calendarView},
+      onSelectionChanged: (Set<Calendar> newSelection) {
+        setState(() {
+          // By default there is only a single segment that can be
+          // selected at one time, so its value is always the first
+          // item in the selected set.
+          calendarView = newSelection.first;
+        });
+      },
+    );
   }
 }

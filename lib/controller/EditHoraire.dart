@@ -1,19 +1,17 @@
-// ignore_for_file: prefer_const_constructors, file_names
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:terreenvie/controller/AdminPage.dart';
-import 'package:terreenvie/controller/MainAppController.dart';
 
-class EditPoste extends StatefulWidget {
-  const EditPoste({Key? key}) : super(key: key);
+class EditHoraire extends StatefulWidget {
+  const EditHoraire({super.key});
 
   @override
-  State<EditPoste> createState() => _EditPosteState();
+  State<EditHoraire> createState() => _EditHoraireState();
 }
 
-class _EditPosteState extends State<EditPoste> {
+class _EditHoraireState extends State<EditHoraire> {
   TextEditingController posteContoller = TextEditingController();
   TextEditingController descContoller = TextEditingController();
   TextEditingController debutContoller = TextEditingController();
@@ -22,7 +20,7 @@ class _EditPosteState extends State<EditPoste> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Modifier le poste")),
+      appBar: AppBar(title: Text("Ajouter les horaires")),
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 400, vertical: 50),
         child: Column(children: [
@@ -115,33 +113,11 @@ class _EditPosteState extends State<EditPoste> {
                 {
                   "poste": posteContoller.text.trim(),
                   "desc": descContoller.text.trim(),
-                  // Suppression de l'ancienne valeur
-                  "hor": FieldValue.arrayRemove([
-                    {
-                      "debut": Get.arguments['debut'].toString(),
-                      "fin": Get.arguments['fin'].toString(),
-                      "nbBen": Get.arguments['nbBen'].toString()
-                    }
-                  ]),
+                  "debut": debutContoller.text.trim(),
+                  "fin": finContoller.text.trim(),
+                  "nbBen": nbBenContoller.text.trim(),
                 },
               ).then((value) => {
-                        // Ajout de la nouvelle valeur
-                        FirebaseFirestore.instance
-                            .collection("pos_hor")
-                            .doc(Get.arguments['posteId'].toString())
-                            .update(
-                          {
-                            "poste": posteContoller.text.trim(),
-                            "desc": descContoller.text.trim(),
-                            "hor": FieldValue.arrayUnion([
-                              {
-                                "debut": debutContoller.text.trim(),
-                                "fin": finContoller.text.trim(),
-                                "nbBen": nbBenContoller.text.trim()
-                              }
-                            ])
-                          },
-                        ),
                         Get.back(),
                       });
             },

@@ -143,7 +143,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         OutlinedButton(
           onPressed: () {
-            // Get.to(() => );
+//  Get.to(() => );  Il faut une page qui lit pos_hor
           },
           child: Text(
             "Je choisi un nouveau créneau",
