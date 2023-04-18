@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
@@ -28,6 +29,8 @@ class AdminPage extends StatefulWidget {
   @override
   State<AdminPage> createState() => _AdminPageState();
 }
+
+var jour;
 
 class _AdminPageState extends State<AdminPage> {
   TextEditingController posteContoller = TextEditingController();
@@ -57,7 +60,9 @@ class _AdminPageState extends State<AdminPage> {
                 ),
                 OutlinedButton(
                   onPressed: () {
-                    Get.to(() => Create());
+                    Get.to(() => Create(), arguments: {
+                      "jour": jour,
+                    });
                     print("J'ajoute un créneau");
                   },
                   child: Text(
@@ -78,7 +83,7 @@ class _AdminPageState extends State<AdminPage> {
                 StreamBuilder(
                   stream: FirebaseFirestore.instance
                       .collection("pos_hor")
-                      // .where("ben_id", isEqualTo: userId!.uid)
+                      // .where("jour", isEqualTo: jour) A METTRE EN PLACE
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                     if (snapshot.hasError) {
@@ -129,6 +134,7 @@ class _AdminPageState extends State<AdminPage> {
                                                 onPressed: () {
                                                   Get.to(() => AddPoste(),
                                                       arguments: {
+                                                        "jour": jour,
                                                         "poste": poste,
                                                         "desc": desc,
                                                         "posteId": posteId,
@@ -195,18 +201,20 @@ class _AdminPageState extends State<AdminPage> {
                                                           // Bouton DELETE
                                                           Expanded(
                                                             child: IconButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                await FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        "pos_hor")
-                                                                    .doc(Get
-                                                                        .arguments[
-                                                                            'posteId']
-                                                                        .toString())
-                                                                    .update({});
+                                                              onPressed: () {
+                                                                print(jour);
                                                               },
+                                                              //     () async {
+                                                              //   await FirebaseFirestore
+                                                              //       .instance
+                                                              //       .collection(
+                                                              //           "pos_hor")
+                                                              //       .doc(Get
+                                                              //           .arguments[
+                                                              //               'posteId']
+                                                              //           .toString())
+                                                              //       .update({});
+                                                              // },
                                                               icon: Icon(
                                                                   Icons.delete),
                                                               style:
@@ -226,6 +234,8 @@ class _AdminPageState extends State<AdminPage> {
                                                                     () =>
                                                                         EditPoste(),
                                                                     arguments: {
+                                                                      "jour":
+                                                                          jour,
                                                                       "poste":
                                                                           poste,
                                                                       "desc":
@@ -328,7 +338,7 @@ class _SingleChoiceState extends State<SingleChoice> {
             icon: Icon(Icons.calendar_today)),
         ButtonSegment<Calendar>(
             value: Calendar.Diamnche,
-            label: Text('Diamnche'),
+            label: Text('Dimanche'),
             icon: Icon(Icons.calendar_today)),
         ButtonSegment<Calendar>(
             value: Calendar.Lundi,
@@ -341,6 +351,7 @@ class _SingleChoiceState extends State<SingleChoice> {
           // By default there is only a single segment that can be
           // selected at one time, so its value is always the first
           // item in the selected set.
+          jour = describeEnum(newSelection.first);
           calendarView = newSelection.first;
         });
       },

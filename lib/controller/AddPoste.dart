@@ -113,6 +113,7 @@ class _AddPosteState extends State<AddPoste> {
                   .doc(Get.arguments['posteId'].toString())
                   .update(
                 {
+                  "jour": Get.arguments['poste'].toString(),
                   "poste": posteContoller.text.trim(),
                   "desc": descContoller.text.trim(),
                   "hor": FieldValue.arrayUnion([

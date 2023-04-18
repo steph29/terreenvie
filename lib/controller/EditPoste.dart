@@ -113,6 +113,7 @@ class _EditPosteState extends State<EditPoste> {
                   .doc(Get.arguments['posteId'].toString())
                   .update(
                 {
+                  "jour": Get.arguments['poste'].toString(),
                   "poste": posteContoller.text.trim(),
                   "desc": descContoller.text.trim(),
                   // Suppression de l'ancienne valeur
