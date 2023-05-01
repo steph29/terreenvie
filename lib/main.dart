@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
 
 Future<void> main() async {
@@ -14,6 +15,7 @@ Future<void> main() async {
     messagingSenderId: "1078182509252",
     projectId: "terreenvie-6723d",
   ));
+
   runApp(MyApp());
 }
 
@@ -32,9 +34,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
-    // ignore: avoid_print
-    print(user?.uid.toString());
-    // Ceci est un test de branche
   }
 
   @override
