@@ -14,7 +14,6 @@ import 'package:terreenvie/controller/EditHoraire.dart';
 import 'package:terreenvie/controller/EditPoste.dart';
 import 'package:terreenvie/model/create.dart';
 import 'MainAppController.dart';
-import 'package:terreenvie/model/CardAdmin.dart';
 
 class AdminPage extends StatefulWidget {
   AdminPage({Key? key}) : super(key: key);
@@ -31,7 +30,6 @@ class _AdminPageState extends State<AdminPage> {
 
   User? userId = FirebaseAuth.instance.currentUser;
   String groupValue = "Samedi";
-  // CardAdmin card = new CardAdmin(NotiferParent: null,);
 
   @override
   Widget build(BuildContext context) {
@@ -47,30 +45,7 @@ class _AdminPageState extends State<AdminPage> {
                 SizedBox(
                   height: 30,
                 ),
-                // Barre de selection des jours
-                // SingleChoice(),
-                // CardAdmin(),
-                CupertinoSegmentedControl<String>(
-                    padding: EdgeInsets.all(20),
-                    groupValue: groupValue,
-                    selectedColor: Colors.blue,
-                    unselectedColor: Colors.white,
-                    pressedColor: Colors.blue.withOpacity(0.2),
-                    children: {
-                      "Mardi": buildSegment("Mardi"),
-                      "Mercredi": buildSegment("Mercredi"),
-                      "Jeudi": buildSegment("Jeudi"),
-                      "Vendredi": buildSegment("Vendredi"),
-                      "Samedi": buildSegment("Samedi"),
-                      "Dimanche": buildSegment("Dimanche"),
-                      "Lundi": buildSegment("Lundi"),
-                    },
-                    onValueChanged: (groupValue) {
-                      print(groupValue);
-                      setState(() {
-                        this.groupValue = groupValue;
-                      });
-                    }),
+                buildSegmentControl(),
                 SizedBox(
                   height: 30,
                 ),
@@ -96,117 +71,7 @@ class _AdminPageState extends State<AdminPage> {
                   height: 30,
                 ),
                 // Liste des cards
-                StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection("pos_hor")
-                      .where("jour", isEqualTo: groupValue)
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text("Something went wrong");
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CupertinoActivityIndicator());
-                    }
-                    if (snapshot.data!.docs.isEmpty) {
-                      return Center(child: Text("No data found"));
-                    }
-                    if (snapshot != null && snapshot.data != null) {
-                      print(groupValue);
-                      return Center(
-                        child: GridView.builder(
-                          controller: ScrollController(),
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (ctx, i) {
-                            var poste = snapshot.data!.docs[i]['poste'];
-                            var desc = snapshot.data!.docs[i]['desc'];
-                            var hor = snapshot.data?.docs[i]['hor'];
-                            var posteId = snapshot.data?.docs[i].id;
-                            return Card(
-                              color: Color(0xFFf2f0e7),
-                              child: Container(
-                                constraints: const BoxConstraints(
-                                    minHeight: 0, maxHeight: 500.0),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20)),
-                                margin: EdgeInsets.all(5),
-                                padding: EdgeInsets.all(5),
-                                child: Stack(
-                                  children: [
-                                    Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            // Bouton Ajouter un horaire
-                                            Expanded(
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  // print(_postsSnap);
-                                                  Get.to(() => AddPoste(),
-                                                      arguments: {
-                                                        "poste": poste,
-                                                        "desc": desc,
-                                                        "posteId": posteId,
-                                                      });
-                                                },
-                                                icon: Icon(Icons.edit),
-                                                style: ElevatedButton.styleFrom(
-                                                  primary: Color(0xFF2b5a72),
-                                                ),
-                                              ),
-                                            ),
-                                            Text(
-                                              poste,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Text(
-                                          desc,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        Column(
-                                          children: [
-                                            buildList(poste, hor, desc, posteId,
-                                                snapshot, i),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            childAspectRatio: 1.0,
-                            crossAxisSpacing: 0.0,
-                            mainAxisSpacing: 5,
-                            mainAxisExtent: 500,
-                          ),
-                        ),
-                      );
-                    }
-                    return Container();
-                  },
-                ),
+                buildCard(groupValue),
                 SizedBox(
                   height: 30,
                 ),
@@ -215,6 +80,134 @@ class _AdminPageState extends State<AdminPage> {
       ),
     ));
   }
+
+  Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
+      padding: EdgeInsets.all(20),
+      groupValue: groupValue,
+      selectedColor: Color(0xFF2b5a72),
+      unselectedColor: Colors.white,
+      borderColor: Color(0xFF2b5a72),
+      pressedColor: Color(0xFF2b5a72).withOpacity(0.2),
+      children: {
+        "Mardi": buildSegment("Mardi"),
+        "Mercredi": buildSegment("Mercredi"),
+        "Jeudi": buildSegment("Jeudi"),
+        "Vendredi": buildSegment("Vendredi"),
+        "Samedi": buildSegment("Samedi"),
+        "Dimanche": buildSegment("Dimanche"),
+        "Lundi": buildSegment("Lundi"),
+      },
+      onValueChanged: (groupValue) {
+        print(groupValue);
+        setState(() {
+          this.groupValue = groupValue;
+        });
+      });
+
+  Widget buildCard(String groupValue) => StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection("pos_hor")
+            .where("jour", isEqualTo: groupValue)
+            .snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CupertinoActivityIndicator());
+          }
+          if (snapshot.data!.docs.isEmpty) {
+            return Center(child: Text("No data found"));
+          }
+          if (snapshot != null && snapshot.data != null) {
+            return Center(
+              child: GridView.builder(
+                controller: ScrollController(),
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (ctx, i) {
+                  var poste = snapshot.data!.docs[i]['poste'];
+                  var desc = snapshot.data!.docs[i]['desc'];
+                  var hor = snapshot.data?.docs[i]['hor'];
+                  var posteId = snapshot.data?.docs[i].id;
+                  return Card(
+                    color: Color(0xFFf2f0e7),
+                    child: Container(
+                      constraints:
+                          const BoxConstraints(minHeight: 0, maxHeight: 500.0),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20)),
+                      margin: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(5),
+                      child: Stack(
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    poste,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF2b5a72)),
+                                  ),
+                                  // Bouton Ajouter un horaire
+                                  IconButton(
+                                    onPressed: () {
+                                      Get.to(() => AddPoste(), arguments: {
+                                        "poste": poste,
+                                        "desc": desc,
+                                        "posteId": posteId,
+                                      });
+                                    },
+                                    icon: Icon(Icons.edit),
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Color(0xFF2b5a72),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                desc,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    color: Color(0xFF2b5a72)),
+                              ),
+                              Column(
+                                children: [
+                                  buildList(
+                                      poste, hor, desc, posteId, snapshot, i),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.0,
+                  crossAxisSpacing: 0.0,
+                  mainAxisSpacing: 5,
+                  mainAxisExtent: 500,
+                ),
+              ),
+            );
+          }
+          return Container();
+        },
+      );
 
   Widget buildSegment(String text) => Container(
         padding: EdgeInsets.all(12),
@@ -242,9 +235,9 @@ class _AdminPageState extends State<AdminPage> {
             title: Text(
               hord + ' - ' + horf + ' avec ' + nben + ' benevoles',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Color(0xFF2b5a72)),
             ),
             trailing: Container(
               width: 70,
