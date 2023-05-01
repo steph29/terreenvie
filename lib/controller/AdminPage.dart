@@ -14,14 +14,7 @@ import 'package:terreenvie/controller/EditHoraire.dart';
 import 'package:terreenvie/controller/EditPoste.dart';
 import 'package:terreenvie/model/create.dart';
 import 'MainAppController.dart';
-
-const List<String> list = <String>[
-  'Buvette principale',
-  'Bénévoles volant',
-  'tri selectif',
-  'Tisanerie'
-];
-// Recupération des postes depuis la base de données
+import 'package:terreenvie/model/CardAdmin.dart';
 
 class AdminPage extends StatefulWidget {
   AdminPage({Key? key}) : super(key: key);
@@ -30,8 +23,6 @@ class AdminPage extends StatefulWidget {
   State<AdminPage> createState() => _AdminPageState();
 }
 
-var jour;
-
 class _AdminPageState extends State<AdminPage> {
   TextEditingController posteContoller = TextEditingController();
   TextEditingController descContoller = TextEditingController();
@@ -39,6 +30,8 @@ class _AdminPageState extends State<AdminPage> {
   TextEditingController nbBenContoller = TextEditingController();
 
   User? userId = FirebaseAuth.instance.currentUser;
+  String groupValue = "Samedi";
+  // CardAdmin card = new CardAdmin(NotiferParent: null,);
 
   @override
   Widget build(BuildContext context) {
@@ -54,16 +47,38 @@ class _AdminPageState extends State<AdminPage> {
                 SizedBox(
                   height: 30,
                 ),
-                SingleChoice(),
+                // Barre de selection des jours
+                // SingleChoice(),
+                // CardAdmin(),
+                CupertinoSegmentedControl<String>(
+                    padding: EdgeInsets.all(20),
+                    groupValue: groupValue,
+                    selectedColor: Colors.blue,
+                    unselectedColor: Colors.white,
+                    pressedColor: Colors.blue.withOpacity(0.2),
+                    children: {
+                      "Mardi": buildSegment("Mardi"),
+                      "Mercredi": buildSegment("Mercredi"),
+                      "Jeudi": buildSegment("Jeudi"),
+                      "Vendredi": buildSegment("Vendredi"),
+                      "Samedi": buildSegment("Samedi"),
+                      "Dimanche": buildSegment("Dimanche"),
+                      "Lundi": buildSegment("Lundi"),
+                    },
+                    onValueChanged: (groupValue) {
+                      print(groupValue);
+                      setState(() {
+                        this.groupValue = groupValue;
+                      });
+                    }),
                 SizedBox(
                   height: 30,
                 ),
                 OutlinedButton(
                   onPressed: () {
                     Get.to(() => Create(), arguments: {
-                      "jour": jour,
+                      "jour": groupValue,
                     });
-                    print("J'ajoute un créneau");
                   },
                   child: Text(
                     "Je rajoute un poste",
@@ -80,10 +95,11 @@ class _AdminPageState extends State<AdminPage> {
                 SizedBox(
                   height: 30,
                 ),
+                // Liste des cards
                 StreamBuilder(
                   stream: FirebaseFirestore.instance
                       .collection("pos_hor")
-                      // .where("jour", isEqualTo: jour) A METTRE EN PLACE
+                      .where("jour", isEqualTo: groupValue)
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                     if (snapshot.hasError) {
@@ -96,6 +112,7 @@ class _AdminPageState extends State<AdminPage> {
                       return Center(child: Text("No data found"));
                     }
                     if (snapshot != null && snapshot.data != null) {
+                      print(groupValue);
                       return Center(
                         child: GridView.builder(
                           controller: ScrollController(),
@@ -128,13 +145,13 @@ class _AdminPageState extends State<AdminPage> {
                                               MainAxisAlignment.center,
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            // Bouton Ajouter
+                                            // Bouton Ajouter un horaire
                                             Expanded(
                                               child: IconButton(
                                                 onPressed: () {
+                                                  // print(_postsSnap);
                                                   Get.to(() => AddPoste(),
                                                       arguments: {
-                                                        "jour": jour,
                                                         "poste": poste,
                                                         "desc": desc,
                                                         "posteId": posteId,
@@ -165,108 +182,8 @@ class _AdminPageState extends State<AdminPage> {
                                         ),
                                         Column(
                                           children: [
-                                            ListView.builder(
-                                                shrinkWrap: true,
-                                                itemCount: hor.length,
-                                                itemBuilder: (context, j) {
-                                                  var horId = snapshot
-                                                      .data?.docs[i]['hor'][j];
-                                                  var hord =
-                                                      snapshot.data?.docs[i]
-                                                          ['hor'][j]["debut"];
-                                                  var horf =
-                                                      snapshot.data?.docs[i]
-                                                          ['hor'][j]["fin"];
-                                                  var nben =
-                                                      snapshot.data?.docs[i]
-                                                          ['hor'][j]['nbBen'];
-                                                  return Card(
-                                                    child: ListTile(
-                                                      title: Text(
-                                                        hord +
-                                                            ' - ' +
-                                                            horf +
-                                                            ' avec ' +
-                                                            nben +
-                                                            ' benevoles',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 15,
-                                                        ),
-                                                      ),
-                                                      trailing: Container(
-                                                        width: 70,
-                                                        child: Row(children: [
-                                                          // Bouton DELETE
-                                                          Expanded(
-                                                            child: IconButton(
-                                                              onPressed: () {
-                                                                print(jour);
-                                                              },
-                                                              //     () async {
-                                                              //   await FirebaseFirestore
-                                                              //       .instance
-                                                              //       .collection(
-                                                              //           "pos_hor")
-                                                              //       .doc(Get
-                                                              //           .arguments[
-                                                              //               'posteId']
-                                                              //           .toString())
-                                                              //       .update({});
-                                                              // },
-                                                              icon: Icon(
-                                                                  Icons.delete),
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                primary: Color(
-                                                                    0xFF2b5a72),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          // Bouton MODIFIER
-                                                          Expanded(
-                                                            child: IconButton(
-                                                              onPressed: () {
-                                                                print(hor[j]);
-                                                                Get.to(
-                                                                    () =>
-                                                                        EditPoste(),
-                                                                    arguments: {
-                                                                      "jour":
-                                                                          jour,
-                                                                      "poste":
-                                                                          poste,
-                                                                      "desc":
-                                                                          desc,
-                                                                      "horId":
-                                                                          horId,
-                                                                      "debut":
-                                                                          hord,
-                                                                      "fin":
-                                                                          horf,
-                                                                      "nbBen":
-                                                                          nben,
-                                                                      "posteId":
-                                                                          posteId,
-                                                                    });
-                                                              },
-                                                              icon: Icon(
-                                                                  Icons.edit),
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                primary: Color(
-                                                                    0xFF2b5a72),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ]),
-                                                      ),
-                                                    ),
-                                                  );
-                                                }),
+                                            buildList(poste, hor, desc, posteId,
+                                                snapshot, i),
                                           ],
                                         ),
                                       ],
@@ -298,63 +215,76 @@ class _AdminPageState extends State<AdminPage> {
       ),
     ));
   }
-}
 
-enum Calendar { Mardi, Mercredi, Jeudi, Vendredi, Samedi, Diamnche, Lundi }
+  Widget buildSegment(String text) => Container(
+        padding: EdgeInsets.all(12),
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 20),
+        ),
+      );
 
-class SingleChoice extends StatefulWidget {
-  const SingleChoice({super.key});
+  Widget buildList(poste, hors, desc, posteId, snapshot, i) => ListView.builder(
+      shrinkWrap: true,
+      itemCount: hors.length,
+      itemBuilder: (context, j) {
+        var horId = snapshot.data?.docs[i]['hor'][j];
+        var hord = snapshot.data?.docs[i]['hor'][j]["debut"];
+        var horf = snapshot.data?.docs[i]['hor'][j]["fin"];
+        var nben = snapshot.data?.docs[i]['hor'][j]['nbBen'];
 
-  @override
-  State<SingleChoice> createState() => _SingleChoiceState();
-}
+        // final sortedItems = hors
+        //   ..sort((item1, item2) => item2.compareTo(item1));
+        // final hor = sortedItems[j];
 
-class _SingleChoiceState extends State<SingleChoice> {
-  Calendar calendarView = Calendar.Samedi;
-
-  @override
-  Widget build(BuildContext context) {
-    return SegmentedButton<Calendar>(
-      segments: const <ButtonSegment<Calendar>>[
-        ButtonSegment<Calendar>(
-            value: Calendar.Mardi,
-            label: Text('Mardi'),
-            icon: Icon(Icons.calendar_view_week)),
-        ButtonSegment<Calendar>(
-            value: Calendar.Mercredi,
-            label: Text('Mercredi'),
-            icon: Icon(Icons.calendar_view_month)),
-        ButtonSegment<Calendar>(
-            value: Calendar.Jeudi,
-            label: Text('Jeudi'),
-            icon: Icon(Icons.calendar_today)),
-        ButtonSegment<Calendar>(
-            value: Calendar.Vendredi,
-            label: Text('Vendredi'),
-            icon: Icon(Icons.calendar_today)),
-        ButtonSegment<Calendar>(
-            value: Calendar.Samedi,
-            label: Text('Samedi'),
-            icon: Icon(Icons.calendar_today)),
-        ButtonSegment<Calendar>(
-            value: Calendar.Diamnche,
-            label: Text('Dimanche'),
-            icon: Icon(Icons.calendar_today)),
-        ButtonSegment<Calendar>(
-            value: Calendar.Lundi,
-            label: Text('Lundi'),
-            icon: Icon(Icons.calendar_today)),
-      ],
-      selected: <Calendar>{calendarView},
-      onSelectionChanged: (Set<Calendar> newSelection) {
-        setState(() {
-          // By default there is only a single segment that can be
-          // selected at one time, so its value is always the first
-          // item in the selected set.
-          jour = describeEnum(newSelection.first);
-          calendarView = newSelection.first;
-        });
-      },
-    );
-  }
+        return Card(
+          child: ListTile(
+            title: Text(
+              hord + ' - ' + horf + ' avec ' + nben + ' benevoles',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            trailing: Container(
+              width: 70,
+              child: Row(children: [
+                // Bouton DELETE
+                Expanded(
+                  child: IconButton(
+                    onPressed: () {
+                      print(groupValue);
+                    },
+                    icon: Icon(Icons.delete),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFF2b5a72),
+                    ),
+                  ),
+                ),
+                // Bouton MODIFIER
+                Expanded(
+                  child: IconButton(
+                    onPressed: () {
+                      Get.to(() => EditPoste(), arguments: {
+                        "jour": groupValue,
+                        "poste": poste,
+                        "desc": desc,
+                        "horId": horId,
+                        "debut": hord,
+                        "fin": horf,
+                        "nbBen": nben,
+                        "posteId": posteId,
+                      });
+                    },
+                    icon: Icon(Icons.edit),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFF2b5a72),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        );
+      });
 }

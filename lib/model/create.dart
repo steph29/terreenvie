@@ -95,7 +95,7 @@ class _CreateState extends State<Create> {
                         .doc()
                         .set({
                       "createdAt": DateTime.now(),
-                      "jour": Get.arguments['poste'].toString(),
+                      "jour": Get.arguments['jour'].toString(),
                       "poste": poste,
                       "desc": desc,
                       "hor": FieldValue.arrayUnion([
