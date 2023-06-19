@@ -23,32 +23,9 @@ class ComptePage extends StatefulWidget {
 }
 
 class _ComptePageState extends State<ComptePage> {
-  TextEditingController posteContoller = TextEditingController();
-  TextEditingController descContoller = TextEditingController();
-  TextEditingController heureContoller = TextEditingController();
-  TextEditingController nbBenContoller = TextEditingController();
-
   User? userId = FirebaseAuth.instance.currentUser;
 
   String groupValue = "Samedi";
-
-  List<bool> checkedItems = [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -162,19 +139,19 @@ class _ComptePageState extends State<ComptePage> {
                                         color: Color(0xFF2b5a72)),
                                   ),
                                   // Bouton Ajouter un horaire
-                                  IconButton(
-                                    onPressed: () {
-                                      Get.to(() => AddPoste(), arguments: {
-                                        "poste": poste,
-                                        "desc": desc,
-                                        "posteId": posteId,
-                                      });
-                                    },
-                                    icon: Icon(Icons.edit),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Color(0xFF2b5a72),
-                                    ),
-                                  ),
+                                  // IconButton(
+                                  //   onPressed: () {
+                                  //     Get.to(() => AddPoste(), arguments: {
+                                  //       "poste": poste,
+                                  //       "desc": desc,
+                                  //       "posteId": posteId,
+                                  //     });
+                                  //   },
+                                  //   icon: Icon(Icons.edit),
+                                  //   style: ElevatedButton.styleFrom(
+                                  //     primary: Color(0xFF2b5a72),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                               Text(
@@ -186,8 +163,6 @@ class _ComptePageState extends State<ComptePage> {
                               ),
                               Column(
                                 children: [
-                                  // buildList(
-                                  // poste, hor, desc, posteId, snapshot, i),
                                   buildCheckList(
                                       poste, hor, desc, posteId, snapshot, i)
                                 ],
@@ -227,13 +202,16 @@ class _ComptePageState extends State<ComptePage> {
         itemCount: hors.length,
         itemBuilder: (context, index) {
           var horId = snapshot.data?.docs[i]['hor'][index];
-          var hord = snapshot.data?.docs[i]['hor'][index]["debut"];
-          var horf = snapshot.data?.docs[i]['hor'][index]["fin"];
-          var nben = snapshot.data?.docs[i]['hor'][index]['nbBen'];
+          var horIds = snapshot.data?.docs[i]['hor'][index].toString();
+          var hord = horId["debut"];
+          var horf = horId["fin"];
+          var nben = horId['nbBen'];
+          var checked = horId['check'];
+
           return Card(
             child: ListTile(
               title: Text(
-                hord + ' - ' + horf + ' avec ' + nben + ' benevoles',
+                hord + ' - ' + horf + ' avec ' + nben.toString() + ' benevoles',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -245,10 +223,15 @@ class _ComptePageState extends State<ComptePage> {
                   children: [
                     Expanded(
                         child: Checkbox(
-                      value: checkedItems[index],
+                      value: checked,
                       onChanged: (value) {
                         setState(() {
-                          checkedItems[index] = value!;
+                          checked = value!;
+                          insertNewPoste(poste, hord, horf, groupValue);
+                          // Mettre à jour la valeur de checked dans Firestore
+                          updateCheckedValue(
+                              posteId, checked, nben, hord, horf, poste, desc);
+                          print(nben);
                         });
                       },
                     )),
@@ -260,67 +243,91 @@ class _ComptePageState extends State<ComptePage> {
         },
       );
 
-  Widget buildList(poste, hors, desc, posteId, snapshot, i) => ListView.builder(
-      shrinkWrap: true,
-      itemCount: hors.length,
-      itemBuilder: (context, j) {
-        var horId = snapshot.data?.docs[i]['hor'][j];
-        var hord = snapshot.data?.docs[i]['hor'][j]["debut"];
-        var horf = snapshot.data?.docs[i]['hor'][j]["fin"];
-        var nben = snapshot.data?.docs[i]['hor'][j]['nbBen'];
+  void insertNewPoste(String poste, String debut, String fin, String jour) {
+    FirebaseFirestore.instance.collection("pos_ben").doc().set({
+      "createdAt": DateTime.now(),
+      "pos_id": FieldValue.arrayUnion([
+        {"debut": debut, "fin": fin, "poste": poste, "jour": jour}
+      ]),
+      "ben_id": userId?.uid,
+    });
+  }
 
-        // final sortedItems = hors
-        //   ..sort((item1, item2) => item2.compareTo(item1));
-        // final hor = sortedItems[j];
+  // void updateCheckedValue(String posteId, bool checked, int nben, String debut,
+  //     String fin, String poste, String desc) {
+  //   FirebaseFirestore.instance
+  //       .collection('pos_hor')
+  //       .doc(posteId
+  //           .toString()) // Il faut mettre supprimer puis ajouter à la facon de Edit Poste
+  //       .update({
+  //     "jour": groupValue,
+  //     "poste": poste,
+  //     "desc": desc,
+  //     "hor": FieldValue.arrayRemove([
+  //       {"debut": debut, "fin": fin, "nbBen": nben, "check": !checked}
+  //     ]),
+  //   }).then((value) => {
+  //             FirebaseFirestore.instance
+  //                 .collection('pos_hor')
+  //                 .doc(posteId.toString())
+  //                 .update({
+  //               "jour": groupValue.toString(),
+  //               "poste": poste.toString(),
+  //               "desc": desc,
+  //               'hor': FieldValue.arrayUnion([
+  //                 {
+  //                   "check": checked,
+  //                   "debut": debut,
+  //                   "fin": fin,
+  //                   "nbBen": checked ? nben - 1 : nben + 1,
+  //                 }
+  //               ])
+  //             })
+  //           });
+  // }
 
-        return Card(
-          child: ListTile(
-            title: Text(
-              hord + ' - ' + horf + ' avec ' + nben + ' benevoles',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Color(0xFF2b5a72)),
-            ),
-            trailing: Container(
-              width: 70,
-              child: Row(children: [
-                // Bouton DELETE
-                Expanded(
-                  child: IconButton(
-                    onPressed: () {
-                      print(groupValue);
-                    },
-                    icon: Icon(Icons.delete),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF2b5a72),
-                    ),
-                  ),
-                ),
-                // Bouton MODIFIER
-                Expanded(
-                  child: IconButton(
-                    onPressed: () {
-                      Get.to(() => EditPoste(), arguments: {
-                        "jour": groupValue,
-                        "poste": poste,
-                        "desc": desc,
-                        "horId": horId,
-                        "debut": hord,
-                        "fin": horf,
-                        "nbBen": nben,
-                        "posteId": posteId,
-                      });
-                    },
-                    icon: Icon(Icons.edit),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF2b5a72),
-                    ),
-                  ),
-                ),
-              ]),
-            ),
-          ),
-        );
+  void updateCheckedValue(String posteId, bool checked, int nben, String debut,
+      String fin, String poste, String desc) {
+    FirebaseFirestore.instance
+        .collection('pos_hor')
+        .doc(posteId.toString())
+        .update({
+      "jour": groupValue,
+      "poste": poste,
+      "desc": desc,
+      "hor": FieldValue.arrayRemove([
+        {"debut": debut, "fin": fin, "nbBen": nben, "check": !checked}
+      ]),
+    }).then((value) {
+      FirebaseFirestore.instance
+          .collection('pos_hor')
+          .doc(posteId.toString())
+          .update({
+        "jour": groupValue.toString(),
+        "poste": poste.toString(),
+        "desc": desc,
+        'hor': FieldValue.arrayUnion([
+          {
+            "check": checked,
+            "debut": debut,
+            "fin": fin,
+            "nbBen": checked ? nben - 1 : nben + 1,
+          }
+        ])
+      }).then((value) {
+        FirebaseFirestore.instance
+            .collection('pos_hor')
+            .doc(posteId.toString())
+            .get()
+            .then((snapshot) {
+          var horList = snapshot.data()!['hor'] as List<dynamic>;
+          horList.sort((a, b) => a['debut'].compareTo(b['debut']));
+          FirebaseFirestore.instance
+              .collection('pos_hor')
+              .doc(posteId.toString())
+              .update({'hor': horList});
+        });
       });
+    });
+  }
 }

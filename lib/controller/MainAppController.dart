@@ -27,6 +27,8 @@ class MainAppController extends StatefulWidget {
 class _MainAppControllerState extends State<MainAppController> {
   PageController page = PageController();
   SideMenuController sideMenu = SideMenuController();
+  User? userId = FirebaseAuth.instance.currentUser;
+
   @override
   void initState() {
     sideMenu.addListener((p0) {
