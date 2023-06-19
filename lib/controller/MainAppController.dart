@@ -93,18 +93,6 @@ class _MainAppControllerState extends State<MainAppController> {
                   sideMenu.changePage(page);
                 },
                 icon: const Icon(Icons.contact_page),
-                // trailing: Container(
-                //     decoration: const BoxDecoration(
-                //         color: Colors.amber,
-                //         borderRadius: BorderRadius.all(Radius.circular(6))),
-                //     child: Padding(
-                //       padding: const EdgeInsets.symmetric(
-                //           horizontal: 6.0, vertical: 3),
-                //       child: Text(
-                //         'New',
-                //         style: TextStyle(fontSize: 11, color: Colors.grey[800]),
-                //       ),
-                //     )),
               ),
               SideMenuItem(
                 priority: 3,

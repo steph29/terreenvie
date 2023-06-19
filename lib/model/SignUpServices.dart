@@ -16,7 +16,8 @@ signUpserv(String userEmail, String userPassword, String userName,
       'email': userEmail,
       'createdAt': DateTime.now(),
       'UserId': userid.uid,
-      'role': 'ben'
+      'role': 'ben',
+      'profil': ''
     }).then((value) => {
           FirebaseAuth.instance.signOut(),
           // ignore: prefer_const_constructors
