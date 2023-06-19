@@ -112,20 +112,22 @@ class _EditPosteState extends State<EditPoste> {
                   .collection("pos_hor")
                   .doc(Get.arguments['posteId'].toString())
                   .update(
-                {
-                  "jour": Get.arguments['jour'].toString(),
-                  "poste": posteContoller.text.trim(),
-                  "desc": descContoller.text.trim(),
-                  // Suppression de l'ancienne valeur
-                  "hor": FieldValue.arrayRemove([
                     {
-                      "debut": Get.arguments['debut'].toString(),
-                      "fin": Get.arguments['fin'].toString(),
-                      "nbBen": Get.arguments['nbBen'].toString()
-                    }
-                  ]),
-                },
-              ).then((value) => {
+                      "jour": Get.arguments['jour'].toString(),
+                      "poste": posteContoller.text.trim(),
+                      "desc": descContoller.text.trim(),
+                      // Suppression de l'ancienne valeur
+                      "hor": FieldValue.arrayRemove([
+                        {
+                          "debut": Get.arguments['debut'].toString(),
+                          "fin": Get.arguments['fin'].toString(),
+                          "nbBen": Get.arguments['nbBen'].toInt(),
+                          "check": false
+                        }
+                      ]),
+                    },
+                  )
+                  .then((value) => {
                         // Ajout de la nouvelle valeur
                         FirebaseFirestore.instance
                             .collection("pos_hor")
@@ -138,13 +140,29 @@ class _EditPosteState extends State<EditPoste> {
                               {
                                 "debut": debutContoller.text.trim(),
                                 "fin": finContoller.text.trim(),
-                                "nbBen": nbBenContoller.text.trim()
+                                "nbBen": int.parse(nbBenContoller.text.trim()),
+                                "check": false
                               }
                             ])
                           },
                         ),
                         Get.back(),
-                      });
+                      })
+                  .then((value) {
+                    FirebaseFirestore.instance
+                        .collection('pos_hor')
+                        .doc(Get.arguments['posteId'].toString())
+                        .get()
+                        .then((snapshot) {
+                      var horList = snapshot.data()!['hor'] as List<dynamic>;
+                      horList.sort((a, b) => a['debut'].compareTo(b['debut']));
+                      FirebaseFirestore.instance
+                          .collection('pos_hor')
+                          .doc(Get.arguments['posteId'].toString())
+                          .update({'hor': horList});
+                    });
+                  });
+              ;
             },
             child: Text(
               "Modifier",

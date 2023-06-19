@@ -87,7 +87,7 @@ class _CreateState extends State<Create> {
                 var desc = descController.text.trim();
                 var debut = debutController.text.trim();
                 var fin = finController.text.trim();
-                var nbBen = nbBenController.text.trim();
+                var nbBen = int.parse(nbBenController.text.trim());
                 if (poste != "") {
                   try {
                     await FirebaseFirestore.instance
@@ -99,7 +99,12 @@ class _CreateState extends State<Create> {
                       "poste": poste,
                       "desc": desc,
                       "hor": FieldValue.arrayUnion([
-                        {"debut": debut, "fin": fin, "nbBen": nbBen}
+                        {
+                          "debut": debut,
+                          "fin": fin,
+                          "nbBen": nbBen,
+                          "check": false
+                        }
                       ]),
                       "ben_id": userId?.uid,
                     });

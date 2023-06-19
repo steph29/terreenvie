@@ -21,143 +21,140 @@ class _DashboardPageState extends State<DashboardPage> {
     //  const DashboardPage({Key? key}) : super(key: key);
 
     return Scaffold(
-        body: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(
-                flex: 1,
-                child: Container(
-                  height: MediaQuery.of(context).size.height / 2,
-                  padding: EdgeInsets.all(20.0),
-                  child: StreamBuilder(
-                    stream: FirebaseFirestore.instance
-                        .collection("pos_hor")
-                        .where("jour", isEqualTo: "5")
-                        .where("ben_id", isEqualTo: userId!.uid)
-                        .snapshots(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasError) {
-                        return Text("Something went wrong");
-                      }
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CupertinoActivityIndicator());
-                      }
-                      if (snapshot.data!.docs.isEmpty) {
-                        return Center(child: Text("No data found"));
-                      }
-                      if (snapshot != null && snapshot.data != null) {
-                        return Center(
-                          child: GridView.builder(
-                            controller: ScrollController(),
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.symmetric(horizontal: 30),
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (ctx, i) {
-                              var poste = snapshot.data!.docs[i]['poste'];
-                              var desc = snapshot.data!.docs[i]['desc'];
-                              var hor = snapshot.data!.docs[i]['debut'];
-
-                              return Card(
-                                color: Color(0xFFf2f0e7),
-                                child: Container(
-                                  height: 290,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20)),
-                                  margin: EdgeInsets.all(5),
-                                  padding: EdgeInsets.all(5),
-                                  child: Stack(
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              poste,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          // Text(poste),
-                                          Row(
-                                            children: [
-                                              Flexible(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Text(
-                                                      desc,
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 15,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      hor,
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 15,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 1.0,
-                              crossAxisSpacing: 0.0,
-                              mainAxisSpacing: 5,
-                              mainAxisExtent: 264,
-                            ),
-                          ),
-                        );
-                      }
-
-                      return Container();
-                    },
-                  ),
-                )),
-          ],
-        ),
-        SizedBox(
-          height: 30,
-        ),
-        OutlinedButton(
-          onPressed: () {
-//  Get.to(() => );  Il faut une page qui lit pos_hor
-          },
-          child: Text(
-            "Je choisi un nouveau créneau",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(43, 90, 114, 1)),
-          ),
-          style: OutlinedButton.styleFrom(
-            backgroundColor: Color.fromRGBO(242, 240, 231, 1),
-          ),
-        ),
-      ],
+        body: SingleChildScrollView(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildCard(),
+                SizedBox(
+                  height: 30,
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     ));
   }
+
+  Widget buildCard() => StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection("pos_ben")
+            .where("ben_id", isEqualTo: userId!.uid)
+            .snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CupertinoActivityIndicator());
+          }
+          if (snapshot.data!.docs.isEmpty) {
+            return Center(child: Text("No data found"));
+          }
+          if (snapshot != null && snapshot.data != null) {
+            return Center(
+              child: GridView.builder(
+                controller: ScrollController(),
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (ctx, i) {
+                  var pos = snapshot.data!.docs[i]['pos_id'];
+                  var posteId = snapshot.data?.docs[i].id;
+                  return Card(
+                    color: Color(0xFFf2f0e7),
+                    child: Container(
+                      constraints:
+                          const BoxConstraints(minHeight: 0, maxHeight: 500.0),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20)),
+                      margin: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(5),
+                      child: Stack(
+                        children: [
+                          SizedBox(
+                            height: 500,
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Vous êtes inscrit pour: ",
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF2b5a72)),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  buildList(pos, posteId, snapshot, i)
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.0,
+                  crossAxisSpacing: 0.0,
+                  mainAxisSpacing: 5,
+                  mainAxisExtent: 500,
+                ),
+              ),
+            );
+          }
+          return Container();
+        },
+      );
+  Widget buildList(poste, posteId, snapshot, i) => ListView.builder(
+      shrinkWrap: true,
+      itemCount: poste.length,
+      itemBuilder: (context, j) {
+        var horId = snapshot.data?.docs[i]['pos_id'][j];
+        var hord = snapshot.data?.docs[i]['pos_id'][j]["debut"];
+        var horf = snapshot.data?.docs[i]['pos_id'][j]["fin"];
+        var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
+        var postes = snapshot.data?.docs[i]['pos_id'][j]['poste'];
+
+        // final sortedItems = hors
+        //   ..sort((item1, item2) => item2.compareTo(item1));
+        // final hor = sortedItems[j];
+
+        return Card(
+          child: ListTile(
+            title: Text(
+              postes.toString() +
+                  ' - ' +
+                  jour.toString() +
+                  ' - ' +
+                  hord +
+                  '-' +
+                  horf,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Color(0xFF2b5a72)),
+            ),
+          ),
+        );
+      });
 }

@@ -119,7 +119,8 @@ class _AddPosteState extends State<AddPoste> {
                     {
                       "debut": debutContoller.text.trim(),
                       "fin": finContoller.text.trim(),
-                      "nbBen": nbBenContoller.text.trim()
+                      "nbBen": int.parse(nbBenContoller.text.trim()),
+                      "check": false
                     }
                   ]),
                 },

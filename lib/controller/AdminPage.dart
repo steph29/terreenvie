@@ -226,14 +226,10 @@ class _AdminPageState extends State<AdminPage> {
         var horf = snapshot.data?.docs[i]['hor'][j]["fin"];
         var nben = snapshot.data?.docs[i]['hor'][j]['nbBen'];
 
-        // final sortedItems = hors
-        //   ..sort((item1, item2) => item2.compareTo(item1));
-        // final hor = sortedItems[j];
-
         return Card(
           child: ListTile(
             title: Text(
-              hord + ' - ' + horf + ' avec ' + nben + ' benevoles',
+              hord + ' - ' + horf + ' avec ' + nben.toString() + ' benevoles',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
@@ -246,7 +242,29 @@ class _AdminPageState extends State<AdminPage> {
                 Expanded(
                   child: IconButton(
                     onPressed: () {
-                      print(groupValue);
+                      FirebaseFirestore.instance
+                          .collection("pos_hor")
+                          .doc(posteId.toString())
+                          .get()
+                          .then((doc) {
+                        if (doc.exists) {
+                          List<dynamic> horaires = doc.data()!['hor'];
+                          horaires.removeWhere((horaire) {
+                            return (horaire['debut'] == hord &&
+                                horaire['fin'] == horf &&
+                                horaire['nbBen'] == nben);
+                          });
+
+                          FirebaseFirestore.instance
+                              .collection("pos_hor")
+                              .doc(posteId.toString())
+                              .update({"hor": horaires}).then((value) {
+                            // Suppression réussie
+                          }).catchError((error) {
+                            // Gestion des erreurs
+                          });
+                        }
+                      });
                     },
                     icon: Icon(Icons.delete),
                     style: ElevatedButton.styleFrom(
