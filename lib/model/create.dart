@@ -21,6 +21,7 @@ class _CreateState extends State<Create> {
   TextEditingController debutController = TextEditingController();
   TextEditingController finController = TextEditingController();
   TextEditingController nbBenController = TextEditingController();
+
   User? userId = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
@@ -108,13 +109,15 @@ class _CreateState extends State<Create> {
                       ]),
                       "ben_id": userId?.uid,
                     });
-                    Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (_, __, ___) => MainAppController(),
-                        transitionDuration: Duration(seconds: 0),
-                      ),
-                    );
+                    Get.offAll(() => MainAppController());
+
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   PageRouteBuilder(
+                    //     // pageBuilder: (_, __, ___) => MainAppController(),
+                    //     // transitionDuration: Duration(seconds: 0),
+                    //   ),
+                    // );
                   } catch (e) {
                     print("Error $e");
                   }

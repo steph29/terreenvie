@@ -227,7 +227,9 @@ class _ComptePageState extends State<ComptePage> {
                       onChanged: (value) {
                         setState(() {
                           checked = value!;
-                          insertNewPoste(poste, hord, horf, groupValue);
+                          checked
+                              ? insertNewPoste(poste, hord, horf, groupValue)
+                              : null;
                           // Mettre à jour la valeur de checked dans Firestore
                           updateCheckedValue(
                               posteId, checked, nben, hord, horf, poste, desc);

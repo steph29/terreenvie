@@ -108,8 +108,7 @@ class _AdminPageState extends State<AdminPage> {
         stream: FirebaseFirestore.instance
             .collection("users")
             .where("UserId", isEqualTo: userId!.uid)
-            .where("profil", isEqualTo: "admin")
-            .snapshots(),
+            .where("profil", whereIn: ["admin", "ref"]).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return Text("Something went wrong");

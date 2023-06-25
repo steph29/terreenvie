@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
 
 signUpserv(String userEmail, String userPassword, String userName,
-    String userPrenom, String userPhone) async {
+    String userPrenom, String userPhone, String profil, String role) async {
   User? userid = FirebaseAuth.instance.currentUser;
 
   try {
@@ -17,7 +17,7 @@ signUpserv(String userEmail, String userPassword, String userName,
       'createdAt': DateTime.now(),
       'UserId': userid.uid,
       'role': 'ben',
-      'profil': ''
+      'profil': 'ben'
     }).then((value) => {
           FirebaseAuth.instance.signOut(),
           // ignore: prefer_const_constructors
