@@ -103,7 +103,7 @@ class _LogControllerState extends State<LogController> {
                               email: userEmail, password: userPassword))
                       .user;
                   if (firebaseUser != null) {
-                    Get.to(() => MainAppController());
+                    Get.offAll(MainAppController());
                   } else {
                     print("Check email and password");
                   }

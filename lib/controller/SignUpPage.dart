@@ -142,6 +142,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 var userName = nameController.text.trim();
                 var userPrenom = prenomController.text.trim();
                 var userPhone = telController.text.trim();
+                var profil = "ben";
+                var role = "ben";
 
                 await FirebaseAuth.instance
                     .createUserWithEmailAndPassword(
@@ -149,7 +151,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     .then((value) => {
                           log("User created"),
                           signUpserv(userEmail, userPassword, userName,
-                              userPrenom, userPhone),
+                              userPrenom, userPhone, profil, role),
                         });
               },
               child: Text("Inscription"),
@@ -163,7 +165,7 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              Get.to(() => LogController());
+              Get.offAllNamed('/login');
             },
             child: Text("Vous avez déjà un compte, connectez-vous !"),
           ),
