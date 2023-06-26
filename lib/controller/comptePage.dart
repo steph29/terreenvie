@@ -30,34 +30,36 @@ class _ComptePageState extends State<ComptePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(title: Text("Faites votre sélection")),
         body: SingleChildScrollView(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(
-              flex: 1,
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                SizedBox(
-                  height: 30,
-                ),
-                buildSegmentControl(),
-                SizedBox(
-                  height: 30,
-                ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                  flex: 1,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 30,
+                        ),
+                        buildSegmentControl(),
+                        SizedBox(
+                          height: 30,
+                        ),
 
-                SizedBox(
-                  height: 30,
-                ),
-                // Liste des cards
-                buildCard(groupValue),
-                SizedBox(
-                  height: 30,
-                ),
-              ])),
-        ],
-      ),
-    ));
+                        SizedBox(
+                          height: 30,
+                        ),
+                        // Liste des cards
+                        buildCard(groupValue),
+                        SizedBox(
+                          height: 30,
+                        ),
+                      ])),
+            ],
+          ),
+        ));
   }
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(

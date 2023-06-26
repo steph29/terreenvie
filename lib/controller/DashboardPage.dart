@@ -21,25 +21,26 @@ class _DashboardPageState extends State<DashboardPage> {
     //  const DashboardPage({Key? key}) : super(key: key);
 
     return Scaffold(
+        appBar: AppBar(title: Text("Votre tableau de bord")),
         body: SingleChildScrollView(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(
-            flex: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                buildCard(),
-                SizedBox(
-                  height: 30,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    userId != null ? buildCard() : Text('Pas de données'),
+                    SizedBox(
+                      height: 30,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          )
-        ],
-      ),
-    ));
+              )
+            ],
+          ),
+        ));
   }
 
   Widget buildCard() => StreamBuilder(

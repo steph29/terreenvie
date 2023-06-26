@@ -14,6 +14,8 @@ import 'package:terreenvie/controller/ForgotPwdPage.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
 import 'package:terreenvie/controller/SignUpPage.dart';
 
+import '../main.dart';
+
 class LogController extends StatefulWidget {
   const LogController({Key? key}) : super(key: key);
 
@@ -26,6 +28,7 @@ class _LogControllerState extends State<LogController> {
   TextEditingController passwordController = TextEditingController();
 
   var _obscureText = true;
+  User? userId = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +106,9 @@ class _LogControllerState extends State<LogController> {
                               email: userEmail, password: userPassword))
                       .user;
                   if (firebaseUser != null) {
-                    Get.offAll(MainAppController());
+                    // Get.offNamed('/');
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => MainAppController()));
                   } else {
                     print("Check email and password");
                   }
@@ -129,12 +134,6 @@ class _LogControllerState extends State<LogController> {
           )),
           SizedBox(
             height: 10.0,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.to(() => SignUpPage());
-            },
-            child: Text("Pas encore de compte, inscrivez-vous !"),
           ),
         ],
       )),
