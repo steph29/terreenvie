@@ -167,7 +167,32 @@ class _MainAppControllerState extends State<MainAppController> {
               ],
             ),
           ),
-
+          // BottomNavigationBar(
+          //   currentIndex: _selectedIndex,
+          //   onTap: (index) {
+          //     setState(() {
+          //       _selectedIndex = index;
+          //     });
+          //   },
+          //   items: const <BottomNavigationBarItem>[
+          //     BottomNavigationBarItem(
+          //       icon: Icon(Icons.home),
+          //       label: 'Page 1',
+          //     ),
+          //     BottomNavigationBarItem(
+          //       icon: Icon(Icons.business),
+          //       label: 'Page 2',
+          //     ),
+          //     BottomNavigationBarItem(
+          //       icon: Icon(Icons.school),
+          //       label: 'Page 3',
+          //     ),
+          //     BottomNavigationBarItem(
+          //       icon: Icon(Icons.contact_mail),
+          //       label: 'Page 4',
+          //     ),
+          //   ],
+          // ),
           // Expanded(
           //   child: Navigator(
           //     key: Get.nestedKey(1),
