@@ -24,8 +24,6 @@ Future<void> main() async {
 class MyApp extends StatefulWidget {
   MyApp({Key? key}) : super(key: key);
 
-  static const String _title = 'Le coin des bénévoles';
-
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -41,18 +39,9 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: MyApp._title,
-      home: user != null ? MainAppController() : const LogController(),
+      home: MainAppController(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: Color(0xFFf2f0e7)),
-      initialRoute: '/',
-      getPages: [
-        GetPage(name: '/', page: () => MainAppController()),
-        GetPage(name: '/login', page: () => LogController()),
-        GetPage(name: '/logout', page: () => LogController()),
-        GetPage(name: '/admin', page: () => AdminPage()),
-        GetPage(name: '/dashboard', page: () => DashboardPage()),
-      ],
     );
   }
 }

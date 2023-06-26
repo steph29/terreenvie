@@ -38,6 +38,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("Inscription")),
       body: SingleChildScrollView(
           child: Column(
         children: [
@@ -165,7 +166,8 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              Get.offAllNamed('/login');
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => LogController()));
             },
             child: Text("Vous avez déjà un compte, connectez-vous !"),
           ),

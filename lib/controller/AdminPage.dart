@@ -34,51 +34,53 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(title: Text("Le coin des référents")),
         body: SingleChildScrollView(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(
-              flex: 1,
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                SizedBox(
-                  height: 30,
-                ),
-                buildSegmentControl(),
-                SizedBox(
-                  height: 30,
-                ),
-                OutlinedButton(
-                  onPressed: () {
-                    Get.to(() => Create(), arguments: {
-                      "jour": groupValue,
-                    });
-                  },
-                  child: Text(
-                    "Je rajoute un poste",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromRGBO(43, 90, 114, 1)),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(242, 240, 231, 1),
-                  ),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                // Liste des cards
-                buildCard(groupValue),
-                SizedBox(
-                  height: 30,
-                ),
-              ])),
-        ],
-      ),
-    ));
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                  flex: 1,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 30,
+                        ),
+                        buildSegmentControl(),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        OutlinedButton(
+                          onPressed: () {
+                            Get.to(() => Create(), arguments: {
+                              "jour": groupValue,
+                            });
+                          },
+                          child: Text(
+                            "Je rajoute un poste",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromRGBO(43, 90, 114, 1)),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Color.fromRGBO(242, 240, 231, 1),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        // Liste des cards
+                        buildCard(groupValue),
+                        SizedBox(
+                          height: 30,
+                        ),
+                      ])),
+            ],
+          ),
+        ));
   }
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
