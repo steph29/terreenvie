@@ -154,7 +154,6 @@ class _DashboardPageState extends State<DashboardPage> {
             trailing: ElevatedButton(
               child: Icon(Icons.delete),
               onPressed: () async {
-                print(poste);
                 await FirebaseFirestore.instance
                     .collection("pos_ben")
                     .doc(posteId)
