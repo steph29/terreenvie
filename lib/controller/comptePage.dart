@@ -140,20 +140,6 @@ class _ComptePageState extends State<ComptePage> {
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xFF2b5a72)),
                                   ),
-                                  // Bouton Ajouter un horaire
-                                  // IconButton(
-                                  //   onPressed: () {
-                                  //     Get.to(() => AddPoste(), arguments: {
-                                  //       "poste": poste,
-                                  //       "desc": desc,
-                                  //       "posteId": posteId,
-                                  //     });
-                                  //   },
-                                  //   icon: Icon(Icons.edit),
-                                  //   style: ElevatedButton.styleFrom(
-                                  //     primary: Color(0xFF2b5a72),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                               Text(
