@@ -243,39 +243,6 @@ class _ComptePageState extends State<ComptePage> {
     });
   }
 
-  // void updateCheckedValue(String posteId, bool checked, int nben, String debut,
-  //     String fin, String poste, String desc) {
-  //   FirebaseFirestore.instance
-  //       .collection('pos_hor')
-  //       .doc(posteId
-  //           .toString()) // Il faut mettre supprimer puis ajouter à la facon de Edit Poste
-  //       .update({
-  //     "jour": groupValue,
-  //     "poste": poste,
-  //     "desc": desc,
-  //     "hor": FieldValue.arrayRemove([
-  //       {"debut": debut, "fin": fin, "nbBen": nben, "check": !checked}
-  //     ]),
-  //   }).then((value) => {
-  //             FirebaseFirestore.instance
-  //                 .collection('pos_hor')
-  //                 .doc(posteId.toString())
-  //                 .update({
-  //               "jour": groupValue.toString(),
-  //               "poste": poste.toString(),
-  //               "desc": desc,
-  //               'hor': FieldValue.arrayUnion([
-  //                 {
-  //                   "check": checked,
-  //                   "debut": debut,
-  //                   "fin": fin,
-  //                   "nbBen": checked ? nben - 1 : nben + 1,
-  //                 }
-  //               ])
-  //             })
-  //           });
-  // }
-
   void updateCheckedValue(String posteId, bool checked, int nben, String debut,
       String fin, String poste, String desc) {
     FirebaseFirestore.instance
