@@ -136,10 +136,6 @@ class _DashboardPageState extends State<DashboardPage> {
         var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
         var postes = snapshot.data?.docs[i]['pos_id'][j]['poste'];
 
-        // final sortedItems = hors
-        //   ..sort((item1, item2) => item2.compareTo(item1));
-        // final hor = sortedItems[j];
-
         return Card(
           child: ListTile(
             title: Text(
@@ -154,6 +150,16 @@ class _DashboardPageState extends State<DashboardPage> {
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                   color: Color(0xFF2b5a72)),
+            ),
+            trailing: ElevatedButton(
+              child: Icon(Icons.delete),
+              onPressed: () async {
+                print(poste);
+                await FirebaseFirestore.instance
+                    .collection("pos_ben")
+                    .doc(posteId)
+                    .delete();
+              },
             ),
           ),
         );
