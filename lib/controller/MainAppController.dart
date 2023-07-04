@@ -8,6 +8,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:get/get.dart';
 import 'package:terreenvie/controller/DashboardPage.dart';
+import 'package:terreenvie/controller/TerreEnVie.dart';
 import 'package:terreenvie/main.dart';
 import 'package:terreenvie/model/create.dart';
 import 'AdminPage.dart';
@@ -16,10 +17,6 @@ import 'LogOutController.dart';
 import 'Logcontroller.dart';
 import 'SignUpPage.dart';
 import 'comptePage.dart';
-
-import 'package:url_launcher/url_launcher.dart';
-
-const String url = 'https://www.terreenvie.com/';
 
 class MainAppController extends StatefulWidget {
   @override
@@ -59,9 +56,9 @@ class _MainAppControllerState extends State<MainAppController> {
       child: SignUpPage(),
     ),
     Container(
-      color: Colors.yellow.shade100,
+      color: Colors.pink.shade100,
       alignment: Alignment.center,
-      child: ContactPage(),
+      child: TerreEnVie(),
     ),
   ];
   final List<Widget> _pagesAdmin = [
@@ -85,6 +82,11 @@ class _MainAppControllerState extends State<MainAppController> {
       child: AdminPage(),
     ),
     Container(
+      color: Colors.pink.shade100,
+      alignment: Alignment.center,
+      child: TerreEnVie(),
+    ),
+    Container(
         color: Colors.orange.shade100,
         alignment: Alignment.center,
         child: LogOutController())
@@ -104,6 +106,11 @@ class _MainAppControllerState extends State<MainAppController> {
       color: Colors.red.shade100,
       alignment: Alignment.center,
       child: ContactPage(),
+    ),
+    Container(
+      color: Colors.blue.shade100,
+      alignment: Alignment.center,
+      child: TerreEnVie(),
     ),
     Container(
         color: Colors.orange.shade100,
@@ -138,6 +145,8 @@ class _MainAppControllerState extends State<MainAppController> {
                               icon: Icon(Icons.admin_panel_settings),
                               label: 'Admin'),
                           BottomNavigationBarItem(
+                              icon: Icon(Icons.web), label: 'Terre En Vie'),
+                          BottomNavigationBarItem(
                               icon: Icon(Icons.exit_to_app),
                               label: 'Deconnexion'),
                         ],
@@ -158,9 +167,11 @@ class _MainAppControllerState extends State<MainAppController> {
                               icon: Icon(Icons.calendar_today),
                               label: 'Choisir ses postes'),
                           BottomNavigationBarItem(
-                              icon: Icon(Icons.contact_mail),
+                              icon: Icon(Icons.contact_mail), label: 'Contact'),
+                          BottomNavigationBarItem(
+                              icon: Icon(Icons.web),
                               label:
-                                  'Contact'), // Afficher uniquement si isAdminVisible est vrai
+                                  'Terre En Vie'), // Afficher uniquement si isAdminVisible est vrai
                           BottomNavigationBarItem(
                               icon: Icon(Icons.exit_to_app),
                               label: 'Deconnexion'),
@@ -181,21 +192,12 @@ class _MainAppControllerState extends State<MainAppController> {
                       BottomNavigationBarItem(
                           icon: const Icon(Icons.add), label: "S'inscrire"),
                       BottomNavigationBarItem(
-                          icon: const Icon(Icons.login),
-                          label: 'Programmation'),
+                          icon: Icon(Icons.web), label: 'Terre En Vie'),
                     ],
                   ))
             : null,
         body: Row(
           children: [
-            ElevatedButton(
-                onPressed: _launchURL,
-                child: Column(
-                  children: [
-                    Icon(Icons.web),
-                    Text("Terre En Vie"),
-                  ],
-                )),
             if (MediaQuery.of(context).size.width >= 640)
               userId != null
                   ? (isAdminVisible
@@ -221,6 +223,9 @@ class _MainAppControllerState extends State<MainAppController> {
                                 icon: Icon(Icons.admin_panel_settings),
                                 label: Text('Admin')),
                             NavigationRailDestination(
+                                icon: Icon(Icons.web),
+                                label: Text('Terre En Vie')),
+                            NavigationRailDestination(
                                 icon: Icon(Icons.exit_to_app),
                                 label: Text('Deconnexion')),
                           ],
@@ -244,6 +249,9 @@ class _MainAppControllerState extends State<MainAppController> {
                                 icon: Icon(Icons.contact_mail),
                                 label: Text('Contact')),
                             NavigationRailDestination(
+                                icon: Icon(Icons.web),
+                                label: Text('Terre En Vie')),
+                            NavigationRailDestination(
                                 icon: Icon(Icons.exit_to_app),
                                 label: Text('Deconnexion')),
                           ],
@@ -263,8 +271,7 @@ class _MainAppControllerState extends State<MainAppController> {
                         NavigationRailDestination(
                             icon: Icon(Icons.add), label: Text("S'inscrire")),
                         NavigationRailDestination(
-                            icon: Icon(Icons.schedule),
-                            label: Text('Programmation')),
+                            icon: Icon(Icons.web), label: Text('Terre En Vie')),
                       ],
                     ),
             Expanded(
@@ -298,9 +305,5 @@ class _MainAppControllerState extends State<MainAppController> {
     }).catchError((error) {
       // Gestion des erreurs
     });
-  }
-
-  _launchURL() async {
-    if (!await launch(url)) throw 'Could not launch $url';
   }
 }
