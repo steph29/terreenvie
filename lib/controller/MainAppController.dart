@@ -19,6 +19,8 @@ import 'comptePage.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
+const String url = 'https://www.terreenvie.com/';
+
 class MainAppController extends StatefulWidget {
   @override
   State<MainAppController> createState() => _MainAppControllerState();
@@ -74,10 +76,9 @@ class _MainAppControllerState extends State<MainAppController> {
       child: ComptePage(),
     ),
     Container(
-      color: Colors.red.shade100,
-      alignment: Alignment.center,
-      child: ContactPage(),
-    ),
+        color: Colors.red.shade100,
+        alignment: Alignment.center,
+        child: ContactPage()),
     Container(
       color: Colors.pink.shade100,
       alignment: Alignment.center,
@@ -187,6 +188,14 @@ class _MainAppControllerState extends State<MainAppController> {
             : null,
         body: Row(
           children: [
+            ElevatedButton(
+                onPressed: _launchURL,
+                child: Column(
+                  children: [
+                    Icon(Icons.web),
+                    Text("Terre En Vie"),
+                  ],
+                )),
             if (MediaQuery.of(context).size.width >= 640)
               userId != null
                   ? (isAdminVisible
@@ -292,11 +301,6 @@ class _MainAppControllerState extends State<MainAppController> {
   }
 
   _launchURL() async {
-    const url = 'https://www.terreenvie.com/';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
+    if (!await launch(url)) throw 'Could not launch $url';
   }
 }
