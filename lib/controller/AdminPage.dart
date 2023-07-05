@@ -34,7 +34,10 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Le coin des référents")),
+        appBar: AppBar(
+          title: Text("Le coin des référents"),
+          backgroundColor: Color(0xFF2b5a72),
+        ),
         body: SingleChildScrollView(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

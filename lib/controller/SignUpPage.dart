@@ -38,14 +38,17 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Inscription")),
+      appBar: AppBar(
+        title: Text("Inscription"),
+        backgroundColor: Color(0xFF2b5a72),
+      ),
       body: SingleChildScrollView(
           child: Column(
         children: [
           Container(
             alignment: Alignment.center,
             height: 200.0,
-            child: Lottie.asset("hands.json"),
+            child: Image.asset("logoTEV.png"),
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
@@ -138,6 +141,10 @@ class _SignUpPageState extends State<SignUpPage> {
             margin: EdgeInsets.symmetric(horizontal: 30.0),
             child: ElevatedButton(
               onPressed: () async {
+                RegExp phoneNumberRegex = RegExp(r'^0[1-9][0-9]{8}$');
+                RegExp emailRegex =
+                    RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+
                 var userEmail = emailController.text.trim();
                 var userPassword = passwordController.text.trim();
                 var userName = nameController.text.trim();
@@ -145,16 +152,81 @@ class _SignUpPageState extends State<SignUpPage> {
                 var userPhone = telController.text.trim();
                 var profil = "ben";
                 var role = "ben";
-
-                await FirebaseAuth.instance
-                    .createUserWithEmailAndPassword(
-                        email: userEmail, password: userPassword)
-                    .then((value) => {
-                          log("User created"),
-                          signUpserv(userEmail, userPassword, userName,
-                              userPrenom, userPhone, profil, role),
-                        });
+                try {
+                  bool isValidPhoneNumber =
+                      phoneNumberRegex.hasMatch(userPhone);
+                  if (isValidPhoneNumber) {
+                    bool isValidEmail = emailRegex.hasMatch(userEmail);
+                    if (isValidEmail) {
+                      await FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                              email: userEmail, password: userPassword)
+                          .then((value) => {
+                                log("User created"),
+                                signUpserv(userEmail, userPassword, userName,
+                                    userPrenom, userPhone, profil, role),
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text("MESSAGE IMPORTANT"),
+                                    content: Text(
+                                        "Conservez bien vos identifiants (adresse email + Mot de Passe), ils vous seront nécessaires pour vous connecter à votre compte. De plus, pour limiter les emails inutiles et polluants, nous limitons l'envoie des emails au strictes minimum. Merci de votre compréhension. "),
+                                    actions: [
+                                      TextButton(
+                                        child: Text("J'ai bien compris"),
+                                        onPressed: () => Navigator.of(context)
+                                            .pushReplacement(MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LogController())),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              });
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text("Erreur"),
+                          content: Text(
+                              "Le format de l'email est invalide. Si vous n'avez d'email, utilisez le modèle suivant: nom.prenom@tev.bzh"),
+                          actions: [
+                            TextButton(
+                              child: Text("OK"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Erreur"),
+                        content: Text("Le numéro de téléphone est invalide"),
+                        actions: [
+                          TextButton(
+                            child: Text("OK"),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  Container(
+                    child: Center(
+                      child: Text("$e"),
+                    ),
+                  );
+                }
               },
+              style: ElevatedButton.styleFrom(
+                primary: Color(
+                    0xFF2b5a72), // Définit la couleur de fond sur transparent
+                elevation: 0, // Supprime l'ombre du bouton
+              ),
               child: Text("Inscription"),
             ),
           ),
@@ -169,6 +241,11 @@ class _SignUpPageState extends State<SignUpPage> {
               Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => LogController()));
             },
+            style: ElevatedButton.styleFrom(
+              primary: Color(
+                  0xFF2b5a72), // Définit la couleur de fond sur transparent
+              elevation: 0, // Supprime l'ombre du bouton
+            ),
             child: Text("Vous avez déjà un compte, connectez-vous !"),
           ),
         ],

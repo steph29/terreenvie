@@ -21,7 +21,7 @@ signUpserv(String userEmail, String userPassword, String userName,
     }).then((value) => {
           FirebaseAuth.instance.signOut(),
           // ignore: prefer_const_constructors
-          Get.to(() => LogController())
+          // Get.to(() => LogController())
         });
   } on FirebaseAuthException catch (e) {
     print("Error $e");

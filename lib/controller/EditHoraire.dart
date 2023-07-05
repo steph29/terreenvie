@@ -20,7 +20,10 @@ class _EditHoraireState extends State<EditHoraire> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Ajouter les horaires")),
+      appBar: AppBar(
+        title: Text("Ajouter les horaires"),
+        backgroundColor: Color(0xFF2b5a72),
+      ),
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 400, vertical: 50),
         child: Column(children: [
