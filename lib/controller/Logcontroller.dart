@@ -33,7 +33,10 @@ class _LogControllerState extends State<LogController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Authentification")),
+      appBar: AppBar(
+        title: Text("Authentification"),
+        backgroundColor: Color(0xFF2b5a72),
+      ),
       body: AuthLog(),
     );
   }
@@ -46,7 +49,7 @@ class _LogControllerState extends State<LogController> {
           Container(
             alignment: Alignment.center,
             height: 200.0,
-            child: Lottie.asset("hands.json"),
+            child: Image.asset("logoTEV.png"),
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
@@ -110,13 +113,59 @@ class _LogControllerState extends State<LogController> {
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (context) => MainAppController()));
                   } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Erreur"),
+                        content: Text(
+                            "Votre identifiant ou mot de passe est invalide."),
+                        actions: [
+                          TextButton(
+                            child: Text("OK"),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    );
                     print("Check email and password");
                   }
                 } on FirebaseAuthException catch (e) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Erreur"),
+                      content: Text(
+                          "Votre identifiant ou mot de passe est invalide."),
+                      actions: [
+                        TextButton(
+                          child: Text("OK"),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  );
                   // ignore: avoid_print
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Erreur"),
+                      content: Text("Erreur $e"),
+                      actions: [
+                        TextButton(
+                          child: Text("OK"),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  );
                   print("Erreur $e");
                 }
               },
+              style: ElevatedButton.styleFrom(
+                primary: Color(
+                    0xFF2b5a72), // Définit la couleur de fond sur transparent
+                elevation: 0, // Supprime l'ombre du bouton
+              ),
               child: Text("Authentification"),
             ),
           ),
@@ -129,6 +178,11 @@ class _LogControllerState extends State<LogController> {
               onPressed: () {
                 Get.to(() => ForgotPwdPage());
               },
+              style: ElevatedButton.styleFrom(
+                primary: Color(
+                    0xFF2b5a72), // Définit la couleur de fond sur transparent
+                elevation: 0, // Supprime l'ombre du bouton
+              ),
               child: Text("Mot de passe oublié ?"),
             ),
           )),

@@ -26,11 +26,15 @@ class _ComptePageState extends State<ComptePage> {
   User? userId = FirebaseAuth.instance.currentUser;
 
   String groupValue = "Samedi";
+  bool isCurrentUserOwner = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Faites votre sélection")),
+        appBar: AppBar(
+          title: Text("Faites votre sélection"),
+          backgroundColor: Color(0xFF2b5a72),
+        ),
         body: SingleChildScrollView(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -112,6 +116,12 @@ class _ComptePageState extends State<ComptePage> {
                   var desc = snapshot.data!.docs[i]['desc'];
                   var hor = snapshot.data?.docs[i]['hor'];
                   var posteId = snapshot.data?.docs[i].id;
+
+                  // Vérifier si l'utilisateur connecté est le propriétaire du poste
+                  String? currentUserId = userId?.uid;
+                  String? ownerId = snapshot.data?.docs[i]['ben_id'];
+                  isCurrentUserOwner = currentUserId == ownerId;
+
                   return Card(
                     color: Color(0xFFf2f0e7),
                     child: Container(
@@ -151,7 +161,7 @@ class _ComptePageState extends State<ComptePage> {
                               ),
                               Column(
                                 children: [
-                                  buildCheckList(
+                                  buildButtonList(
                                       poste, hor, desc, posteId, snapshot, i)
                                 ],
                               ),
@@ -184,7 +194,7 @@ class _ComptePageState extends State<ComptePage> {
         ),
       );
 
-  Widget buildCheckList(poste, hors, desc, posteId, snapshot, i) =>
+  Widget buildButtonList(poste, hors, desc, posteId, snapshot, i) =>
       ListView.builder(
         shrinkWrap: true,
         itemCount: hors.length,
@@ -210,14 +220,32 @@ class _ComptePageState extends State<ComptePage> {
                 child: Row(
                   children: [
                     Expanded(
-                        child: Checkbox(
-                      value: checked,
-                      onChanged: (value) {
+                        child: IconButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFF2b5a72),
+                      ),
+                      icon: Icon(Icons.check_circle),
+                      onPressed: () {
                         setState(() {
-                          checked = value!;
+                          checked = !checked;
                           checked
-                              ? insertNewPoste(poste, hord, horf, groupValue)
+                              ? insertNewPoste(
+                                  posteId, poste, hord, desc, horf, groupValue)
                               : null;
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("Merci "),
+                              content: Text(
+                                  "Votre sélection est bien enregistrer. Vous pouvez la retrouver dasn votre tableau de bord."),
+                              actions: [
+                                TextButton(
+                                  child: Text("Poursuivre"),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                          );
                           // Mettre à jour la valeur de checked dans Firestore
                           updateCheckedValue(
                               posteId, checked, nben, hord, horf, poste, desc);
@@ -233,11 +261,19 @@ class _ComptePageState extends State<ComptePage> {
         },
       );
 
-  void insertNewPoste(String poste, String debut, String fin, String jour) {
+  void insertNewPoste(String posteId, String poste, String debut, String desc,
+      String fin, String jour) {
     FirebaseFirestore.instance.collection("pos_ben").doc().set({
       "createdAt": DateTime.now(),
       "pos_id": FieldValue.arrayUnion([
-        {"debut": debut, "fin": fin, "poste": poste, "jour": jour}
+        {
+          "debut": debut,
+          "fin": fin,
+          "poste": poste,
+          "desc": desc,
+          "jour": jour,
+          "posteId": posteId
+        }
       ]),
       "ben_id": userId?.uid,
     });
@@ -265,7 +301,7 @@ class _ComptePageState extends State<ComptePage> {
         "desc": desc,
         'hor': FieldValue.arrayUnion([
           {
-            "check": checked,
+            "check": false,
             "debut": debut,
             "fin": fin,
             "nbBen": checked ? nben - 1 : nben + 1,

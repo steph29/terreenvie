@@ -24,6 +24,7 @@ class _ForgotPwdPageState extends State<ForgotPwdPage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text("Mot de passe perdu ?"),
+        backgroundColor: Color(0xFF2b5a72),
         // actions: []
       ),
       body: SingleChildScrollView(
@@ -32,7 +33,7 @@ class _ForgotPwdPageState extends State<ForgotPwdPage> {
           Container(
             alignment: Alignment.center,
             height: 200.0,
-            child: Lottie.asset("hands.json"),
+            child: Image.asset("logoTEV.png"),
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
@@ -57,12 +58,48 @@ class _ForgotPwdPageState extends State<ForgotPwdPage> {
               try {
                 await FirebaseAuth.instance
                     .sendPasswordResetEmail(email: forgotemial)
-                    .then((value) =>
-                        {print("Email send"), Get.off(() => LogController())});
+                    .then((value) => {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("Validé"),
+                              content: Text(
+                                  "Un email vient de vous être envoyé. Suivez les instructions pour réinitialiser votre mot de passe. Si vous ne trouvez pas l'email, vérifier les spams"),
+                              actions: [
+                                TextButton(
+                                  child: Text("OK"),
+                                  onPressed: () => Navigator.of(context)
+                                      .pushReplacement(MaterialPageRoute(
+                                          builder: (context) =>
+                                              LogController())),
+                                ),
+                              ],
+                            ),
+                          ),
+                          //  Get.off(() => LogController())
+                        });
               } on FirebaseAuthException catch (e) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text("Erreur"),
+                    content: Text("Votre email est invalide."),
+                    actions: [
+                      TextButton(
+                        child: Text("OK"),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                );
                 print("Erreur $e");
               }
             },
+            style: ElevatedButton.styleFrom(
+              primary: Color(
+                  0xFF2b5a72), // Définit la couleur de fond sur transparent
+              elevation: 0, // Supprime l'ombre du bouton
+            ),
             child: Text("Réinitialiser mon mot de passe"),
           ),
         ]),

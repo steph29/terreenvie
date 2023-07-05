@@ -35,7 +35,10 @@ class _LogOutControllerState extends State<LogOutController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Déconnexion")),
+      appBar: AppBar(
+        title: Text("Déconnexion"),
+        backgroundColor: Color(0xFF2b5a72),
+      ),
       body: Disconnect(),
     );
   }
@@ -48,6 +51,11 @@ class _LogOutControllerState extends State<LogOutController> {
             Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => MainAppController()));
           },
+          style: ElevatedButton.styleFrom(
+            primary:
+                Color(0xFF2b5a72), // Définit la couleur de fond sur transparent
+            elevation: 0, // Supprime l'ombre du bouton
+          ),
           child: Text('Se déconnecter')),
     );
   }

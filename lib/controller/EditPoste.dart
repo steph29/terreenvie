@@ -22,7 +22,10 @@ class _EditPosteState extends State<EditPoste> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Modifier le poste")),
+      appBar: AppBar(
+        title: Text("Modifier le poste"),
+        backgroundColor: Color(0xFF2b5a72),
+      ),
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 400, vertical: 50),
         child: Column(children: [

@@ -21,7 +21,10 @@ class _DashboardPageState extends State<DashboardPage> {
     //  const DashboardPage({Key? key}) : super(key: key);
 
     return Scaffold(
-        appBar: AppBar(title: Text("Votre tableau de bord")),
+        appBar: AppBar(
+          title: Text("Votre tableau de bord"),
+          backgroundColor: Color(0xFF2b5a72),
+        ),
         body: SingleChildScrollView(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -31,7 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    userId != null ? buildCard() : Text('Pas de données'),
+                    userId != null ? buildCardList() : Text('Pas de données'),
                     SizedBox(
                       height: 30,
                     ),
@@ -43,7 +46,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ));
   }
 
-  Widget buildCard() => StreamBuilder(
+  Widget buildCardList() => StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("pos_ben")
             .where("ben_id", isEqualTo: userId!.uid)
@@ -60,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
           }
           if (snapshot != null && snapshot.data != null) {
             return Center(
-              child: GridView.builder(
+              child: ListView.builder(
                 controller: ScrollController(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -68,42 +71,23 @@ class _DashboardPageState extends State<DashboardPage> {
                 itemBuilder: (ctx, i) {
                   var pos = snapshot.data!.docs[i]['pos_id'];
                   var posteId = snapshot.data?.docs[i].id;
-                  return Card(
-                    color: Color(0xFFf2f0e7),
+                  return Center(
                     child: Container(
                       constraints:
-                          const BoxConstraints(minHeight: 0, maxHeight: 500.0),
+                          const BoxConstraints(minHeight: 0, maxHeight: 200.0),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20)),
                       margin: EdgeInsets.all(5),
                       padding: EdgeInsets.all(5),
                       child: Stack(
                         children: [
-                          SizedBox(
-                            height: 500,
-                          ),
                           Column(
-                            mainAxisSize: MainAxisSize.max,
+                            mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Vous êtes inscrit pour: ",
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF2b5a72)),
-                                  ),
-                                ],
-                              ),
                               Column(
                                 children: [
-                                  buildList(pos, posteId, snapshot, i)
+                                  buildList(pos, posteId, snapshot, i),
                                 ],
                               ),
                             ],
@@ -113,19 +97,13 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   );
                 },
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: 0.0,
-                  mainAxisSpacing: 5,
-                  mainAxisExtent: 500,
-                ),
               ),
             );
           }
           return Container();
         },
       );
+
   Widget buildList(poste, posteId, snapshot, i) => ListView.builder(
       shrinkWrap: true,
       itemCount: poste.length,
@@ -135,6 +113,7 @@ class _DashboardPageState extends State<DashboardPage> {
         var horf = snapshot.data?.docs[i]['pos_id'][j]["fin"];
         var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
         var postes = snapshot.data?.docs[i]['pos_id'][j]['poste'];
+        var posteId = snapshot.data?.docs[i]['pos_id'][j]['posteId'];
 
         return Card(
           child: ListTile(
@@ -151,16 +130,66 @@ class _DashboardPageState extends State<DashboardPage> {
                   fontSize: 15,
                   color: Color(0xFF2b5a72)),
             ),
-            trailing: ElevatedButton(
-              child: Icon(Icons.delete),
+            trailing: IconButton(
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF2b5a72),
+              ),
+              icon: Icon(Icons.delete),
               onPressed: () async {
                 await FirebaseFirestore.instance
                     .collection("pos_ben")
                     .doc(posteId)
                     .delete();
+                // updateCheckedValue()
               },
             ),
           ),
         );
       });
+
+  void updateCheckedValue(String posteId, bool checked, int nben, String debut,
+      String fin, String poste, String desc, String jour) {
+    FirebaseFirestore.instance
+        .collection('pos_hor')
+        // .where("posteId", isEqualTo: posteId).where("")
+        .doc(posteId.toString())
+        .update({
+      "jour": jour,
+      "poste": poste,
+      "desc": desc,
+      "hor": FieldValue.arrayRemove([
+        {"debut": debut, "fin": fin, "nbBen": nben, "check": !checked}
+      ]),
+    }).then((value) {
+      FirebaseFirestore.instance
+          .collection('pos_hor')
+          .doc(posteId.toString())
+          .update({
+        "jour": jour.toString(),
+        "poste": poste.toString(),
+        "desc": desc,
+        'hor': FieldValue.arrayUnion([
+          {
+            "check": false,
+            "debut": debut,
+            "fin": fin,
+            "nbBen": nben + 1,
+          }
+        ])
+      }).then((value) {
+        FirebaseFirestore.instance
+            .collection('pos_hor')
+            .doc(posteId.toString())
+            .get()
+            .then((snapshot) {
+          var horList = snapshot.data()!['hor'] as List<dynamic>;
+          horList.sort((a, b) => a['debut'].compareTo(b['debut']));
+          FirebaseFirestore.instance
+              .collection('pos_hor')
+              .doc(posteId.toString())
+              .update({'hor': horList});
+        });
+      });
+    });
+  }
 }
