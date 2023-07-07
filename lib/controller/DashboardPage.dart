@@ -113,7 +113,7 @@ class _DashboardPageState extends State<DashboardPage> {
         var horf = snapshot.data?.docs[i]['pos_id'][j]["fin"];
         var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
         var postes = snapshot.data?.docs[i]['pos_id'][j]['poste'];
-        var posteId = snapshot.data?.docs[i]['pos_id'][j]['posteId'];
+        // var posteId = snapshot.data?.docs[i]['pos_id'][j]['posteId'];
 
         return Card(
           child: ListTile(
@@ -138,9 +138,8 @@ class _DashboardPageState extends State<DashboardPage> {
               onPressed: () async {
                 await FirebaseFirestore.instance
                     .collection("pos_ben")
-                    .doc(posteId)
+                    .doc(posteId.toString())
                     .delete();
-                // updateCheckedValue()
               },
             ),
           ),

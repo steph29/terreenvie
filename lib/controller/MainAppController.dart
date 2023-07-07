@@ -290,7 +290,6 @@ class _MainAppControllerState extends State<MainAppController> {
         .where('UserId', isEqualTo: userId!.uid)
         .get()
         .then((QuerySnapshot snapshot) {
-      print(snapshot.docs.first.data());
       if (snapshot.docs.isNotEmpty) {
         final data = snapshot.docs.first.data() as Map<String, dynamic>;
         final profil = data['profil'];
