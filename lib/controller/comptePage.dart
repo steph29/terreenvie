@@ -118,7 +118,7 @@ class _ComptePageState extends State<ComptePage> {
                   var posteId = snapshot.data?.docs[i].id;
 
                   // Vérifier si l'utilisateur connecté est le propriétaire du poste
-                  String currentUserId = userId?.uid;
+                  String currentUserId = userId.uid;
                   String ownerId = snapshot.data?.docs[i]['ben_id'];
                   isCurrentUserOwner = currentUserId == ownerId;
 
