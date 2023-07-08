@@ -10,7 +10,7 @@ import 'package:lottie/lottie.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
 
 class ForgotPwdPage extends StatefulWidget {
-  const ForgotPwdPage({Key? key}) : super(key: key);
+  const ForgotPwdPage({Key key}) : super(key: key);
 
   @override
   State<ForgotPwdPage> createState() => _ForgotPwdPageState();

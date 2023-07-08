@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EditHoraire extends StatefulWidget {
-  const EditHoraire({super.key});
+  const EditHoraire({key});
 
   @override
   State<EditHoraire> createState() => _EditHoraireState();

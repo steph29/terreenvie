@@ -14,7 +14,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  User? userId = FirebaseAuth.instance.currentUser;
+  User userId = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget buildCardList() => StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("pos_ben")
-            .where("ben_id", isEqualTo: userId!.uid)
+            .where("ben_id", isEqualTo: userId.uid)
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -58,7 +58,7 @@ class _DashboardPageState extends State<DashboardPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CupertinoActivityIndicator());
           }
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data.docs.isEmpty) {
             return Center(child: Text("No data found"));
           }
           if (snapshot != null && snapshot.data != null) {
@@ -67,9 +67,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 controller: ScrollController(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
-                itemCount: snapshot.data!.docs.length,
+                itemCount: snapshot.data.docs.length,
                 itemBuilder: (ctx, i) {
-                  var pos = snapshot.data!.docs[i]['pos_id'];
+                  var pos = snapshot.data.docs[i]['pos_id'];
                   var posteId = snapshot.data?.docs[i].id;
                   return Center(
                     child: Container(
@@ -113,7 +113,7 @@ class _DashboardPageState extends State<DashboardPage> {
         var horf = snapshot.data?.docs[i]['pos_id'][j]["fin"];
         var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
         var postes = snapshot.data?.docs[i]['pos_id'][j]['poste'];
-        var posteId = snapshot.data?.docs[i]['pos_id'][j]['posteId'];
+        var idPoste = snapshot.data?.docs[i]['pos_id'][j]['posteId'];
 
         return Card(
           child: ListTile(
@@ -136,60 +136,66 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               icon: Icon(Icons.delete),
               onPressed: () async {
+                updatePosHor(idPoste, hord, horf);
+                // UpdateBen(idPoste, posteId, hord, horf);
+
                 await FirebaseFirestore.instance
                     .collection("pos_ben")
-                    .doc(posteId)
+                    .doc(posteId.toString())
                     .delete();
-                // updateCheckedValue()
               },
             ),
           ),
         );
       });
 
-  void updateCheckedValue(String posteId, bool checked, int nben, String debut,
-      String fin, String poste, String desc, String jour) {
+  void updatePosHor(String posteId, String debut, String fin) {
     FirebaseFirestore.instance
         .collection('pos_hor')
-        // .where("posteId", isEqualTo: posteId).where("")
-        .doc(posteId.toString())
-        .update({
-      "jour": jour,
-      "poste": poste,
-      "desc": desc,
-      "hor": FieldValue.arrayRemove([
-        {"debut": debut, "fin": fin, "nbBen": nben, "check": !checked}
-      ]),
-    }).then((value) {
+        .doc(posteId)
+        .get()
+        .then((snapshot) {
+      var horList = snapshot.data()['hor'] as List<dynamic>;
+      for (var hor in horList) {
+        if (hor['debut'] == debut && hor['fin'] == fin) {
+          hor['nbBen'] = hor['nbBen'] + 1;
+          break;
+        }
+      }
       FirebaseFirestore.instance
           .collection('pos_hor')
-          .doc(posteId.toString())
-          .update({
-        "jour": jour.toString(),
-        "poste": poste.toString(),
-        "desc": desc,
-        'hor': FieldValue.arrayUnion([
-          {
-            "check": false,
-            "debut": debut,
-            "fin": fin,
-            "nbBen": nben + 1,
-          }
-        ])
-      }).then((value) {
-        FirebaseFirestore.instance
-            .collection('pos_hor')
-            .doc(posteId.toString())
-            .get()
-            .then((snapshot) {
-          var horList = snapshot.data()!['hor'] as List<dynamic>;
-          horList.sort((a, b) => a['debut'].compareTo(b['debut']));
-          FirebaseFirestore.instance
-              .collection('pos_hor')
-              .doc(posteId.toString())
-              .update({'hor': horList});
-        });
-      });
+          .doc(posteId)
+          .update({'hor': horList});
     });
   }
+
+  Widget UpdateBen(String idPoste, String posteId, String debut, String fin) =>
+      StreamBuilder(
+        //  On récupère les informations de posteId
+
+        stream: FirebaseFirestore.instance.collection("pos_ben").where("pos_id",
+            arrayContains: {"posteId": idPoste, "debut": debut}).snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          print(FieldPath.documentId);
+
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CupertinoActivityIndicator());
+          }
+          if (snapshot.data.docs.isEmpty) {
+            return Center(child: Text("No data found"));
+          }
+          if (snapshot != null && snapshot.data != null) {
+            // var doc = snapshot.data.docs.first;
+            // var documentId = doc.id;
+            // print("hello");
+            List<String> postesIds =
+                snapshot.data.docs.map((doc) => doc.id).toList();
+            // On met à jour les informations dans pos_hor
+          }
+          return Container();
+        },
+      );
 }

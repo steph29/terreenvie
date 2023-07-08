@@ -16,14 +16,14 @@ import 'package:terreenvie/model/create.dart';
 import 'MainAppController.dart';
 
 class ComptePage extends StatefulWidget {
-  const ComptePage({Key? key}) : super(key: key);
+  const ComptePage({Key key}) : super(key: key);
 
   @override
   State<ComptePage> createState() => _ComptePageState();
 }
 
 class _ComptePageState extends State<ComptePage> {
-  User? userId = FirebaseAuth.instance.currentUser;
+  User userId = FirebaseAuth.instance.currentUser;
 
   String groupValue = "Samedi";
   bool isCurrentUserOwner = false;
@@ -101,7 +101,7 @@ class _ComptePageState extends State<ComptePage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CupertinoActivityIndicator());
           }
-          if (snapshot.data!.docs.isEmpty) {
+          if (snapshot.data.docs.isEmpty) {
             return Center(child: Text("No data found"));
           }
           if (snapshot != null && snapshot.data != null) {
@@ -110,16 +110,16 @@ class _ComptePageState extends State<ComptePage> {
                 controller: ScrollController(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
-                itemCount: snapshot.data!.docs.length,
+                itemCount: snapshot.data.docs.length,
                 itemBuilder: (ctx, i) {
-                  var poste = snapshot.data!.docs[i]['poste'];
-                  var desc = snapshot.data!.docs[i]['desc'];
+                  var poste = snapshot.data.docs[i]['poste'];
+                  var desc = snapshot.data.docs[i]['desc'];
                   var hor = snapshot.data?.docs[i]['hor'];
                   var posteId = snapshot.data?.docs[i].id;
 
                   // Vérifier si l'utilisateur connecté est le propriétaire du poste
-                  String? currentUserId = userId?.uid;
-                  String? ownerId = snapshot.data?.docs[i]['ben_id'];
+                  String currentUserId = userId?.uid;
+                  String ownerId = snapshot.data?.docs[i]['ben_id'];
                   isCurrentUserOwner = currentUserId == ownerId;
 
                   return Card(
@@ -208,54 +208,71 @@ class _ComptePageState extends State<ComptePage> {
 
           return Card(
             child: ListTile(
-              title: Text(
-                hord + ' - ' + horf + ' avec ' + nben.toString() + ' benevoles',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: Color(0xFF2b5a72)),
-              ),
-              trailing: Container(
-                width: 70,
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: IconButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF2b5a72),
-                      ),
-                      icon: Icon(Icons.check_circle),
-                      onPressed: () {
-                        setState(() {
-                          checked = !checked;
-                          checked
-                              ? insertNewPoste(
-                                  posteId, poste, hord, desc, horf, groupValue)
-                              : null;
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text("Merci "),
-                              content: Text(
-                                  "Votre sélection est bien enregistrer. Vous pouvez la retrouver dasn votre tableau de bord."),
-                              actions: [
-                                TextButton(
-                                  child: Text("Poursuivre"),
-                                  onPressed: () => Navigator.pop(context),
-                                ),
-                              ],
+              title: (nben != 0)
+                  ? Text(
+                      hord +
+                          ' - ' +
+                          horf +
+                          ' avec ' +
+                          nben.toString() +
+                          ' benevoles',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color(0xFF2b5a72)),
+                    )
+                  : Text(
+                      hord + ' - ' + horf,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color(0xFF2b5a72)),
+                    ),
+              trailing: (nben != 0)
+                  ? Container(
+                      width: 70,
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: IconButton(
+                            style: ElevatedButton.styleFrom(
+                              primary: Color(0xFF2b5a72),
                             ),
-                          );
-                          // Mettre à jour la valeur de checked dans Firestore
-                          updateCheckedValue(
-                              posteId, checked, nben, hord, horf, poste, desc);
-                          print(nben);
-                        });
-                      },
-                    )),
-                  ],
-                ),
-              ),
+                            icon: Icon(Icons.check_circle),
+                            onPressed: () {
+                              setState(() {
+                                checked = !checked;
+                                checked
+                                    ? insertNewPoste(posteId, poste, hord, desc,
+                                        horf, groupValue)
+                                    : null;
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text("Merci "),
+                                    content: Text(
+                                        "Votre sélection est bien enregistrer. Vous pouvez la retrouver dasn votre tableau de bord."),
+                                    actions: [
+                                      TextButton(
+                                        child: Text("Poursuivre"),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                // Mettre à jour la valeur de checked dans Firestore
+                                updateCheckedValue(posteId, checked, nben, hord,
+                                    horf, poste, desc);
+                                print(nben);
+                              });
+                            },
+                          )),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      child: Text("Complet"),
+                    ),
             ),
           );
         },
@@ -313,7 +330,7 @@ class _ComptePageState extends State<ComptePage> {
             .doc(posteId.toString())
             .get()
             .then((snapshot) {
-          var horList = snapshot.data()!['hor'] as List<dynamic>;
+          var horList = snapshot.data()['hor'] as List<dynamic>;
           horList.sort((a, b) => a['debut'].compareTo(b['debut']));
           FirebaseFirestore.instance
               .collection('pos_hor')

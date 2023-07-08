@@ -17,7 +17,7 @@ import 'package:terreenvie/controller/SignUpPage.dart';
 import '../main.dart';
 
 class LogController extends StatefulWidget {
-  const LogController({Key? key}) : super(key: key);
+  const LogController({Key key}) : super(key: key);
 
   @override
   State<LogController> createState() => _LogControllerState();
@@ -28,7 +28,7 @@ class _LogControllerState extends State<LogController> {
   TextEditingController passwordController = TextEditingController();
 
   var _obscureText = true;
-  User? userId = FirebaseAuth.instance.currentUser;
+  User userId = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +104,7 @@ class _LogControllerState extends State<LogController> {
                 var userPassword = passwordController.text.trim();
 
                 try {
-                  final User? firebaseUser = (await FirebaseAuth.instance
+                  final User firebaseUser = (await FirebaseAuth.instance
                           .signInWithEmailAndPassword(
                               email: userEmail, password: userPassword))
                       .user;

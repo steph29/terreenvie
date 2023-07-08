@@ -24,7 +24,7 @@ class MainAppController extends StatefulWidget {
 }
 
 class _MainAppControllerState extends State<MainAppController> {
-  User? userId; //= FirebaseAuth.instance.currentUser;
+  User userId; //= FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -287,10 +287,9 @@ class _MainAppControllerState extends State<MainAppController> {
   void _checkUserAdminStatus() {
     FirebaseFirestore.instance
         .collection("users")
-        .where('UserId', isEqualTo: userId!.uid)
+        .where('UserId', isEqualTo: userId.uid)
         .get()
         .then((QuerySnapshot snapshot) {
-      print(snapshot.docs.first.data());
       if (snapshot.docs.isNotEmpty) {
         final data = snapshot.docs.first.data() as Map<String, dynamic>;
         final profil = data['profil'];
