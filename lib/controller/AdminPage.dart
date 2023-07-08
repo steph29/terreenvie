@@ -16,7 +16,7 @@ import 'package:terreenvie/model/create.dart';
 import 'MainAppController.dart';
 
 class AdminPage extends StatefulWidget {
-  AdminPage({Key key}) : super(key: key);
+  AdminPage({Key? key}) : super(key: key);
 
   @override
   State<AdminPage> createState() => _AdminPageState();
@@ -28,7 +28,7 @@ class _AdminPageState extends State<AdminPage> {
   TextEditingController heureContoller = TextEditingController();
   TextEditingController nbBenContoller = TextEditingController();
 
-  User userId = FirebaseAuth.instance.currentUser;
+  User? userId = FirebaseAuth.instance.currentUser;
   String groupValue = "Samedi";
 
   @override
@@ -112,7 +112,7 @@ class _AdminPageState extends State<AdminPage> {
   Widget buildCard(String groupValue) => StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("users")
-            .where("UserId", isEqualTo: userId.uid)
+            .where("UserId", isEqualTo: userId!.uid)
             .where("profil", whereIn: ["admin", "ref"]).snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -121,12 +121,12 @@ class _AdminPageState extends State<AdminPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CupertinoActivityIndicator());
           }
-          if (snapshot.data.docs.isEmpty) {
+          if (snapshot.data!.docs.isEmpty) {
             return Center(child: Text("No data found"));
           }
           if (snapshot != null && snapshot.data != null) {
             List<String> adminUserIds =
-                snapshot.data.docs.map((doc) => doc.id).toList();
+                snapshot.data!.docs.map((doc) => doc.id).toList();
 
             return StreamBuilder(
               stream: FirebaseFirestore.instance
@@ -141,7 +141,7 @@ class _AdminPageState extends State<AdminPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CupertinoActivityIndicator());
                 }
-                if (snapshot.data.docs.isEmpty) {
+                if (snapshot.data!.docs.isEmpty) {
                   return Center(child: Text("No data found"));
                 }
                 if (snapshot != null && snapshot.data != null) {
@@ -150,10 +150,10 @@ class _AdminPageState extends State<AdminPage> {
                       controller: ScrollController(),
                       shrinkWrap: true,
                       padding: const EdgeInsets.symmetric(horizontal: 30),
-                      itemCount: snapshot.data.docs.length,
+                      itemCount: snapshot.data!.docs.length,
                       itemBuilder: (ctx, i) {
-                        var poste = snapshot.data.docs[i]['poste'];
-                        var desc = snapshot.data.docs[i]['desc'];
+                        var poste = snapshot.data!.docs[i]['poste'];
+                        var desc = snapshot.data!.docs[i]['desc'];
                         var hor = snapshot.data?.docs[i]['hor'];
                         var posteId = snapshot.data?.docs[i].id;
                         return Card(
@@ -278,7 +278,7 @@ class _AdminPageState extends State<AdminPage> {
                           .get()
                           .then((doc) {
                         if (doc.exists) {
-                          List<dynamic> horaires = doc.data()['hor'];
+                          List<dynamic> horaires = doc.data()!['hor'];
                           horaires.removeWhere((horaire) {
                             return (horaire['debut'] == hord &&
                                 horaire['fin'] == horf &&

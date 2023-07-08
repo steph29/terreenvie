@@ -7,7 +7,7 @@ import 'package:terreenvie/controller/AdminPage.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
 
 class AddPoste extends StatefulWidget {
-  const AddPoste({Key key}) : super(key: key);
+  const AddPoste({Key? key}) : super(key: key);
 
   @override
   State<AddPoste> createState() => _AddPosteState();

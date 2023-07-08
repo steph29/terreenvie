@@ -19,7 +19,7 @@ import 'package:terreenvie/controller/SignUpPage.dart';
 import '../main.dart';
 
 class LogOutController extends StatefulWidget {
-  const LogOutController({Key key}) : super(key: key);
+  const LogOutController({Key? key}) : super(key: key);
 
   @override
   State<LogOutController> createState() => _LogOutControllerState();
@@ -30,7 +30,7 @@ class _LogOutControllerState extends State<LogOutController> {
   TextEditingController passwordController = TextEditingController();
 
   var _obscureText = true;
-  User userId = FirebaseAuth.instance.currentUser;
+  User? userId = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {

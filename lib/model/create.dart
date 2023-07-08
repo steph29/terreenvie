@@ -9,7 +9,7 @@ import 'package:terreenvie/controller/MainAppController.dart';
 import '../controller/DashboardPage.dart';
 
 class Create extends StatefulWidget {
-  const Create({Key key}) : super(key: key);
+  const Create({Key? key}) : super(key: key);
 
   @override
   State<Create> createState() => _CreateState();
@@ -22,7 +22,7 @@ class _CreateState extends State<Create> {
   TextEditingController finController = TextEditingController();
   TextEditingController nbBenController = TextEditingController();
 
-  User userId = FirebaseAuth.instance.currentUser;
+  User? userId = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
