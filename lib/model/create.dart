@@ -28,6 +28,7 @@ class _CreateState extends State<Create> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Les créneaux disponible"),
+        backgroundColor: Color(0xFF2b5a72),
       ),
       body: Container(
         child: Column(
@@ -109,7 +110,7 @@ class _CreateState extends State<Create> {
                       ]),
                       "ben_id": userId?.uid,
                     });
-                    Get.offAll(() => MainAppController());
+                    Get.back();
 
                     // Navigator.pushReplacement(
                     //   context,
