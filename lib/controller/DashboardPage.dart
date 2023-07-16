@@ -53,13 +53,15 @@ class _DashboardPageState extends State<DashboardPage> {
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Text("Something went wrong");
+            return Text("Oups! une erreur est survenue");
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CupertinoActivityIndicator());
           }
           if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text("No data found"));
+            return Center(
+                child: Text(
+                    "Vous n'avez pas encore de créneau sélectionné. Allez dans l'onglet Choisir ses postes"));
           }
           if (snapshot != null && snapshot.data != null) {
             return Center(

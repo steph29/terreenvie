@@ -172,13 +172,30 @@ class _ComptePageState extends State<ComptePage> {
                     ),
                   );
                 },
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: 0.0,
-                  mainAxisSpacing: 5,
-                  mainAxisExtent: 500,
-                ),
+                gridDelegate: (MediaQuery.of(context).size.width >= 1024)
+                    ? SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        childAspectRatio: 1.0,
+                        crossAxisSpacing: 0.0,
+                        mainAxisSpacing: 5,
+                        mainAxisExtent: 500,
+                      )
+                    : ((MediaQuery.of(context).size.width <= 1024 &&
+                            MediaQuery.of(context).size.width >= 640)
+                        ? SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 0.0,
+                            mainAxisSpacing: 5,
+                            mainAxisExtent: 500,
+                          )
+                        : (SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 0.0,
+                            mainAxisSpacing: 5,
+                            mainAxisExtent: 500,
+                          ))),
               ),
             );
           }
@@ -251,7 +268,7 @@ class _ComptePageState extends State<ComptePage> {
                                   builder: (context) => AlertDialog(
                                     title: Text("Merci "),
                                     content: Text(
-                                        "Votre sélection est bien enregistrer. Vous pouvez la retrouver dasn votre tableau de bord."),
+                                        "Votre sélection est bien enregistrée. Vous pouvez la retrouver dans votre tableau de bord."),
                                     actions: [
                                       TextButton(
                                         child: Text("Poursuivre"),

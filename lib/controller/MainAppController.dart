@@ -72,10 +72,10 @@ class _MainAppControllerState extends State<MainAppController> {
       alignment: Alignment.center,
       child: ComptePage(),
     ),
-    Container(
-        color: Colors.red.shade100,
-        alignment: Alignment.center,
-        child: ContactPage()),
+    // Container(
+    //     color: Colors.red.shade100,
+    //     alignment: Alignment.center,
+    //     child: ContactPage()),
     Container(
       color: Colors.pink.shade100,
       alignment: Alignment.center,
@@ -102,11 +102,11 @@ class _MainAppControllerState extends State<MainAppController> {
       alignment: Alignment.center,
       child: ComptePage(),
     ),
-    Container(
-      color: Colors.red.shade100,
-      alignment: Alignment.center,
-      child: ContactPage(),
-    ),
+    // Container(
+    //   color: Colors.red.shade100,
+    //   alignment: Alignment.center,
+    //   child: ContactPage(),
+    // ),
     Container(
       color: Colors.blue.shade100,
       alignment: Alignment.center,
@@ -139,8 +139,8 @@ class _MainAppControllerState extends State<MainAppController> {
                           BottomNavigationBarItem(
                               icon: Icon(Icons.calendar_today),
                               label: 'Choisir ses postes'),
-                          BottomNavigationBarItem(
-                              icon: Icon(Icons.contact_mail), label: 'Contact'),
+                          // BottomNavigationBarItem(
+                          //     icon: Icon(Icons.contact_mail), label: 'Contact'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.admin_panel_settings),
                               label: 'Admin'),
@@ -166,8 +166,8 @@ class _MainAppControllerState extends State<MainAppController> {
                           BottomNavigationBarItem(
                               icon: Icon(Icons.calendar_today),
                               label: 'Choisir ses postes'),
-                          BottomNavigationBarItem(
-                              icon: Icon(Icons.contact_mail), label: 'Contact'),
+                          // BottomNavigationBarItem(
+                          //     icon: Icon(Icons.contact_mail), label: 'Contact'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.web),
                               label:
@@ -216,9 +216,9 @@ class _MainAppControllerState extends State<MainAppController> {
                             NavigationRailDestination(
                                 icon: Icon(Icons.calendar_today),
                                 label: Text('Choisir ses postes')),
-                            NavigationRailDestination(
-                                icon: Icon(Icons.contact_mail),
-                                label: Text('Contact')),
+                            // NavigationRailDestination(
+                            //     icon: Icon(Icons.contact_mail),
+                            //     label: Text('Contact')),
                             NavigationRailDestination(
                                 icon: Icon(Icons.admin_panel_settings),
                                 label: Text('Admin')),
@@ -245,9 +245,9 @@ class _MainAppControllerState extends State<MainAppController> {
                             NavigationRailDestination(
                                 icon: Icon(Icons.calendar_today),
                                 label: Text('Choisir ses postes')),
-                            NavigationRailDestination(
-                                icon: Icon(Icons.contact_mail),
-                                label: Text('Contact')),
+                            // NavigationRailDestination(
+                            //     icon: Icon(Icons.contact_mail),
+                            //     label: Text('Contact')),
                             NavigationRailDestination(
                                 icon: Icon(Icons.web),
                                 label: Text('Terre En Vie')),
