@@ -14,7 +14,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  User userId = FirebaseAuth.instance.currentUser;
+  User? userId = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -49,17 +49,19 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget buildCardList() => StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("pos_ben")
-            .where("ben_id", isEqualTo: userId.uid)
+            .where("ben_id", isEqualTo: userId!.uid)
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Text("Something went wrong");
+            return Text("Oups! une erreur est survenue");
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CupertinoActivityIndicator());
           }
-          if (snapshot.data.docs.isEmpty) {
-            return Center(child: Text("No data found"));
+          if (snapshot.data!.docs.isEmpty) {
+            return Center(
+                child: Text(
+                    "Vous n'avez pas encore de créneau sélectionné. Allez dans l'onglet Choisir ses postes"));
           }
           if (snapshot != null && snapshot.data != null) {
             return Center(
@@ -67,9 +69,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 controller: ScrollController(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
-                itemCount: snapshot.data.docs.length,
+                itemCount: snapshot.data!.docs.length,
                 itemBuilder: (ctx, i) {
-                  var pos = snapshot.data.docs[i]['pos_id'];
+                  var pos = snapshot.data!.docs[i]['pos_id'];
                   var posteId = snapshot.data?.docs[i].id;
                   return Center(
                     child: Container(
@@ -155,7 +157,7 @@ class _DashboardPageState extends State<DashboardPage> {
         .doc(posteId)
         .get()
         .then((snapshot) {
-      var horList = snapshot.data()['hor'] as List<dynamic>;
+      var horList = snapshot.data()!['hor'] as List<dynamic>;
       for (var hor in horList) {
         if (hor['debut'] == debut && hor['fin'] == fin) {
           hor['nbBen'] = hor['nbBen'] + 1;
@@ -184,7 +186,7 @@ class _DashboardPageState extends State<DashboardPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CupertinoActivityIndicator());
           }
-          if (snapshot.data.docs.isEmpty) {
+          if (snapshot.data!.docs.isEmpty) {
             return Center(child: Text("No data found"));
           }
           if (snapshot != null && snapshot.data != null) {
@@ -192,7 +194,7 @@ class _DashboardPageState extends State<DashboardPage> {
             // var documentId = doc.id;
             // print("hello");
             List<String> postesIds =
-                snapshot.data.docs.map((doc) => doc.id).toList();
+                snapshot.data!.docs.map((doc) => doc.id).toList();
             // On met à jour les informations dans pos_hor
           }
           return Container();

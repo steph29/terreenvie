@@ -7,7 +7,7 @@ import 'package:terreenvie/controller/AdminPage.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
 
 class EditPoste extends StatefulWidget {
-  const EditPoste({Key key}) : super(key: key);
+  const EditPoste({Key? key}) : super(key: key);
 
   @override
   State<EditPoste> createState() => _EditPosteState();
@@ -157,7 +157,7 @@ class _EditPosteState extends State<EditPoste> {
                         .doc(Get.arguments['posteId'].toString())
                         .get()
                         .then((snapshot) {
-                      var horList = snapshot.data()['hor'] as List<dynamic>;
+                      var horList = snapshot.data()!['hor'] as List<dynamic>;
                       horList.sort((a, b) => a['debut'].compareTo(b['debut']));
                       FirebaseFirestore.instance
                           .collection('pos_hor')

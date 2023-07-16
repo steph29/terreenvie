@@ -16,14 +16,14 @@ import 'package:terreenvie/model/create.dart';
 import 'MainAppController.dart';
 
 class ComptePage extends StatefulWidget {
-  const ComptePage({Key key}) : super(key: key);
+  const ComptePage({Key? key}) : super(key: key);
 
   @override
   State<ComptePage> createState() => _ComptePageState();
 }
 
 class _ComptePageState extends State<ComptePage> {
-  User userId = FirebaseAuth.instance.currentUser;
+  User? userId = FirebaseAuth.instance.currentUser;
 
   String groupValue = "Samedi";
   bool isCurrentUserOwner = false;
@@ -101,7 +101,7 @@ class _ComptePageState extends State<ComptePage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CupertinoActivityIndicator());
           }
-          if (snapshot.data.docs.isEmpty) {
+          if (snapshot.data!.docs.isEmpty) {
             return Center(child: Text("No data found"));
           }
           if (snapshot != null && snapshot.data != null) {
@@ -110,15 +110,15 @@ class _ComptePageState extends State<ComptePage> {
                 controller: ScrollController(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
-                itemCount: snapshot.data.docs.length,
+                itemCount: snapshot.data!.docs.length,
                 itemBuilder: (ctx, i) {
-                  var poste = snapshot.data.docs[i]['poste'];
-                  var desc = snapshot.data.docs[i]['desc'];
+                  var poste = snapshot.data!.docs[i]['poste'];
+                  var desc = snapshot.data!.docs[i]['desc'];
                   var hor = snapshot.data?.docs[i]['hor'];
                   var posteId = snapshot.data?.docs[i].id;
 
                   // Vérifier si l'utilisateur connecté est le propriétaire du poste
-                  String currentUserId = userId.uid;
+                  String currentUserId = userId!.uid;
                   String ownerId = snapshot.data?.docs[i]['ben_id'];
                   isCurrentUserOwner = currentUserId == ownerId;
 
@@ -172,13 +172,30 @@ class _ComptePageState extends State<ComptePage> {
                     ),
                   );
                 },
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: 0.0,
-                  mainAxisSpacing: 5,
-                  mainAxisExtent: 500,
-                ),
+                gridDelegate: (MediaQuery.of(context).size.width >= 1024)
+                    ? SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        childAspectRatio: 1.0,
+                        crossAxisSpacing: 0.0,
+                        mainAxisSpacing: 5,
+                        mainAxisExtent: 500,
+                      )
+                    : ((MediaQuery.of(context).size.width <= 1024 &&
+                            MediaQuery.of(context).size.width >= 640)
+                        ? SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 0.0,
+                            mainAxisSpacing: 5,
+                            mainAxisExtent: 500,
+                          )
+                        : (SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 0.0,
+                            mainAxisSpacing: 5,
+                            mainAxisExtent: 500,
+                          ))),
               ),
             );
           }
@@ -251,7 +268,7 @@ class _ComptePageState extends State<ComptePage> {
                                   builder: (context) => AlertDialog(
                                     title: Text("Merci "),
                                     content: Text(
-                                        "Votre sélection est bien enregistrer. Vous pouvez la retrouver dasn votre tableau de bord."),
+                                        "Votre sélection est bien enregistrée. Vous pouvez la retrouver dans votre tableau de bord."),
                                     actions: [
                                       TextButton(
                                         child: Text("Poursuivre"),
@@ -330,7 +347,7 @@ class _ComptePageState extends State<ComptePage> {
             .doc(posteId.toString())
             .get()
             .then((snapshot) {
-          var horList = snapshot.data()['hor'] as List<dynamic>;
+          var horList = snapshot.data()!['hor'] as List<dynamic>;
           horList.sort((a, b) => a['debut'].compareTo(b['debut']));
           FirebaseFirestore.instance
               .collection('pos_hor')

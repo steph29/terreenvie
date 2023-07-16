@@ -1,13 +1,13 @@
 import 'package:firebase_database/firebase_database.dart';
 
 class MyUser {
-  String uid;
-  String prenom;
-  String nom;
+  String? uid;
+  String? prenom;
+  String? nom;
 
-  MyUser(DataSnapshot snapshot, {String uid}) {
+  MyUser(DataSnapshot snapshot, {String? uid}) {
     uid = snapshot.key;
-    Object map = snapshot.value;
+    Object? map = snapshot.value;
     prenom = (snapshot.value as Map)['prenom'];
     nom = (snapshot.value as Map)['nom'];
   }
