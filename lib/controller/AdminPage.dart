@@ -227,7 +227,7 @@ class _AdminPageState extends State<AdminPage> {
                               childAspectRatio: 1.0,
                               crossAxisSpacing: 0.0,
                               mainAxisSpacing: 5,
-                              mainAxisExtent: 500,
+                              mainAxisExtent: 450,
                             )
                           : ((MediaQuery.of(context).size.width <= 1024 &&
                                   MediaQuery.of(context).size.width >= 640)
@@ -236,14 +236,14 @@ class _AdminPageState extends State<AdminPage> {
                                   childAspectRatio: 1.0,
                                   crossAxisSpacing: 0.0,
                                   mainAxisSpacing: 5,
-                                  mainAxisExtent: 500,
+                                  mainAxisExtent: 450,
                                 )
                               : (SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 1,
                                   childAspectRatio: 1.0,
                                   crossAxisSpacing: 0.0,
                                   mainAxisSpacing: 5,
-                                  mainAxisExtent: 500,
+                                  mainAxisExtent: 450,
                                 ))),
                     ),
                   );
