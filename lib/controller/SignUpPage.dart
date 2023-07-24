@@ -170,7 +170,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   builder: (context) => AlertDialog(
                                     title: Text("MESSAGE IMPORTANT"),
                                     content: Text(
-                                        "Conservez bien vos identifiants (adresse email + Mot de Passe), ils vous seront nécessaires pour vous connecter à votre compte. De plus, pour limiter les emails inutiles et polluants, nous limitons l'envoie des emails au strictes minimum. Merci de votre compréhension. "),
+                                        "Conservez bien vos identifiants (adresse email + Mot de Passe), ils vous seront nécessaires pour vous connecter à votre compte. Le tableau de bord permet de voir vos créneaux à tout moment du jour et de la nuit, il n'y a donc plus d'email récapitulatifs ."),
                                     actions: [
                                       TextButton(
                                         child: Text("J'ai bien compris"),

@@ -12,6 +12,7 @@ import 'package:terreenvie/controller/TerreEnVie.dart';
 import 'package:terreenvie/main.dart';
 import 'package:terreenvie/model/create.dart';
 import 'AdminPage.dart';
+import 'Analyse.dart';
 import 'ContactPage.dart';
 import 'LogOutController.dart';
 import 'Logcontroller.dart';
@@ -84,6 +85,11 @@ class _MainAppControllerState extends State<MainAppController> {
     Container(
       color: Colors.pink.shade100,
       alignment: Alignment.center,
+      child: Analyse(),
+    ),
+    Container(
+      color: Colors.pink.shade100,
+      alignment: Alignment.center,
       child: TerreEnVie(),
     ),
     Container(
@@ -144,6 +150,8 @@ class _MainAppControllerState extends State<MainAppController> {
                           BottomNavigationBarItem(
                               icon: Icon(Icons.admin_panel_settings),
                               label: 'Admin'),
+                          BottomNavigationBarItem(
+                              icon: Icon(Icons.auto_graph), label: 'Analyse'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.web), label: 'Terre En Vie'),
                           BottomNavigationBarItem(
@@ -222,6 +230,9 @@ class _MainAppControllerState extends State<MainAppController> {
                             NavigationRailDestination(
                                 icon: Icon(Icons.admin_panel_settings),
                                 label: Text('Admin')),
+                            NavigationRailDestination(
+                                icon: Icon(Icons.auto_graph),
+                                label: Text('Analyses')),
                             NavigationRailDestination(
                                 icon: Icon(Icons.web),
                                 label: Text('Terre En Vie')),

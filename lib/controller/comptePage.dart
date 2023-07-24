@@ -51,6 +51,7 @@ class _ComptePageState extends State<ComptePage> {
                         SizedBox(
                           height: 30,
                         ),
+
                         // Liste des cards
                         buildCard(groupValue),
                         SizedBox(

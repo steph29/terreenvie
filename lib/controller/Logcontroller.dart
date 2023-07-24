@@ -51,6 +51,18 @@ class _LogControllerState extends State<LogController> {
             height: 200.0,
             child: Image.asset("logoTEV.png"),
           ),
+          SizedBox(
+            height: 10.0,
+          ),
+          Container(
+            child: Text(
+              "Une adresse mail PAR PERSONNE. Si la votre est déjà utilisée, vous pouvez utiliser le modèle suivant: prenom.nom@tev.bzh ",
+              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+            ),
+          ),
+          SizedBox(
+            height: 10.0,
+          ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
             child: TextFormField(
@@ -166,7 +178,7 @@ class _LogControllerState extends State<LogController> {
                     0xFF2b5a72), // Définit la couleur de fond sur transparent
                 elevation: 0, // Supprime l'ombre du bouton
               ),
-              child: Text("Authentification"),
+              child: Text("Se connecter"),
             ),
           ),
           SizedBox(
@@ -188,6 +200,21 @@ class _LogControllerState extends State<LogController> {
           )),
           SizedBox(
             height: 10.0,
+          ),
+          Container(
+            child: Text(
+              "Si c'est votre première venue, allez sur 'S'inscrire' en haut à gauche.",
+              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+            ),
+          ),
+          SizedBox(
+            height: 10.0,
+          ),
+          Container(
+            child: Text(
+              "Le tableau de bord permet de voir vos créneaux à tout moment du jour et de la nuit, il n'y a donc plus d'emails récapitulatifs.",
+              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+            ),
           ),
         ],
       )),
