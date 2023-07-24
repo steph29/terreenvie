@@ -51,10 +51,6 @@ class _ComptePageState extends State<ComptePage> {
                         SizedBox(
                           height: 30,
                         ),
-
-                        SizedBox(
-                          height: 30,
-                        ),
                         // Liste des cards
                         buildCard(groupValue),
                         SizedBox(
@@ -102,7 +98,7 @@ class _ComptePageState extends State<ComptePage> {
             return Center(child: CupertinoActivityIndicator());
           }
           if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text("No data found"));
+            return Center(child: Text("Quartier Libre !"));
           }
           if (snapshot != null && snapshot.data != null) {
             return Center(
@@ -178,7 +174,7 @@ class _ComptePageState extends State<ComptePage> {
                         childAspectRatio: 1.0,
                         crossAxisSpacing: 0.0,
                         mainAxisSpacing: 5,
-                        mainAxisExtent: 500,
+                        mainAxisExtent: 450,
                       )
                     : ((MediaQuery.of(context).size.width <= 1024 &&
                             MediaQuery.of(context).size.width >= 640)
@@ -194,7 +190,7 @@ class _ComptePageState extends State<ComptePage> {
                             childAspectRatio: 1.0,
                             crossAxisSpacing: 0.0,
                             mainAxisSpacing: 5,
-                            mainAxisExtent: 500,
+                            mainAxisExtent: 450,
                           ))),
               ),
             );

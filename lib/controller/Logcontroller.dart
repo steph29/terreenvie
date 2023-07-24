@@ -78,7 +78,7 @@ class _LogControllerState extends State<LogController> {
                 labelStyle: TextStyle(
                   color: Colors.grey[400],
                 ),
-                labelText: 'Password',
+                labelText: 'Mot de passe',
                 suffixIcon: IconButton(
                   icon: Icon(
                     Icons.visibility,
