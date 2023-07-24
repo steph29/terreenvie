@@ -199,6 +199,20 @@ class _AdminPageState extends State<AdminPage> {
                                             primary: Color(0xFF2b5a72),
                                           ),
                                         ),
+                                        // Bouton delete
+                                        IconButton(
+                                          onPressed: () async {
+                                            print(posteId.toString());
+                                            await FirebaseFirestore.instance
+                                                .collection("pos_hor")
+                                                .doc(posteId.toString())
+                                                .delete();
+                                          },
+                                          icon: Icon(Icons.delete),
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Color(0xFF2b5a72),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     Text(
@@ -227,15 +241,11 @@ class _AdminPageState extends State<AdminPage> {
                               childAspectRatio: 1.0,
                               crossAxisSpacing: 0.0,
                               mainAxisSpacing: 5,
-
                               mainAxisExtent: (groupValue == 'Lundi' ||
                                       groupValue == 'Jeudi' ||
                                       groupValue == 'Mardi')
                                   ? 250
                                   : 450,
-
-                              mainAxisExtent: 450,
-
                             )
                           : ((MediaQuery.of(context).size.width <= 1024 &&
                                   MediaQuery.of(context).size.width >= 640)
@@ -244,30 +254,22 @@ class _AdminPageState extends State<AdminPage> {
                                   childAspectRatio: 1.0,
                                   crossAxisSpacing: 0.0,
                                   mainAxisSpacing: 5,
-
                                   mainAxisExtent: (groupValue == 'Lundi' ||
                                           groupValue == 'Jeudi' ||
                                           groupValue == 'Mardi')
                                       ? 250
                                       : 450,
-
-                                  mainAxisExtent: 450,
-
                                 )
                               : (SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 1,
                                   childAspectRatio: 1.0,
                                   crossAxisSpacing: 0.0,
                                   mainAxisSpacing: 5,
-
                                   mainAxisExtent: (groupValue == 'Lundi' ||
                                           groupValue == 'Jeudi' ||
                                           groupValue == 'Mardi')
                                       ? 250
                                       : 450,
-
-                                  mainAxisExtent: 450,
-
                                 ))),
                     ),
                   );
