@@ -99,7 +99,7 @@ class _ComptePageState extends State<ComptePage> {
             return Center(child: CupertinoActivityIndicator());
           }
           if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text("No data found"));
+            return Center(child: Text("Quartier Libre !"));
           }
           if (snapshot != null && snapshot.data != null) {
             return Center(

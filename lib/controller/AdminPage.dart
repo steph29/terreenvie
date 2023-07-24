@@ -142,7 +142,7 @@ class _AdminPageState extends State<AdminPage> {
                   return Center(child: CupertinoActivityIndicator());
                 }
                 if (snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text("No data found"));
+                  return Center(child: Text("Quartier Libre !"));
                 }
                 if (snapshot != null && snapshot.data != null) {
                   return Center(
@@ -227,7 +227,15 @@ class _AdminPageState extends State<AdminPage> {
                               childAspectRatio: 1.0,
                               crossAxisSpacing: 0.0,
                               mainAxisSpacing: 5,
+
+                              mainAxisExtent: (groupValue == 'Lundi' ||
+                                      groupValue == 'Jeudi' ||
+                                      groupValue == 'Mardi')
+                                  ? 250
+                                  : 450,
+
                               mainAxisExtent: 450,
+
                             )
                           : ((MediaQuery.of(context).size.width <= 1024 &&
                                   MediaQuery.of(context).size.width >= 640)
@@ -236,14 +244,30 @@ class _AdminPageState extends State<AdminPage> {
                                   childAspectRatio: 1.0,
                                   crossAxisSpacing: 0.0,
                                   mainAxisSpacing: 5,
+
+                                  mainAxisExtent: (groupValue == 'Lundi' ||
+                                          groupValue == 'Jeudi' ||
+                                          groupValue == 'Mardi')
+                                      ? 250
+                                      : 450,
+
                                   mainAxisExtent: 450,
+
                                 )
                               : (SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 1,
                                   childAspectRatio: 1.0,
                                   crossAxisSpacing: 0.0,
                                   mainAxisSpacing: 5,
+
+                                  mainAxisExtent: (groupValue == 'Lundi' ||
+                                          groupValue == 'Jeudi' ||
+                                          groupValue == 'Mardi')
+                                      ? 250
+                                      : 450,
+
                                   mainAxisExtent: 450,
+
                                 ))),
                     ),
                   );
