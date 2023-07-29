@@ -133,6 +133,7 @@ class _AdminPageState extends State<AdminPage> {
                   .collection("pos_hor")
                   .where("jour", isEqualTo: groupValue)
                   .where("ben_id", whereIn: adminUserIds)
+                  .orderBy('poste')
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
