@@ -53,7 +53,7 @@ class _ComptePageState extends State<ComptePage> {
                         ),
 
                         // Liste des cards
-                        buildCard(groupValue),
+                        buildCardtri(groupValue),
                         SizedBox(
                           height: 30,
                         ),
@@ -117,6 +117,137 @@ class _ComptePageState extends State<ComptePage> {
                   // Vérifier si l'utilisateur connecté est le propriétaire du poste
                   String currentUserId = userId!.uid;
                   String ownerId = snapshot.data?.docs[i]['ben_id'];
+                  isCurrentUserOwner = currentUserId == ownerId;
+
+                  return Card(
+                    color: Color(0xFFf2f0e7),
+                    child: Container(
+                      constraints:
+                          const BoxConstraints(minHeight: 0, maxHeight: 500.0),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20)),
+                      margin: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(5),
+                      child: Stack(
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    poste,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF2b5a72)),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                desc,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    color: Color(0xFF2b5a72)),
+                              ),
+                              Column(
+                                children: [
+                                  buildButtonList(
+                                      poste, hor, desc, posteId, snapshot, i)
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                gridDelegate: (MediaQuery.of(context).size.width >= 1024)
+                    ? SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        childAspectRatio: 1.0,
+                        crossAxisSpacing: 0.0,
+                        mainAxisSpacing: 5,
+                        mainAxisExtent: (groupValue == 'Lundi' ||
+                                groupValue == 'Jeudi' ||
+                                groupValue == 'Mardi')
+                            ? 250
+                            : 450,
+                      )
+                    : ((MediaQuery.of(context).size.width <= 1024 &&
+                            MediaQuery.of(context).size.width >= 640)
+                        ? SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 0.0,
+                            mainAxisSpacing: 5,
+                            mainAxisExtent: (groupValue == 'Lundi' ||
+                                    groupValue == 'Jeudi' ||
+                                    groupValue == 'Mardi')
+                                ? 250
+                                : 450,
+                          )
+                        : (SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 0.0,
+                            mainAxisSpacing: 5,
+                            mainAxisExtent: (groupValue == 'Lundi' ||
+                                    groupValue == 'Jeudi' ||
+                                    groupValue == 'Mardi')
+                                ? 250
+                                : 450,
+                          ))),
+              ),
+            );
+          }
+          return Container();
+        },
+      );
+
+  Widget buildCardtri(String groupValue) => StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection("pos_hor")
+            .where("jour", isEqualTo: groupValue)
+            .orderBy('poste')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print(snapshot.error);
+            return Text("Something went wrong: ${snapshot.error}");
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CupertinoActivityIndicator());
+          }
+          if (snapshot.data!.docs.isEmpty) {
+            return Center(child: Text("Quartier Libre !"));
+          }
+
+          if (snapshot != null && snapshot.data != null) {
+            return Center(
+              child: GridView.builder(
+                controller: ScrollController(),
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (ctx, i) {
+                  var poste = snapshot.data!.docs[i]['poste'];
+                  var desc = snapshot.data!.docs[i]['desc'];
+                  var hor = snapshot.data!.docs[i]['hor'];
+                  var posteId = snapshot.data!.docs[i].id;
+                  snapshot.data!.docs
+                      .toList()
+                      .sort((a, b) => a['poste'].compareTo(b['poste']));
+                  // Vérifier si l'utilisateur connecté est le propriétaire du poste
+                  String currentUserId = userId!.uid;
+                  String ownerId = snapshot.data!.docs[i]['ben_id'];
                   isCurrentUserOwner = currentUserId == ownerId;
 
                   return Card(
