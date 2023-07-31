@@ -133,10 +133,12 @@ class _AdminPageState extends State<AdminPage> {
                   .collection("pos_hor")
                   .where("jour", isEqualTo: groupValue)
                   .where("ben_id", whereIn: adminUserIds)
+                  .orderBy('poste')
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
-                  return Text("Something went wrong");
+                  print(snapshot.error);
+                  return Text("Something went wrong: ${snapshot.error}");
                 }
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CupertinoActivityIndicator());
