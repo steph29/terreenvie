@@ -48,6 +48,15 @@ class _ComptePageState extends State<ComptePage> {
                           height: 30,
                         ),
                         buildSegmentControl(),
+                        Container(
+                          child: Text(
+                            "Entrées, crêpes, montage, restauration... le choix est grand, pensez à descendre ! ",
+                            style: TextStyle(
+                                color: Color(0xFF2b5a72),
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
                         SizedBox(
                           height: 30,
                         ),
@@ -64,7 +73,7 @@ class _ComptePageState extends State<ComptePage> {
   }
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(15),
       groupValue: groupValue,
       selectedColor: Color(0xFF2b5a72),
       unselectedColor: Colors.white,
