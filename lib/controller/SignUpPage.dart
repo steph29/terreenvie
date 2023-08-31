@@ -110,6 +110,15 @@ class _SignUpPageState extends State<SignUpPage> {
             height: 10.0,
           ),
           Container(
+            child: Text(
+              "Votre mot de passe DOIT contenir 6 caractères minimum.",
+              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+            ),
+          ),
+          SizedBox(
+            height: 10.0,
+          ),
+          Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
             child: TextFormField(
               controller: passwordController,
