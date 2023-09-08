@@ -1,8 +1,24 @@
+import 'dart:convert';
+import 'dart:html';
+import 'dart:io';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:pdf/widgets.dart' as pw;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'dart:typed_data';
+import 'package:syncfusion_flutter_pdf/pdf.dart' as syn;
+import 'package:open_file/open_file.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'PDF/web.dart';
+import 'PDF/mobile.dart';
 
 class Analyse extends StatefulWidget {
   const Analyse({Key? key}) : super(key: key);
@@ -12,202 +28,272 @@ class Analyse extends StatefulWidget {
 }
 
 class _AnalyseState extends State<Analyse> {
+  String groupValue = "Samedi";
+  List<List<dynamic>> test = [];
+  List<List<dynamic>> items = [];
+  List<String> poste = ['Animation Sonore'];
+  String? selectedPoste;
+
   @override
   Widget build(BuildContext context) {
-    return LineChart(sampleData1);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Ki kè où?"),
+        backgroundColor: Color(0xFF2b5a72),
+      ),
+      body: Column(
+        children: [
+          buildSegmentControl(),
+          new DropdownButton<String>(
+              items: <String>[
+                'Animation Sonore',
+                'Atelier animation enfants',
+                'Buvette principale',
+                'Bénévoles Volant',
+                'Conferences',
+                'Electricite',
+                'Entree',
+                'Exposants',
+                'Faire les crepes',
+                'Montage',
+                'Restauration Benevoles',
+                'Restauration Visiteurs',
+                'Secours',
+                'Sono'
+              ].map((String value) {
+                //La fonction crée un objet qui aura la même valeur et le même texte, à partir du tableau d'objet
+                return new DropdownMenuItem<String>(
+                  value: value,
+                  child: new Text(value),
+                );
+              }).toList(),
+              hint: const Text(
+                'Quel poste voulez-vous sélectionner ?',
+              ),
+              value: selectedPoste,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedPoste = newValue;
+                });
+              }),
+          Expanded(
+            child: FutureBuilder<List<List<dynamic>>>(
+              future: fetchData(groupValue),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(
+                    strokeWidth: 4,
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Erreur : ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Text('Aucune donnée disponible.');
+                }
+                List<List<dynamic>> items = snapshot.data!;
+                return ListView(
+                  children: items.map((item) {
+                    // Créez des Widgets à partir des données de chaque élément
+                    return ListTile(
+                      title: Text(
+                          'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
+                      subtitle: Text(
+                          'Poste: le ${item[3]} à ${item[4]} de ${item[5]} à ${item[6]}'),
+                      // Ajoutez d'autres éléments ici en fonction de votre structure de données
+                    );
+                  }).toList(), //snapshot.data!,
+                );
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _createPDF();
+            },
+            child: Text("Générer PDF"),
+          ),
+        ],
+      ),
+    );
   }
 
-  LineChartData get sampleData1 => LineChartData(
-        lineTouchData: lineTouchData1,
-        gridData: gridData,
-        titlesData: titlesData1,
-        borderData: borderData,
-        lineBarsData: lineBarsData1,
-        minX: 0,
-        maxX: 14,
-        maxY: 4,
-        minY: 0,
-      );
+  Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
+      padding: EdgeInsets.all(15),
+      groupValue: groupValue,
+      selectedColor: Color(0xFF2b5a72),
+      unselectedColor: Colors.white,
+      borderColor: Color(0xFF2b5a72),
+      pressedColor: Color(0xFF2b5a72).withOpacity(0.2),
+      children: {
+        "Mardi": buildSegment("Mardi"),
+        "Mercredi": buildSegment("Mercredi"),
+        "Jeudi": buildSegment("Jeudi"),
+        "Vendredi": buildSegment("Vendredi"),
+        "Samedi": buildSegment("Samedi"),
+        "Dimanche": buildSegment("Dimanche"),
+        "Lundi": buildSegment("Lundi"),
+      },
+      onValueChanged: (groupValue) {
+        print(groupValue);
+        setState(() {
+          this.groupValue = groupValue;
+        });
+      });
 
-  LineTouchData get lineTouchData1 => LineTouchData(
-        handleBuiltInTouches: true,
-        touchTooltipData: LineTouchTooltipData(
-          tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
+  Widget buildSegment(String text) => Container(
+        padding: EdgeInsets.all(12),
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 20),
         ),
       );
 
-  FlGridData get gridData => FlGridData(show: false);
+  Future<List<List>> fetchData(String groupValue) async {
+    items = [];
+    Widget? itemWidget = null;
+    QuerySnapshot<Map<String, dynamic>> posBenSnapshot =
+        await FirebaseFirestore.instance.collection('pos_ben').get();
 
-  Widget leftTitleWidgets(double value, TitleMeta meta) {
-    const style = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
-    );
-    String text;
-    switch (value.toInt()) {
-      case 1:
-        text = '1m';
-        break;
-      case 2:
-        text = '2m';
-        break;
-      case 3:
-        text = '3m';
-        break;
-      case 4:
-        text = '5m';
-        break;
-      case 5:
-        text = '6m';
-        break;
-      default:
-        return Container();
+    // Convertissez les documents en une liste pour trier les résultats
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+        posBenSnapshot.docs;
+
+    // Triez les documents en fonction du champ "poste" à l'index 0, puis du champ "jour"
+    documents.sort((a, b) {
+      String posteA = a.get('pos_id')[0]['poste'] ?? '';
+      String posteB = b.get('pos_id')[0]['poste'] ?? '';
+      String jourA = a.get('pos_id')[0]['jour'] ?? 0;
+      String jourB = b.get('pos_id')[0]['jour'] ?? 0;
+      String heureA = a.get('pos_id')[0]['debut'] ?? 0;
+      String HeureB = b.get('pos_id')[0]['debut'] ?? 0;
+
+      int posteComparison = posteA.compareTo(posteB);
+      int jourComparaison = jourA.compareTo(jourB);
+
+      if (posteComparison == 0) {
+        // Si les postes sont identiques, comparez par jour
+        if (jourComparaison == 0) {
+          return heureA.compareTo(HeureB);
+        } else {
+          return jourA.compareTo(jourB);
+        }
+      } else {
+        return posteComparison;
+      }
+    });
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> document in documents) {
+      Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+
+      // Accédez à la liste "pos_id"
+      List<dynamic>? posIdList = data['pos_id'];
+      if (posIdList != null && posIdList.isNotEmpty) {
+        // Accédez au premier élément (index 0) de "pos_id"
+        Map<String, dynamic>? firstPosId = posIdList[0];
+        if (firstPosId != null) {
+          // Accédez au champ "jour" dans le premier élément de "pos_id"
+          String? jour = firstPosId['jour'];
+
+          if (jour != null && jour == groupValue) {
+            // Si le champ "jour" correspond à groupValue, ajoutez cet élément à la liste
+            String? benevoleId = data['ben_id'] as String?;
+
+            if (benevoleId != null) {
+              DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(benevoleId)
+                      .get();
+
+              if (userSnapshot.exists) {
+                Map<String, dynamic> userData =
+                    userSnapshot.data() as Map<String, dynamic>;
+
+                itemWidget = ListTile(
+                  title: Text(
+                      'Nom et prénom de l\'utilisateur: ${userData['nom']} ${userData['prenom']}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          'Élément du poste: ${data['pos_id'][0]['poste']} de ${data['pos_id'][0]['debut']} à ${data['pos_id'][0]['fin']} le ${data['pos_id'][0]['jour']}'), // Remplacez "votre_champ" par le champ que vous souhaitez afficher
+                      // Ajoutez d'autres champs de "pos_ben" ici si nécessaire
+                    ],
+                  ),
+                );
+                items.add([
+                  userData['nom'],
+                  userData['prenom'],
+                  userData['tel'],
+                  data['pos_id'][0]['jour'],
+                  data['pos_id'][0]['poste'],
+                  data['pos_id'][0]['debut'],
+                  data['pos_id'][0]['fin']
+                ]);
+              }
+            }
+          }
+        }
+      }
     }
 
-    return Text(text, style: style, textAlign: TextAlign.center);
+    return items;
   }
 
-  SideTitles leftTitles() => SideTitles(
-        getTitlesWidget: leftTitleWidgets,
-        showTitles: true,
-        interval: 1,
-        reservedSize: 40,
-      );
+  Future<void> _createPDF() async {
+    // Create a new PDF document.
+    PdfDocument document = PdfDocument();
+    // Add a new page to the document.
+    final page = document.pages.add();
+    final Size pageSize = page.getClientSize();
 
-  SideTitles get bottomTitles => SideTitles(
-        showTitles: true,
-        reservedSize: 32,
-        interval: 1,
-        getTitlesWidget: bottomTitleWidgets,
-      );
+    page.graphics.drawImage(PdfBitmap(await _readImageData('logoTEV.png')),
+        Rect.fromLTWH(0, 0, 50, 50));
 
-  FlTitlesData get titlesData1 => FlTitlesData(
-        bottomTitles: AxisTitles(
-          sideTitles: bottomTitles,
-        ),
-        rightTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        topTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        leftTitles: AxisTitles(
-          sideTitles: leftTitles(),
-        ),
-      );
-  List<LineChartBarData> get lineBarsData1 => [
-        lineChartBarData1_1,
-        lineChartBarData1_2,
-        lineChartBarData1_3,
-        lineChartBarData1_4,
-      ];
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    const style = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 16,
-    );
-    Widget text;
-    switch (value.toInt()) {
-      case 2:
-        text = const Text('SEPT', style: style);
-        break;
-      case 7:
-        text = const Text('OCT', style: style);
-        break;
-      case 12:
-        text = const Text('DEC', style: style);
-        break;
-      default:
-        text = const Text('');
-        break;
+    PdfGrid grid = PdfGrid();
+    grid.style = PdfGridStyle(
+        font: PdfStandardFont(PdfFontFamily.helvetica, 15),
+        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
+    grid.columns.add(count: 7);
+    grid.headers.add(1);
+
+    PdfGridRow headers = grid.headers[0];
+    headers.cells[0].value = 'Nom';
+    headers.cells[1].value = 'Prenom';
+    headers.cells[2].value = 'Téléphone';
+    headers.cells[3].value = 'Jour';
+    headers.cells[4].value = 'poste';
+    headers.cells[5].value = 'debut';
+    headers.cells[6].value = 'fin';
+
+    for (var i = 0; i < items.length; i++) {
+      PdfGridRow row = grid.rows.add();
+      row.cells[0].value = items[i][0];
+      row.cells[1].value = items[i][1];
+      row.cells[2].value = items[i][2];
+      row.cells[3].value = items[i][3];
+      row.cells[4].value = items[i][4];
+      row.cells[5].value = items[i][5];
+      row.cells[6].value = items[i][6];
     }
 
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      space: 10,
-      child: text,
-    );
+    grid.draw(
+        page: document.pages.add(),
+        bounds: Rect.fromLTWH(0, 40, pageSize.width, pageSize.height));
+
+    //Save the document
+    List<int> bytes = await document.save();
+    //Dispose the document
+    document.dispose();
+    //Download the output file
+    AnchorElement(
+        href:
+            "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
+      ..setAttribute("download", "Bénévole_de_TEV.pdf")
+      ..click();
   }
 
-  FlBorderData get borderData => FlBorderData(
-        show: true,
-        border: Border(
-          bottom: BorderSide(color: Colors.blue.withOpacity(0.2), width: 4),
-          left: const BorderSide(color: Colors.transparent),
-          right: const BorderSide(color: Colors.transparent),
-          top: const BorderSide(color: Colors.transparent),
-        ),
-      );
-
-  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
-        isCurved: true,
-        color: Colors.green,
-        barWidth: 8,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
-        belowBarData: BarAreaData(show: false),
-        spots: const [
-          FlSpot(1, 1),
-          FlSpot(3, 1.5),
-          FlSpot(5, 1.4),
-          FlSpot(7, 3.4),
-          FlSpot(10, 2),
-          FlSpot(12, 2.2),
-          FlSpot(13, 1.8),
-        ],
-      );
-
-  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
-        isCurved: true,
-        color: Colors.pink,
-        barWidth: 8,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
-        belowBarData: BarAreaData(
-          show: false,
-          color: Colors.pink.withOpacity(0),
-        ),
-        spots: const [
-          FlSpot(1, 1),
-          FlSpot(3, 2.8),
-          FlSpot(7, 1.2),
-          FlSpot(10, 2.8),
-          FlSpot(12, 2.6),
-          FlSpot(13, 3.9),
-        ],
-      );
-
-  LineChartBarData get lineChartBarData1_3 => LineChartBarData(
-        isCurved: true,
-        color: Colors.cyan,
-        barWidth: 8,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
-        belowBarData: BarAreaData(show: false),
-        spots: const [
-          FlSpot(1, 2.8),
-          FlSpot(3, 1.9),
-          FlSpot(6, 3),
-          FlSpot(10, 1.3),
-          FlSpot(13, 2.5),
-        ],
-      );
-  LineChartBarData get lineChartBarData1_4 => LineChartBarData(
-        isCurved: true,
-        color: Colors.yellowAccent,
-        barWidth: 8,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
-        belowBarData: BarAreaData(show: false),
-        spots: const [
-          FlSpot(1, 3),
-          FlSpot(2, 2.9),
-          FlSpot(3, 2.5),
-          FlSpot(4, 2.1),
-          FlSpot(5, 1.9),
-          FlSpot(6, 1.6),
-          FlSpot(10, 2.7),
-          FlSpot(13, 2.5),
-        ],
-      );
+  Future<Uint8List> _readImageData(String name) async {
+    final data = await rootBundle.load('$name');
+    return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  }
 }
