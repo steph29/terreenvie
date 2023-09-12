@@ -33,6 +33,7 @@ class _AnalyseState extends State<Analyse> {
   List<List<dynamic>> items = [];
   List<String> poste = ['Animation Sonore'];
   String? selectedPoste;
+  int totalCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -46,20 +47,34 @@ class _AnalyseState extends State<Analyse> {
           buildSegmentControl(),
           new DropdownButton<String>(
               items: <String>[
-                'Animation Sonore',
+                'Animation Sonores',
                 'Atelier animation enfants',
+                'Barriere',
+                'benevoles volants',
+                'Bénévole Volant',
+                'Benevoles volants',
                 'Buvette principale',
-                'Bénévoles Volant',
+                'Chapiteau',
                 'Conferences',
+                'Decoration',
                 'Electricite',
                 'Entree',
                 'Exposants',
                 'Faire les crepes',
+                'Flechage',
+                'Flechage / Signalétique',
                 'Montage',
+                'Plomberie',
                 'Restauration Benevoles',
                 'Restauration Visiteurs',
                 'Secours',
-                'Sono'
+                'Sono',
+                'Stand',
+                'Surveillance',
+                'Tisanerie',
+                'Toilettes seches',
+                'Vaisselle',
+                'Ventes de crepes'
               ].map((String value) {
                 //La fonction crée un objet qui aura la même valeur et le même texte, à partir du tableau d'objet
                 return new DropdownMenuItem<String>(
@@ -90,6 +105,7 @@ class _AnalyseState extends State<Analyse> {
                   return Text('Aucune donnée disponible.');
                 }
                 List<List<dynamic>> items = snapshot.data!;
+                print(totalCount);
                 return ListView(
                   children: items.map((item) {
                     // Créez des Widgets à partir des données de chaque élément
@@ -105,6 +121,11 @@ class _AnalyseState extends State<Analyse> {
               },
             ),
           ),
+          // FutureBuilder(
+          //     future: fetchData(groupValue),
+          //     builder: (context, snapshot) {
+          //       return Text('Nombre de bénévoles : $totalCount');
+          //     }),
           ElevatedButton(
             onPressed: () async {
               await _createPDF();
@@ -150,6 +171,7 @@ class _AnalyseState extends State<Analyse> {
   Future<List<List>> fetchData(String groupValue) async {
     items = [];
     Widget? itemWidget = null;
+    totalCount = 0;
     QuerySnapshot<Map<String, dynamic>> posBenSnapshot =
         await FirebaseFirestore.instance.collection('pos_ben').get();
 
@@ -192,50 +214,53 @@ class _AnalyseState extends State<Analyse> {
         if (firstPosId != null) {
           // Accédez au champ "jour" dans le premier élément de "pos_id"
           String? jour = firstPosId['jour'];
+          String? poste = firstPosId['poste'];
 
           if (jour != null && jour == groupValue) {
             // Si le champ "jour" correspond à groupValue, ajoutez cet élément à la liste
-            String? benevoleId = data['ben_id'] as String?;
+            if (poste != null && poste == selectedPoste) {
+              String? benevoleId = data['ben_id'] as String?;
 
-            if (benevoleId != null) {
-              DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(benevoleId)
-                      .get();
+              if (benevoleId != null) {
+                DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(benevoleId)
+                        .get();
 
-              if (userSnapshot.exists) {
-                Map<String, dynamic> userData =
-                    userSnapshot.data() as Map<String, dynamic>;
+                if (userSnapshot.exists) {
+                  Map<String, dynamic> userData =
+                      userSnapshot.data() as Map<String, dynamic>;
 
-                itemWidget = ListTile(
-                  title: Text(
-                      'Nom et prénom de l\'utilisateur: ${userData['nom']} ${userData['prenom']}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          'Élément du poste: ${data['pos_id'][0]['poste']} de ${data['pos_id'][0]['debut']} à ${data['pos_id'][0]['fin']} le ${data['pos_id'][0]['jour']}'), // Remplacez "votre_champ" par le champ que vous souhaitez afficher
-                      // Ajoutez d'autres champs de "pos_ben" ici si nécessaire
-                    ],
-                  ),
-                );
-                items.add([
-                  userData['nom'],
-                  userData['prenom'],
-                  userData['tel'],
-                  data['pos_id'][0]['jour'],
-                  data['pos_id'][0]['poste'],
-                  data['pos_id'][0]['debut'],
-                  data['pos_id'][0]['fin']
-                ]);
+                  itemWidget = ListTile(
+                    title: Text(
+                        'Nom et prénom de l\'utilisateur: ${userData['nom']} ${userData['prenom']}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            'Élément du poste: ${data['pos_id'][0]['poste']} de ${data['pos_id'][0]['debut']} à ${data['pos_id'][0]['fin']} le ${data['pos_id'][0]['jour']}'), // Remplacez "votre_champ" par le champ que vous souhaitez afficher
+                        // Ajoutez d'autres champs de "pos_ben" ici si nécessaire
+                      ],
+                    ),
+                  );
+                  items.add([
+                    userData['nom'],
+                    userData['prenom'],
+                    userData['tel'],
+                    data['pos_id'][0]['jour'],
+                    data['pos_id'][0]['poste'],
+                    data['pos_id'][0]['debut'],
+                    data['pos_id'][0]['fin']
+                  ]);
+                  totalCount++;
+                }
               }
             }
           }
         }
       }
     }
-
     return items;
   }
 
@@ -247,11 +272,11 @@ class _AnalyseState extends State<Analyse> {
     final Size pageSize = page.getClientSize();
 
     page.graphics.drawImage(PdfBitmap(await _readImageData('logoTEV.png')),
-        Rect.fromLTWH(0, 0, 50, 50));
+        Rect.fromLTWH(0, 0, 40, 40));
 
     PdfGrid grid = PdfGrid();
     grid.style = PdfGridStyle(
-        font: PdfStandardFont(PdfFontFamily.helvetica, 15),
+        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
         cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
     grid.columns.add(count: 7);
     grid.headers.add(1);
@@ -278,7 +303,7 @@ class _AnalyseState extends State<Analyse> {
 
     grid.draw(
         page: document.pages.add(),
-        bounds: Rect.fromLTWH(0, 40, pageSize.width, pageSize.height));
+        bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
     //Save the document
     List<int> bytes = await document.save();

@@ -15,7 +15,7 @@ signUpserv(String userEmail, String userPassword, String userName,
       'tel': userPhone,
       'email': userEmail,
       'createdAt': DateTime.now(),
-      'UserId': userid!.uid,
+      'UserId': userid.uid,
       'role': 'ben',
       'profil': 'ben'
     }).then((value) => {
