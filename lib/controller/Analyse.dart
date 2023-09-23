@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:get/get.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -20,6 +21,28 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'PDF/web.dart';
 import 'PDF/mobile.dart';
 
+class Users {
+  final String id;
+  final String nom;
+  final String prenom;
+
+  Users({required this.id, required this.nom, required this.prenom});
+}
+
+class Poste {
+  final String nomPoste;
+  final String jour;
+  final String heureDebut;
+  final String heureFin;
+
+  Poste({
+    required this.nomPoste,
+    required this.jour,
+    required this.heureDebut,
+    required this.heureFin,
+  });
+}
+
 class Analyse extends StatefulWidget {
   const Analyse({Key? key}) : super(key: key);
 
@@ -31,114 +54,282 @@ class _AnalyseState extends State<Analyse> {
   String groupValue = "Samedi";
   List<List<dynamic>> test = [];
   List<List<dynamic>> items = [];
+  List<List<dynamic>> itemsUser = [];
   List<String> poste = ['Animation Sonore'];
   String? selectedPoste;
   int totalCount = 0;
+  int totalCountUser = 0;
+  List<String> userNames = [];
+  List<String> usersID = [];
+  String? selectedUser;
+  String? userId;
+  List<Users> users = [];
+  List<Poste> userPosts = [];
+  List<List<dynamic>> userse = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Charger la liste des noms d'utilisateurs depuis Firebase
+    loadUserNames();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Ki kè où?"),
-        backgroundColor: Color(0xFF2b5a72),
-      ),
-      body: Column(
-        children: [
-          buildSegmentControl(),
-          new DropdownButton<String>(
-              items: <String>[
-                'Animation Sonores',
-                'Atelier animation enfants',
-                'Barriere',
-                'benevoles volants',
-                'Bénévole Volant',
-                'Benevoles volants',
-                'Buvette principale',
-                'Chapiteau',
-                'Conferences',
-                'Decoration',
-                'Electricite',
-                'Entree',
-                'Exposants',
-                'Faire les crepes',
-                'Flechage',
-                'Flechage / Signalétique',
-                'Montage',
-                'Plomberie',
-                'Restauration Benevoles',
-                'Restauration Visiteurs',
-                'Secours',
-                'Sono',
-                'Stand',
-                'Surveillance',
-                'Tisanerie',
-                'Toilettes seches',
-                'Vaisselle',
-                'Ventes de crepes'
-              ].map((String value) {
-                //La fonction crée un objet qui aura la même valeur et le même texte, à partir du tableau d'objet
-                return new DropdownMenuItem<String>(
-                  value: value,
-                  child: new Text(value),
-                );
-              }).toList(),
-              hint: const Text(
-                'Quel poste voulez-vous sélectionner ?',
-              ),
-              value: selectedPoste,
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedPoste = newValue;
-                });
-              }),
-          Expanded(
-            child: FutureBuilder<List<List<dynamic>>>(
-              future: fetchData(groupValue),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(
-                    strokeWidth: 4,
-                  );
-                } else if (snapshot.hasError) {
-                  return Text('Erreur : ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('Aucune donnée disponible.');
-                }
-                List<List<dynamic>> items = snapshot.data!;
-                print(totalCount);
-                return ListView(
-                  children: items.map((item) {
-                    // Créez des Widgets à partir des données de chaque élément
-                    return ListTile(
-                      title: Text(
-                          'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
-                      subtitle: Text(
-                          'Poste: le ${item[3]} à ${item[4]} de ${item[5]} à ${item[6]}'),
-                      // Ajoutez d'autres éléments ici en fonction de votre structure de données
-                    );
-                  }).toList(), //snapshot.data!,
-                );
-              },
-            ),
-          ),
-          // FutureBuilder(
-          //     future: fetchData(groupValue),
-          //     builder: (context, snapshot) {
-          //       return Text('Nombre de bénévoles : $totalCount');
-          //     }),
-          ElevatedButton(
-            onPressed: () async {
-              await _createPDF();
-            },
-            child: Text("Générer PDF"),
-          ),
-        ],
-      ),
-    );
+        appBar: AppBar(
+          title: Text("Ki kè où?"),
+          backgroundColor: Color(0xFF2b5a72),
+        ),
+        // TODO : Réarranger en fonction de la taille des écrans
+        body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.pinkAccent.withOpacity(0.1),
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 2.5,
+                          child: Column(
+                            children: [
+                              buildSegmentControl(),
+                              new DropdownButton<String>(
+                                  items: <String>[
+                                    'Animation Sonores',
+                                    'Ateliers animation enfants',
+                                    'Barriere',
+                                    'benevoles volants',
+                                    'Bénévole Volant',
+                                    'Benevoles volants',
+                                    'Buvette principale',
+                                    'Chapiteau',
+                                    'Conferences',
+                                    'Decoration',
+                                    'Electricite',
+                                    'Entree',
+                                    'Exposants',
+                                    'Faire les crepes',
+                                    'Flechage',
+                                    'Flechage / Signalétique',
+                                    'Montage',
+                                    'Plomberie',
+                                    'Restauration Benevoles',
+                                    'Restauration Visiteurs',
+                                    'Secours',
+                                    'Sono',
+                                    'Stand',
+                                    'Surveillance',
+                                    'Tisanerie',
+                                    'Toilettes seches',
+                                    'Vaisselle',
+                                    'Ventes de crepes'
+                                  ].map((String value) {
+                                    //La fonction crée un objet qui aura la même valeur et le même texte, à partir du tableau d'objet
+                                    return new DropdownMenuItem<String>(
+                                      value: value,
+                                      child: new Text(value),
+                                    );
+                                  }).toList(),
+                                  hint: const Text(
+                                    'Quel poste voulez-vous sélectionner ?',
+                                  ),
+                                  value: selectedPoste,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      selectedPoste = newValue;
+                                    });
+                                  }),
+                              FutureBuilder<List<List<dynamic>>>(
+                                future: fetchData(groupValue),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return CircularProgressIndicator(
+                                      strokeWidth: 4,
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return Text('Erreur : ${snapshot.error}');
+                                  } else if (!snapshot.hasData ||
+                                      snapshot.data!.isEmpty) {
+                                    return Text('Aucune donnée disponible.');
+                                  }
+                                  List<List<dynamic>> items = snapshot.data!;
+                                  print(totalCount);
+                                  return Expanded(
+                                      child: Container(
+                                    width:
+                                        MediaQuery.of(context).size.width / 6,
+                                    height:
+                                        MediaQuery.of(context).size.height / 6,
+                                    child: ListView(
+                                      children: items.map((item) {
+                                        // Créez des Widgets à partir des données de chaque élément
+                                        return ListTile(
+                                          title: Text(
+                                              'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
+                                          subtitle: Text(
+                                              'Poste: le ${item[3]} à ${item[4]} de ${item[5]} à ${item[6]}'),
+                                          // Ajoutez d'autres éléments ici en fonction de votre structure de données
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ));
+                                },
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await _createPDF();
+                                },
+                                child: Text("Générer PDF"),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.yellowAccent.withOpacity(0.1),
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 2.5,
+                          child: Column(
+                            children: [
+                              Text('La liste des ki ! '),
+                              FutureBuilder<List<List<dynamic>>>(
+                                future: getAllUsers(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return CircularProgressIndicator(
+                                      strokeWidth: 4,
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return Text('Erreur : ${snapshot.error}');
+                                  } else if (!snapshot.hasData ||
+                                      snapshot.data!.isEmpty) {
+                                    return Text('Aucune donnée disponible.');
+                                  }
+                                  List<List<dynamic>> items = snapshot.data!;
+                                  return Expanded(
+                                      child: Container(
+                                    width:
+                                        MediaQuery.of(context).size.width / 6,
+                                    height:
+                                        MediaQuery.of(context).size.height / 6,
+                                    child: ListView(
+                                      children: items.map((item) {
+                                        // Créez des Widgets à partir des données de chaque élément
+                                        return ListTile(
+                                          title: Text(
+                                              'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ));
+                                },
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await _createPDFuser();
+                                },
+                                child: Text("Générer PDF user"),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    DropdownButton<String>(
+                      value: selectedUser,
+                      onChanged: (String? newValue) async {
+                        setState(() {
+                          selectedUser = newValue;
+                        });
+
+                        if (selectedUser != null) {
+                          final selectedUserId = users
+                              .firstWhere((user) =>
+                                  '${user.nom} ${user.prenom}' == selectedUser)
+                              .id;
+
+                          // Récupérer les postes de l'utilisateur sélectionné
+                          final postes = await getUserPosts(selectedUserId);
+                          setState(() {
+                            for (var i = 0; i < postes.length; i++)
+                              userPosts = postes[
+                                  i]; // Mettre à jour la liste des postes de l'utilisateur
+                          });
+                        }
+                      },
+                      items: userNames
+                          .map<DropdownMenuItem<String>>((String userName) {
+                        return DropdownMenuItem<String>(
+                          value: userName,
+                          child: Text(userName),
+                        );
+                      }).toList(),
+                      hint: Text('Sélectionnez un nom'),
+                    ),
+                    if (selectedUser != null)
+                      Expanded(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 6,
+                          height: MediaQuery.of(context).size.height / 6,
+                          child: ListView.builder(
+                            itemCount: userPosts.length,
+                            itemBuilder: (context, index) {
+                              final poste = userPosts[index];
+                              return ListTile(
+                                title: Text('Nom du poste: ${poste.nomPoste}'),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Jour: ${poste.jour}'),
+                                    Text('Heure de début: ${poste.heureDebut}'),
+                                    Text('Heure de fin: ${poste.heureFin}'),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    Container(
+                      width: MediaQuery.of(context).size.width / 2.5,
+                      height: MediaQuery.of(context).size.height / 2.5,
+                      decoration:
+                          BoxDecoration(color: Colors.green.withOpacity(0.1)),
+                    )
+                  ],
+                )
+              ],
+            )));
   }
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
-      padding: EdgeInsets.all(15),
+      padding: EdgeInsets.all(5),
       groupValue: groupValue,
       selectedColor: Color(0xFF2b5a72),
       unselectedColor: Colors.white,
@@ -161,10 +352,10 @@ class _AnalyseState extends State<Analyse> {
       });
 
   Widget buildSegment(String text) => Container(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(6),
         child: Text(
           text,
-          style: TextStyle(fontSize: 20),
+          style: TextStyle(fontSize: 12),
         ),
       );
 
@@ -245,7 +436,7 @@ class _AnalyseState extends State<Analyse> {
                     ),
                   );
                   items.add([
-                    userData['nom'],
+                    userData['nom'].toUpperCase(),
                     userData['prenom'],
                     userData['tel'],
                     data['pos_id'][0]['jour'],
@@ -318,6 +509,146 @@ class _AnalyseState extends State<Analyse> {
   }
 
   Future<Uint8List> _readImageData(String name) async {
+    final data = await rootBundle.load('$name');
+    return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  }
+
+  Future<List<List<dynamic>>> getAllUsers() async {
+    QuerySnapshot<Map<String, dynamic>> userSnapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+        userSnapshot.docs;
+    documents.sort((a, b) {
+      String nomA = (a.get('nom') ?? '').toUpperCase();
+      String nomB = (b.get('nom') ?? '').toUpperCase();
+      String prenomA = (a.get('prenom') ?? '');
+      String prenomB = (b.get('prenom') ?? '');
+
+      return nomA.compareTo(nomB);
+    });
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> document in documents) {
+      Map<String, dynamic> userData = document.data();
+
+      itemsUser.add([
+        userData['nom'].toUpperCase(),
+        userData['prenom'],
+        userData['tel'],
+      ]);
+    }
+
+    return itemsUser;
+  }
+
+  Future<void> _createPDFuser() async {
+    // Create a new PDF document.
+    PdfDocument document = PdfDocument();
+    // Add a new page to the document.
+    final page = document.pages.add();
+    final Size pageSize = page.getClientSize();
+
+    PdfGrid grid = PdfGrid();
+    grid.style = PdfGridStyle(
+        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
+        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
+    grid.columns.add(count: 3);
+    grid.headers.add(1);
+
+    PdfGridRow headers = grid.headers[0];
+    headers.cells[0].value = 'Nom';
+    headers.cells[1].value = 'Prenom';
+    headers.cells[2].value = 'Téléphone';
+
+    for (var i = 0; i < itemsUser.length; i++) {
+      PdfGridRow row = grid.rows.add();
+      row.cells[0].value = itemsUser[i][0];
+      row.cells[1].value = itemsUser[i][1];
+      row.cells[2].value = itemsUser[i][2];
+    }
+
+    grid.draw(
+        page: document.pages.add(),
+        bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
+
+    //Save the document
+    List<int> bytes = await document.save();
+    //Dispose the document
+    document.dispose();
+    //Download the output file
+    AnchorElement(
+        href:
+            "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
+      ..setAttribute("download", "Bénévole_de_TEV.pdf")
+      ..click();
+  }
+
+  Future<void> loadUserNames() async {
+    final QuerySnapshot<Map<String, dynamic>> userSnapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+
+    final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+        userSnapshot.docs;
+
+    documents.sort((a, b) {
+      String nomA = (a.get('nom') ?? '').toUpperCase();
+      String nomB = (b.get('nom') ?? '').toUpperCase();
+      String prenomA = (a.get('prenom') ?? '');
+      String prenomB = (b.get('prenom') ?? '');
+
+      return nomA.compareTo(nomB);
+    });
+
+    setState(() {
+      users = documents
+          .map(
+            (doc) => Users(
+              id: doc.id,
+              nom: doc['nom'] as String,
+              prenom: doc['prenom'] as String,
+            ),
+          )
+          .toList();
+      userNames = users.map((user) => '${user.nom} ${user.prenom}').toList();
+    });
+  }
+
+  Future<List<List<Poste>>> getUserPosts(String userName) async {
+    final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
+        await FirebaseFirestore.instance
+            .collection('pos_ben')
+            .where('ben_id', isEqualTo: userName)
+            .get();
+
+    final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+        postsSnapshot.docs;
+    return postsSnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      List<Poste> postesUsers = [];
+      for (var i = 0; i < data['pos_id'].length; i++) {
+        String nomPoste = data['pos_id'][i]['poste'] as String;
+        String jour = data['pos_id'][i]['jour'] as String;
+        String heureDebut = data['pos_id'][i]['debut'] as String;
+        String heureFin = data['pos_id'][i]['fin'] as String;
+
+        postesUsers.add(Poste(
+          nomPoste: nomPoste,
+          jour: jour,
+          heureDebut: heureDebut,
+          heureFin: heureFin,
+        ));
+        print(postesUsers[0].nomPoste +
+            ' ' +
+            ' ' +
+            postesUsers[0].heureDebut +
+            ' ' +
+            postesUsers[0].heureFin);
+      }
+      return postesUsers;
+    }).toList();
+  }
+
+  Future<Uint8List> _readImageData1(String name) async {
     final data = await rootBundle.load('$name');
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
