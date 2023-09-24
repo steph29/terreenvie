@@ -66,6 +66,7 @@ class _AnalyseState extends State<Analyse> {
   List<Users> users = [];
   List<Poste> userPosts = [];
   List<List<dynamic>> userse = [];
+  List<Poste> postesUsers = [];
 
   @override
   void initState() {
@@ -103,6 +104,7 @@ class _AnalyseState extends State<Analyse> {
                           height: MediaQuery.of(context).size.height / 2.5,
                           child: Column(
                             children: [
+                              Text("Ki kè où "),
                               buildSegmentControl(),
                               new DropdownButton<String>(
                                   items: <String>[
@@ -261,61 +263,79 @@ class _AnalyseState extends State<Analyse> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    DropdownButton<String>(
-                      value: selectedUser,
-                      onChanged: (String? newValue) async {
-                        setState(() {
-                          selectedUser = newValue;
-                        });
+                    Container(
+                      width: MediaQuery.of(context).size.width / 2.5,
+                      height: MediaQuery.of(context).size.height / 2.5,
+                      decoration: BoxDecoration(
+                          color: Colors.blueAccent.withOpacity(0.1)),
+                      child: Column(
+                        children: [
+                          Text('Ki fè koi'),
+                          Row(children: [
+                            DropdownButton<String>(
+                              value: selectedUser,
+                              onChanged: (String? newValue) async {
+                                setState(() {
+                                  selectedUser = newValue;
+                                });
 
-                        if (selectedUser != null) {
-                          final selectedUserId = users
-                              .firstWhere((user) =>
-                                  '${user.nom} ${user.prenom}' == selectedUser)
-                              .id;
+                                if (selectedUser != null) {
+                                  final selectedUserId = users
+                                      .firstWhere((user) =>
+                                          '${user.nom} ${user.prenom}' ==
+                                          selectedUser)
+                                      .id;
 
-                          // Récupérer les postes de l'utilisateur sélectionné
-                          final postes = await getUserPosts(selectedUserId);
-                          setState(() {
-                            for (var i = 0; i < postes.length; i++)
-                              userPosts = postes[
-                                  i]; // Mettre à jour la liste des postes de l'utilisateur
-                          });
-                        }
-                      },
-                      items: userNames
-                          .map<DropdownMenuItem<String>>((String userName) {
-                        return DropdownMenuItem<String>(
-                          value: userName,
-                          child: Text(userName),
-                        );
-                      }).toList(),
-                      hint: Text('Sélectionnez un nom'),
-                    ),
-                    if (selectedUser != null)
-                      Expanded(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 6,
-                          height: MediaQuery.of(context).size.height / 6,
-                          child: ListView.builder(
-                            itemCount: userPosts.length,
-                            itemBuilder: (context, index) {
-                              final poste = userPosts[index];
-                              return ListTile(
-                                title: Text('Nom du poste: ${poste.nomPoste}'),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Jour: ${poste.jour}'),
-                                    Text('Heure de début: ${poste.heureDebut}'),
-                                    Text('Heure de fin: ${poste.heureFin}'),
-                                  ],
+                                  // Récupérer les postes de l'utilisateur sélectionné
+                                  final postes =
+                                      await getUserPosts(selectedUserId);
+                                  setState(() {
+                                    for (var i = 0; i < postes.length; i++)
+                                      userPosts =
+                                          postesUsers; // Mettre à jour la liste des postes de l'utilisateur
+                                  });
+                                }
+                              },
+                              items: userNames.map<DropdownMenuItem<String>>(
+                                  (String userName) {
+                                return DropdownMenuItem<String>(
+                                  value: userName,
+                                  child: Text(userName),
+                                );
+                              }).toList(),
+                              hint: Text('Sélectionnez un nom'),
+                            ),
+                            Expanded(
+                              child: Container(
+                                width: MediaQuery.of(context).size.width / 6,
+                                height: MediaQuery.of(context).size.height / 3,
+                                child: ListView.builder(
+                                  itemCount: userPosts.length,
+                                  itemBuilder: (context, index) {
+                                    final poste = userPosts[index];
+                                    return ListTile(
+                                      title: Text(
+                                          'Nom du poste: ${poste.nomPoste}'),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Jour: ${poste.jour}'),
+                                          Text(
+                                              'Heure de début: ${poste.heureDebut}'),
+                                          Text(
+                                              'Heure de fin: ${poste.heureFin}'),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
-                          ),
-                        ),
+                              ),
+                            ),
+                          ]),
+                        ],
                       ),
+                    ),
                     Container(
                       width: MediaQuery.of(context).size.width / 2.5,
                       height: MediaQuery.of(context).size.height / 2.5,
@@ -613,7 +633,8 @@ class _AnalyseState extends State<Analyse> {
     });
   }
 
-  Future<List<List<Poste>>> getUserPosts(String userName) async {
+  Future<List<Poste>> getUserPosts(String userName) async {
+    postesUsers = [];
     final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
         await FirebaseFirestore.instance
             .collection('pos_ben')
@@ -622,9 +643,8 @@ class _AnalyseState extends State<Analyse> {
 
     final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
         postsSnapshot.docs;
-    return postsSnapshot.docs.map((doc) {
+    postsSnapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
-      List<Poste> postesUsers = [];
       for (var i = 0; i < data['pos_id'].length; i++) {
         String nomPoste = data['pos_id'][i]['poste'] as String;
         String jour = data['pos_id'][i]['jour'] as String;
@@ -637,15 +657,9 @@ class _AnalyseState extends State<Analyse> {
           heureDebut: heureDebut,
           heureFin: heureFin,
         ));
-        print(postesUsers[0].nomPoste +
-            ' ' +
-            ' ' +
-            postesUsers[0].heureDebut +
-            ' ' +
-            postesUsers[0].heureFin);
       }
-      return postesUsers;
     }).toList();
+    return postesUsers;
   }
 
   Future<Uint8List> _readImageData1(String name) async {
