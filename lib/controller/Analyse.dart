@@ -118,6 +118,7 @@ class _AnalyseState extends State<Analyse> {
                                     'Chapiteau',
                                     'Conferences',
                                     'Decoration',
+                                    'Demontage / Nettoyage',
                                     'Electricite',
                                     'Entree',
                                     'Exposants',
