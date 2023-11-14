@@ -49,6 +49,7 @@ dependencies:
   path_provider: ^2.1.1
   syncfusion_flutter_pdf: ^22.2.12
   open_file: ^3.3.2
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -75,6 +76,7 @@ assets:
   - assets/hands.json
   - assets/fonts/arial-unicode-ms.ttf
   - assets/fonts/OpenSans-Regular.ttf
+  - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
   # For details regarding adding assets from package dependencies, see
