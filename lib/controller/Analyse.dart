@@ -238,7 +238,7 @@ class _AnalyseState extends State<Analyse> {
                                         // Créez des Widgets à partir des données de chaque élément
                                         return ListTile(
                                           title: Text(
-                                              'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
+                                              'Nom, prénom, Email : ${item[0]} ${item[1]} ${item[2]}'),
                                         );
                                       }).toList(),
                                     ),
@@ -555,7 +555,7 @@ class _AnalyseState extends State<Analyse> {
       itemsUser.add([
         userData['nom'].toUpperCase(),
         userData['prenom'],
-        userData['tel'],
+        userData['email'],
       ]);
     }
 
@@ -579,7 +579,7 @@ class _AnalyseState extends State<Analyse> {
     PdfGridRow headers = grid.headers[0];
     headers.cells[0].value = 'Nom';
     headers.cells[1].value = 'Prenom';
-    headers.cells[2].value = 'Téléphone';
+    headers.cells[2].value = 'Email';
 
     for (var i = 0; i < itemsUser.length; i++) {
       PdfGridRow row = grid.rows.add();
