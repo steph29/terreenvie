@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:html';
+// import 'dart:html';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -510,11 +510,11 @@ class _AnalyseState extends State<Analyse> {
     //Dispose the document
     document.dispose();
     //Download the output file
-    AnchorElement(
-        href:
-            "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
-      ..setAttribute("download", "Bénévole_de_TEV.pdf")
-      ..click();
+    // AnchorElement(
+    //     href:
+    //         "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
+    //   ..setAttribute("download", "Bénévole_de_TEV.pdf")
+    //   ..click();
   }
 
   Future<Uint8List> _readImageData(String name) async {
@@ -583,11 +583,11 @@ class _AnalyseState extends State<Analyse> {
     //Dispose the document
     document.dispose();
     //Download the output file
-    AnchorElement(
-        href:
-            "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
-      ..setAttribute("download", "Bénévole_de_TEV.pdf")
-      ..click();
+    // AnchorElement(
+    //     href:
+    //         "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
+    //   ..setAttribute("download", "Bénévole_de_TEV.pdf")
+    //   ..click();
   }
 
   Future<void> loadUserNames() async {

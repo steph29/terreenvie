@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1078182509252:android:5227a7001d06d6682b2791",
+        "mobilesdk_app_id": "1:1078182509252:android:d393db692712a4432b2791",
         "android_client_info": {
-          "package_name": "com.example.terreenvie"
+          "package_name": "com.terreenvie.terreenvie"
         }
       },
       "oauth_client": [
