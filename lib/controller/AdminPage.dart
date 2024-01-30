@@ -1,19 +1,14 @@
-import 'dart:js';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:terreenvie/controller/AddPoste.dart';
-import 'package:terreenvie/controller/EditHoraire.dart';
 import 'package:terreenvie/controller/EditPoste.dart';
 import 'package:terreenvie/model/create.dart';
-import 'MainAppController.dart';
 
 class AdminPage extends StatefulWidget {
   AdminPage({Key? key}) : super(key: key);
@@ -36,7 +31,7 @@ class _AdminPageState extends State<AdminPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Le coin des référents"),
-          backgroundColor: Color(0xFF2b5a72),
+          backgroundColor: Color(0xFFf2f0e7),
         ),
         body: SingleChildScrollView(
           child: Row(
@@ -124,7 +119,7 @@ class _AdminPageState extends State<AdminPage> {
           if (snapshot.data!.docs.isEmpty) {
             return Center(child: Text("No data found"));
           }
-          if (snapshot != null && snapshot.data != null) {
+          if (snapshot.data != null) {
             List<String> adminUserIds =
                 snapshot.data!.docs.map((doc) => doc.id).toList();
 
@@ -146,7 +141,7 @@ class _AdminPageState extends State<AdminPage> {
                 if (snapshot.data!.docs.isEmpty) {
                   return Center(child: Text("Quartier Libre !"));
                 }
-                if (snapshot != null && snapshot.data != null) {
+                if (snapshot.data != null) {
                   return Center(
                     child: GridView.builder(
                       controller: ScrollController(),
@@ -198,7 +193,7 @@ class _AdminPageState extends State<AdminPage> {
                                           },
                                           icon: Icon(Icons.edit),
                                           style: ElevatedButton.styleFrom(
-                                            primary: Color(0xFF2b5a72),
+                                            backgroundColor: Color(0xFFf2f0e7),
                                           ),
                                         ),
                                         // Bouton delete
@@ -212,7 +207,7 @@ class _AdminPageState extends State<AdminPage> {
                                           },
                                           icon: Icon(Icons.delete),
                                           style: ElevatedButton.styleFrom(
-                                            primary: Color(0xFF2b5a72),
+                                            backgroundColor: Color(0xFFf2f0e7),
                                           ),
                                         ),
                                       ],
@@ -343,7 +338,7 @@ class _AdminPageState extends State<AdminPage> {
                     },
                     icon: Icon(Icons.delete),
                     style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF2b5a72),
+                      backgroundColor: Color(0xFFf2f0e7),
                     ),
                   ),
                 ),
@@ -364,7 +359,7 @@ class _AdminPageState extends State<AdminPage> {
                     },
                     icon: Icon(Icons.edit),
                     style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF2b5a72),
+                      backgroundColor: Color(0xFFf2f0e7),
                     ),
                   ),
                 ),

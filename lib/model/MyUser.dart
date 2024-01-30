@@ -7,7 +7,6 @@ class MyUser {
 
   MyUser(DataSnapshot snapshot, {String? uid}) {
     uid = snapshot.key;
-    Object? map = snapshot.value;
     prenom = (snapshot.value as Map)['prenom'];
     nom = (snapshot.value as Map)['nom'];
   }

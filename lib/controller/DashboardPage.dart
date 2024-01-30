@@ -2,9 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../model/create.dart';
 
 class DashboardPage extends StatefulWidget {
   // const DashboardPage({Key? key}) : super(key: key);
@@ -23,7 +20,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Votre tableau de bord"),
-          backgroundColor: Color(0xFF2b5a72),
+          backgroundColor: Color(0xFFf2f0e7),
         ),
         body: SingleChildScrollView(
           child: Row(
@@ -63,7 +60,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Text(
                     "Vous n'avez pas encore de créneau sélectionné. Allez dans l'onglet Choisir ses postes"));
           }
-          if (snapshot != null && snapshot.data != null) {
+          if (snapshot.data != null) {
             return Center(
               child: ListView.builder(
                 controller: ScrollController(),
@@ -110,7 +107,6 @@ class _DashboardPageState extends State<DashboardPage> {
       shrinkWrap: true,
       itemCount: poste.length,
       itemBuilder: (context, j) {
-        var horId = snapshot.data?.docs[i]['pos_id'][j];
         var hord = snapshot.data?.docs[i]['pos_id'][j]["debut"];
         var horf = snapshot.data?.docs[i]['pos_id'][j]["fin"];
         var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
@@ -134,7 +130,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             trailing: IconButton(
               style: ElevatedButton.styleFrom(
-                primary: Color(0xFF2b5a72),
+                backgroundColor: Color(0xFFf2f0e7),
               ),
               icon: Icon(Icons.delete),
               onPressed: () async {

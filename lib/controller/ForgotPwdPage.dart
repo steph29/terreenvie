@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
 
 class ForgotPwdPage extends StatefulWidget {
@@ -24,7 +22,7 @@ class _ForgotPwdPageState extends State<ForgotPwdPage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text("Mot de passe perdu ?"),
-        backgroundColor: Color(0xFF2b5a72),
+        backgroundColor: Color(0xFFf2f0e7),
         // actions: []
       ),
       body: SingleChildScrollView(
@@ -96,8 +94,8 @@ class _ForgotPwdPageState extends State<ForgotPwdPage> {
               }
             },
             style: ElevatedButton.styleFrom(
-              primary: Color(
-                  0xFF2b5a72), // Définit la couleur de fond sur transparent
+              backgroundColor: Color(
+                  0xFFf2f0e7), // Définit la couleur de fond sur transparent
               elevation: 0, // Supprime l'ombre du bouton
             ),
             child: Text("Réinitialiser mon mot de passe"),
