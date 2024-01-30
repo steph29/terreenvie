@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,13 +7,8 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:terreenvie/controller/DashboardPage.dart';
-import 'package:lottie/lottie.dart';
 import 'package:terreenvie/controller/ForgotPwdPage.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
-import 'package:terreenvie/controller/SignUpPage.dart';
-
-import '../main.dart';
 
 class LogController extends StatefulWidget {
   const LogController({Key? key}) : super(key: key);
@@ -35,7 +29,7 @@ class _LogControllerState extends State<LogController> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Authentification"),
-        backgroundColor: Color(0xFF2b5a72),
+        backgroundColor: Color(0xFFf2f0e7),
       ),
       body: AuthLog(),
     );
@@ -174,8 +168,8 @@ class _LogControllerState extends State<LogController> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                primary: Color(
-                    0xFF2b5a72), // Définit la couleur de fond sur transparent
+                backgroundColor: Color(
+                    0xFFf2f0e7), // Définit la couleur de fond sur transparent
                 elevation: 0, // Supprime l'ombre du bouton
               ),
               child: Text("Se connecter"),
@@ -191,8 +185,8 @@ class _LogControllerState extends State<LogController> {
                 Get.to(() => ForgotPwdPage());
               },
               style: ElevatedButton.styleFrom(
-                primary: Color(
-                    0xFF2b5a72), // Définit la couleur de fond sur transparent
+                backgroundColor: Color(
+                    0xFFf2f0e7), // Définit la couleur de fond sur transparent
                 elevation: 0, // Supprime l'ombre du bouton
               ),
               child: Text("Mot de passe oublié ?"),

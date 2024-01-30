@@ -1,19 +1,10 @@
-import 'dart:js';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:terreenvie/controller/AddPoste.dart';
-import 'package:terreenvie/controller/EditHoraire.dart';
-import 'package:terreenvie/controller/EditPoste.dart';
-import 'package:terreenvie/model/create.dart';
-import 'MainAppController.dart';
 
 class ComptePage extends StatefulWidget {
   const ComptePage({Key? key}) : super(key: key);
@@ -33,7 +24,7 @@ class _ComptePageState extends State<ComptePage> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Faites votre sélection"),
-          backgroundColor: Color(0xFF2b5a72),
+          backgroundColor: Color(0xFFf2f0e7),
         ),
         body: SingleChildScrollView(
           child: Row(
@@ -110,7 +101,7 @@ class _ComptePageState extends State<ComptePage> {
           if (snapshot.data!.docs.isEmpty) {
             return Center(child: Text("Quartier Libre !"));
           }
-          if (snapshot != null && snapshot.data != null) {
+          if (snapshot.data != null) {
             return Center(
               child: GridView.builder(
                 controller: ScrollController(),
@@ -239,7 +230,7 @@ class _ComptePageState extends State<ComptePage> {
             return Center(child: Text("Quartier Libre !"));
           }
 
-          if (snapshot != null && snapshot.data != null) {
+          if (snapshot.data != null) {
             return Center(
               child: GridView.builder(
                 controller: ScrollController(),
@@ -366,7 +357,6 @@ class _ComptePageState extends State<ComptePage> {
         itemCount: hors.length,
         itemBuilder: (context, index) {
           var horId = snapshot.data?.docs[i]['hor'][index];
-          var horIds = snapshot.data?.docs[i]['hor'][index].toString();
           var hord = horId["debut"];
           var horf = horId["fin"];
           var nben = horId['nbBen'];
@@ -402,7 +392,7 @@ class _ComptePageState extends State<ComptePage> {
                           Expanded(
                               child: IconButton(
                             style: ElevatedButton.styleFrom(
-                              primary: Color(0xFF2b5a72),
+                              backgroundColor: Color(0xFFf2f0e7),
                             ),
                             icon: Icon(Icons.check_circle),
                             onPressed: () {

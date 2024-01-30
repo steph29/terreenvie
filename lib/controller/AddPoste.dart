@@ -3,8 +3,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:terreenvie/controller/AdminPage.dart';
-import 'package:terreenvie/controller/MainAppController.dart';
 
 class AddPoste extends StatefulWidget {
   const AddPoste({Key? key}) : super(key: key);
@@ -24,7 +22,7 @@ class _AddPosteState extends State<AddPoste> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Modifier le poste"),
-        backgroundColor: Color(0xFF2b5a72),
+        backgroundColor: Color(0xFFf2f0e7),
       ),
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 400, vertical: 50),

@@ -3,12 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:terreenvie/controller/DashboardPage.dart';
-import 'package:lottie/lottie.dart';
-import 'package:get/get.dart';
 import 'package:terreenvie/controller/Logcontroller.dart';
 import 'package:terreenvie/model/SignUpServices.dart';
 
@@ -25,12 +21,7 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController prenomController = TextEditingController();
   TextEditingController telController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool _log = true;
-  String _adresseMail = "";
-  String _motDePasse = "";
-  String _prenom = "";
-  String _name = "";
-  String _tel = "";
+
   var _obscureText = true;
 
   User? currentUser = FirebaseAuth.instance.currentUser;

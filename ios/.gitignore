@@ -7,6 +7,9 @@
 **/*sync/
 .sconsign.dblite
 .tags*
+.env
+.env.production
+.env.developpment
 **/.vagrant/
 **/DerivedData/
 Icon?

@@ -1,25 +1,13 @@
 import 'dart:convert';
 import 'dart:html';
-import 'dart:io';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:get/get.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:typed_data';
-import 'package:syncfusion_flutter_pdf/pdf.dart' as syn;
-import 'package:open_file/open_file.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'PDF/web.dart';
-import 'PDF/mobile.dart';
 
 class Users {
   final String id;
@@ -80,7 +68,7 @@ class _AnalyseState extends State<Analyse> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Ki kè où?"),
-          backgroundColor: Color(0xFF2b5a72),
+          backgroundColor: Color(0xFFf2f0e7),
         ),
         // TODO : Réarranger en fonction de la taille des écrans
         body: Container(
@@ -543,8 +531,6 @@ class _AnalyseState extends State<Analyse> {
     documents.sort((a, b) {
       String nomA = (a.get('nom') ?? '').toUpperCase();
       String nomB = (b.get('nom') ?? '').toUpperCase();
-      String prenomA = (a.get('prenom') ?? '');
-      String prenomB = (b.get('prenom') ?? '');
 
       return nomA.compareTo(nomB);
     });
@@ -614,8 +600,6 @@ class _AnalyseState extends State<Analyse> {
     documents.sort((a, b) {
       String nomA = (a.get('nom') ?? '').toUpperCase();
       String nomB = (b.get('nom') ?? '').toUpperCase();
-      String prenomA = (a.get('prenom') ?? '');
-      String prenomB = (b.get('prenom') ?? '');
 
       return nomA.compareTo(nomB);
     });
@@ -642,8 +626,6 @@ class _AnalyseState extends State<Analyse> {
             .where('ben_id', isEqualTo: userName)
             .get();
 
-    final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-        postsSnapshot.docs;
     postsSnapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
       for (var i = 0; i < data['pos_id'].length; i++) {
