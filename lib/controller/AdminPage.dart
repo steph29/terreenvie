@@ -82,20 +82,20 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(0),
       groupValue: groupValue,
       selectedColor: Color(0xFF2b5a72),
       unselectedColor: Colors.white,
       borderColor: Color(0xFF2b5a72),
       pressedColor: Color(0xFF2b5a72).withOpacity(0.2),
       children: {
-        "Mardi": buildSegment("Mardi"),
-        "Mercredi": buildSegment("Mercredi"),
-        "Jeudi": buildSegment("Jeudi"),
-        "Vendredi": buildSegment("Vendredi"),
-        "Samedi": buildSegment("Samedi"),
-        "Dimanche": buildSegment("Dimanche"),
-        "Lundi": buildSegment("Lundi"),
+        "Mardi": (kIsWeb) ? buildSegment("Mardi") : buildSegment("Mar"),
+        "Mercredi": (kIsWeb) ? buildSegment("Mercredi") : buildSegment("Mer"),
+        "Jeudi": (kIsWeb) ? buildSegment("Jeudi") : buildSegment("Jeu"),
+        "Vendredi": (kIsWeb) ? buildSegment("Vendredi") : buildSegment("Ven"),
+        "Samedi": (kIsWeb) ? buildSegment("Samedi") : buildSegment("Sam"),
+        "Dimanche": (kIsWeb) ? buildSegment("Dimanche") : buildSegment("Dim"),
+        "Lundi": (kIsWeb) ? buildSegment("Lundi") : buildSegment("Lun"),
       },
       onValueChanged: (groupValue) {
         print(groupValue);
@@ -156,78 +156,134 @@ class _AdminPageState extends State<AdminPage> {
                         return Card(
                           color: Color(0xFFf2f0e7),
                           child: Container(
-                            constraints: const BoxConstraints(
-                                minHeight: 0, maxHeight: 500.0),
+                            constraints:
+                                BoxConstraints(minHeight: 0, maxHeight: 500.0),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20)),
                             margin: EdgeInsets.all(5),
                             padding: EdgeInsets.all(5),
-                            child: Stack(
-                              children: [
-                                Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          poste,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                              fontSize: 25,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF2b5a72)),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  (kIsWeb)
+                                      ? Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              poste,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF2b5a72)),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                IconButton(
+                                                  onPressed: () {
+                                                    Get.to(() => AddPoste(),
+                                                        arguments: {
+                                                          "poste": poste,
+                                                          "desc": desc,
+                                                          "posteId": posteId,
+                                                        });
+                                                  },
+                                                  icon: Icon(Icons.edit),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Color(0xFFf2f0e7),
+                                                  ),
+                                                ),
+                                                // Bouton delete
+                                                IconButton(
+                                                  onPressed: () async {
+                                                    print(posteId.toString());
+                                                    await FirebaseFirestore
+                                                        .instance
+                                                        .collection("pos_hor")
+                                                        .doc(posteId.toString())
+                                                        .delete();
+                                                  },
+                                                  icon: Icon(Icons.delete),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Color(0xFFf2f0e7),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        )
+                                      : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              poste,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF2b5a72)),
+                                            ),
+                                            // Bouton Ajouter un horaire
+                                            IconButton(
+                                              onPressed: () {
+                                                Get.to(() => AddPoste(),
+                                                    arguments: {
+                                                      "poste": poste,
+                                                      "desc": desc,
+                                                      "posteId": posteId,
+                                                    });
+                                              },
+                                              icon: Icon(Icons.edit),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Color(0xFFf2f0e7),
+                                              ),
+                                            ),
+                                            // Bouton delete
+                                            IconButton(
+                                              onPressed: () async {
+                                                print(posteId.toString());
+                                                await FirebaseFirestore.instance
+                                                    .collection("pos_hor")
+                                                    .doc(posteId.toString())
+                                                    .delete();
+                                              },
+                                              icon: Icon(Icons.delete),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Color(0xFFf2f0e7),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        // Bouton Ajouter un horaire
-                                        IconButton(
-                                          onPressed: () {
-                                            Get.to(() => AddPoste(),
-                                                arguments: {
-                                                  "poste": poste,
-                                                  "desc": desc,
-                                                  "posteId": posteId,
-                                                });
-                                          },
-                                          icon: Icon(Icons.edit),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0xFFf2f0e7),
-                                          ),
-                                        ),
-                                        // Bouton delete
-                                        IconButton(
-                                          onPressed: () async {
-                                            print(posteId.toString());
-                                            await FirebaseFirestore.instance
-                                                .collection("pos_hor")
-                                                .doc(posteId.toString())
-                                                .delete();
-                                          },
-                                          icon: Icon(Icons.delete),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0xFFf2f0e7),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      desc,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: Color(0xFF2b5a72)),
-                                    ),
-                                    Column(
-                                      children: [
-                                        buildList(poste, hor, desc, posteId,
-                                            snapshot, i),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                  Text(
+                                    desc,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: Color(0xFF2b5a72)),
+                                  ),
+                                  Column(
+                                    children: [
+                                      SingleChildScrollView(
+                                        child: buildList(poste, hor, desc,
+                                            posteId, snapshot, i),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -280,10 +336,12 @@ class _AdminPageState extends State<AdminPage> {
       );
 
   Widget buildSegment(String text) => Container(
-        padding: EdgeInsets.all(12),
+        padding: (kIsWeb) ? EdgeInsets.all(12) : EdgeInsets.all(3),
         child: Text(
           text,
-          style: TextStyle(fontSize: 20),
+          style: (kIsWeb)
+              ? TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+              : TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       );
 

@@ -1,4 +1,3 @@
-import 'dart:convert';
 // import 'dart:html';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -67,275 +66,286 @@ class _AnalyseState extends State<Analyse> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Ki kè où?"),
+          title: Text("Ki ké où?"),
           backgroundColor: Color(0xFFf2f0e7),
         ),
         // TODO : Réarranger en fonction de la taille des écrans
-        body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.pinkAccent.withOpacity(0.1),
-                          ),
-                          width: MediaQuery.of(context).size.width / 2.5,
-                          height: MediaQuery.of(context).size.height / 2.5,
-                          child: Column(
-                            children: [
-                              Text("Ki kè où "),
-                              buildSegmentControl(),
-                              new DropdownButton<String>(
-                                  items: <String>[
-                                    'Animation Sonores',
-                                    'Ateliers animation enfants',
-                                    'Barriere',
-                                    'benevoles volants',
-                                    'Bénévole Volant',
-                                    'Benevoles volants',
-                                    'Buvette principale',
-                                    'Chapiteau',
-                                    'Conferences',
-                                    'Decoration',
-                                    'Demontage / Nettoyage',
-                                    'Electricite',
-                                    'Entree',
-                                    'Exposants',
-                                    'Faire les crepes',
-                                    'Flechage',
-                                    'Flechage / Signalétique',
-                                    'Montage',
-                                    'Plomberie',
-                                    'Restauration Benevoles',
-                                    'Restauration Visiteurs',
-                                    'Secours',
-                                    'Sono',
-                                    'Stand',
-                                    'Surveillance',
-                                    'Tisanerie',
-                                    'Toilettes seches',
-                                    'Vaisselle',
-                                    'Ventes de crepes'
-                                  ].map((String value) {
-                                    //La fonction crée un objet qui aura la même valeur et le même texte, à partir du tableau d'objet
-                                    return new DropdownMenuItem<String>(
-                                      value: value,
-                                      child: new Text(value),
-                                    );
-                                  }).toList(),
-                                  hint: const Text(
-                                    'Quel poste voulez-vous sélectionner ?',
-                                  ),
-                                  value: selectedPoste,
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedPoste = newValue;
-                                    });
-                                  }),
-                              FutureBuilder<List<List<dynamic>>>(
-                                future: fetchData(groupValue),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return CircularProgressIndicator(
-                                      strokeWidth: 4,
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    return Text('Erreur : ${snapshot.error}');
-                                  } else if (!snapshot.hasData ||
-                                      snapshot.data!.isEmpty) {
-                                    return Text('Aucune donnée disponible.');
-                                  }
-                                  List<List<dynamic>> items = snapshot.data!;
-                                  print(totalCount);
-                                  return Expanded(
-                                      child: Container(
-                                    width:
-                                        MediaQuery.of(context).size.width / 6,
-                                    height:
-                                        MediaQuery.of(context).size.height / 6,
-                                    child: ListView(
-                                      children: items.map((item) {
-                                        // Créez des Widgets à partir des données de chaque élément
-                                        return ListTile(
-                                          title: Text(
-                                              'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
-                                          subtitle: Text(
-                                              'Poste: le ${item[3]} à ${item[4]} de ${item[5]} à ${item[6]}'),
-                                          // Ajoutez d'autres éléments ici en fonction de votre structure de données
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ));
-                                },
-                              ),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  await _createPDF();
-                                },
-                                child: Text("Générer PDF"),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.yellowAccent.withOpacity(0.1),
-                          ),
-                          width: MediaQuery.of(context).size.width / 2.5,
-                          height: MediaQuery.of(context).size.height / 2.5,
-                          child: Column(
-                            children: [
-                              Text('La liste des ki ! '),
-                              FutureBuilder<List<List<dynamic>>>(
-                                future: getAllUsers(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return CircularProgressIndicator(
-                                      strokeWidth: 4,
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    return Text('Erreur : ${snapshot.error}');
-                                  } else if (!snapshot.hasData ||
-                                      snapshot.data!.isEmpty) {
-                                    return Text('Aucune donnée disponible.');
-                                  }
-                                  List<List<dynamic>> items = snapshot.data!;
-                                  return Expanded(
-                                      child: Container(
-                                    width:
-                                        MediaQuery.of(context).size.width / 6,
-                                    height:
-                                        MediaQuery.of(context).size.height / 6,
-                                    child: ListView(
-                                      children: items.map((item) {
-                                        // Créez des Widgets à partir des données de chaque élément
-                                        return ListTile(
-                                          title: Text(
-                                              'Nom, prénom, Email : ${item[0]} ${item[1]} ${item[2]}'),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ));
-                                },
-                              ),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  await _createPDFuser();
-                                },
-                                child: Text("Générer PDF user"),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width / 2.5,
-                      height: MediaQuery.of(context).size.height / 2.5,
-                      decoration: BoxDecoration(
-                          color: Colors.blueAccent.withOpacity(0.1)),
-                      child: Column(
-                        children: [
-                          Text('Ki fè koi'),
-                          Row(children: [
-                            DropdownButton<String>(
-                              value: selectedUser,
-                              onChanged: (String? newValue) async {
-                                setState(() {
-                                  selectedUser = newValue;
-                                });
-
-                                if (selectedUser != null) {
-                                  final selectedUserId = users
-                                      .firstWhere((user) =>
-                                          '${user.nom} ${user.prenom}' ==
-                                          selectedUser)
-                                      .id;
-
-                                  // Récupérer les postes de l'utilisateur sélectionné
-                                  final postes =
-                                      await getUserPosts(selectedUserId);
-                                  setState(() {
-                                    for (var i = 0; i < postes.length; i++)
-                                      userPosts =
-                                          postesUsers; // Mettre à jour la liste des postes de l'utilisateur
-                                  });
-                                }
-                              },
-                              items: userNames.map<DropdownMenuItem<String>>(
-                                  (String userName) {
-                                return DropdownMenuItem<String>(
-                                  value: userName,
-                                  child: Text(userName),
-                                );
-                              }).toList(),
-                              hint: Text('Sélectionnez un nom'),
-                            ),
-                            Expanded(
-                              child: Container(
-                                width: MediaQuery.of(context).size.width / 6,
-                                height: MediaQuery.of(context).size.height / 3,
-                                child: ListView.builder(
-                                  itemCount: userPosts.length,
-                                  itemBuilder: (context, index) {
-                                    final poste = userPosts[index];
-                                    return ListTile(
-                                      title: Text(
-                                          'Nom du poste: ${poste.nomPoste}'),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Jour: ${poste.jour}'),
-                                          Text(
-                                              'Heure de début: ${poste.heureDebut}'),
-                                          Text(
-                                              'Heure de fin: ${poste.heureFin}'),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ]),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width / 2.5,
-                      height: MediaQuery.of(context).size.height / 2.5,
-                      decoration:
-                          BoxDecoration(color: Colors.green.withOpacity(0.1)),
-                    )
-                  ],
-                )
-              ],
-            )));
+        body: SingleChildScrollView(
+            padding: EdgeInsets.all(20),
+            child: (kIsWeb) ? isWeb() : isMobile()));
   }
+
+  Widget isMobile() => Column(
+        children: [
+          Kikeou(),
+          space(),
+          kifekoi(),
+          space(),
+          Listedeski(),
+          space(),
+          kiela()
+        ],
+      );
+
+  Widget space() => SizedBox(
+        height: 30,
+      );
+
+  Widget isWeb() => Column(
+        children: [
+          SizedBox(
+            height: 5,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Kikeou(),
+              Listedeski(),
+            ],
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [kifekoi(), kiela()],
+          )
+        ],
+      );
+
+  Widget Kikeou() => Container(
+        decoration: BoxDecoration(
+          color: Colors.pinkAccent.withOpacity(0.1),
+        ),
+        width: (kIsWeb)
+            ? MediaQuery.of(context).size.width / 2.5
+            : MediaQuery.of(context).size.width / 1.1,
+        height: MediaQuery.of(context).size.height / 2.5,
+        child: Column(
+          children: [
+            Text("Ki ké où "),
+            buildSegmentControl(),
+            new DropdownButton<String>(
+                items: <String>[
+                  'Animation Sonores',
+                  'Ateliers animation enfants',
+                  'Barriere',
+                  'benevoles volants',
+                  'Bénévole Volant',
+                  'Benevoles volants',
+                  'Buvette principale',
+                  'Chapiteau',
+                  'Conferences',
+                  'Decoration',
+                  'Demontage / Nettoyage',
+                  'Electricite',
+                  'Entree',
+                  'Exposants',
+                  'Faire les crepes',
+                  'Flechage',
+                  'Flechage / Signalétique',
+                  'Montage',
+                  'Plomberie',
+                  'Restauration Benevoles',
+                  'Restauration Visiteurs',
+                  'Secours',
+                  'Sono',
+                  'Stand',
+                  'Surveillance',
+                  'Tisanerie',
+                  'Toilettes seches',
+                  'Vaisselle',
+                  'Ventes de crepes'
+                ].map((String value) {
+                  //La fonction crée un objet qui aura la même valeur et le même texte, à partir du tableau d'objet
+                  return new DropdownMenuItem<String>(
+                    value: value,
+                    child: new Text(value),
+                  );
+                }).toList(),
+                hint: const Text(
+                  'Quel poste voulez-vous sélectionner ?',
+                ),
+                value: selectedPoste,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedPoste = newValue;
+                  });
+                }),
+            FutureBuilder<List<List<dynamic>>>(
+              future: fetchData(groupValue),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(
+                    strokeWidth: 4,
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Erreur : ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Text('Aucune donnée disponible.');
+                }
+                List<List<dynamic>> items = snapshot.data!;
+                print(totalCount);
+                return Expanded(
+                    child: Container(
+                  width: (kIsWeb)
+                      ? MediaQuery.of(context).size.width / 1.1
+                      : MediaQuery.of(context).size.width / 6,
+                  height: MediaQuery.of(context).size.height / 6,
+                  child: ListView(
+                    children: items.map((item) {
+                      // Créez des Widgets à partir des données de chaque élément
+                      return ListTile(
+                        title: Text(
+                            'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
+                        subtitle: Text(
+                            'Poste: le ${item[3]} à ${item[4]} de ${item[5]} à ${item[6]}'),
+                        // Ajoutez d'autres éléments ici en fonction de votre structure de données
+                      );
+                    }).toList(),
+                  ),
+                ));
+              },
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _createPDF();
+              },
+              child: Text("Générer PDF"),
+            ),
+          ],
+        ),
+      );
+
+  Widget Listedeski() => Container(
+        decoration: BoxDecoration(
+          color: Colors.yellowAccent.withOpacity(0.1),
+        ),
+        width: (kIsWeb)
+            ? MediaQuery.of(context).size.width / 2.5
+            : MediaQuery.of(context).size.width / 1.1,
+        height: MediaQuery.of(context).size.height / 2.5,
+        child: Column(
+          children: [
+            Text('La liste des ki ! '),
+            FutureBuilder<List<List<dynamic>>>(
+              future: getAllUsers(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(
+                    strokeWidth: 4,
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Erreur : ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Text('Aucune donnée disponible.');
+                }
+                List<List<dynamic>> items = snapshot.data!;
+                return Expanded(
+                    child: Container(
+                  width: (kIsWeb)
+                      ? MediaQuery.of(context).size.width / 1.1
+                      : MediaQuery.of(context).size.width / 6,
+                  height: MediaQuery.of(context).size.height / 6,
+                  child: ListView(
+                    children: items.map((item) {
+                      // Créez des Widgets à partir des données de chaque élément
+                      return ListTile(
+                        title: Text(
+                            'Nom, prénom, Email : ${item[0]} ${item[1]} ${item[2]}'),
+                      );
+                    }).toList(),
+                  ),
+                ));
+              },
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _createPDFuser();
+              },
+              child: Text("Générer PDF user"),
+            ),
+          ],
+        ),
+      );
+
+  Widget kifekoi() => Container(
+        width: (kIsWeb)
+            ? MediaQuery.of(context).size.width / 2.5
+            : MediaQuery.of(context).size.width / 1.1,
+        height: MediaQuery.of(context).size.height / 2.5,
+        decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1)),
+        child: Column(
+          children: [
+            Text('Ki fè koi'),
+            Row(children: [
+              DropdownButton<String>(
+                value: selectedUser,
+                onChanged: (String? newValue) async {
+                  setState(() {
+                    selectedUser = newValue;
+                  });
+
+                  if (selectedUser != null) {
+                    final selectedUserId = users
+                        .firstWhere((user) =>
+                            '${user.nom} ${user.prenom}' == selectedUser)
+                        .id;
+
+                    // Récupérer les postes de l'utilisateur sélectionné
+                    final postes = await getUserPosts(selectedUserId);
+                    setState(() {
+                      for (var i = 0; i < postes.length; i++)
+                        userPosts =
+                            postesUsers; // Mettre à jour la liste des postes de l'utilisateur
+                    });
+                  }
+                },
+                items:
+                    userNames.map<DropdownMenuItem<String>>((String userName) {
+                  return DropdownMenuItem<String>(
+                    value: userName,
+                    child: Text(userName),
+                  );
+                }).toList(),
+                hint: Text('Sélectionnez un nom'),
+              ),
+              Expanded(
+                child: Container(
+                  width: MediaQuery.of(context).size.width / 6,
+                  height: MediaQuery.of(context).size.height / 3,
+                  child: ListView.builder(
+                    itemCount: userPosts.length,
+                    itemBuilder: (context, index) {
+                      final poste = userPosts[index];
+                      return ListTile(
+                        title: Text('Nom du poste: ${poste.nomPoste}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Jour: ${poste.jour}'),
+                            Text('Heure de début: ${poste.heureDebut}'),
+                            Text('Heure de fin: ${poste.heureFin}'),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ]),
+          ],
+        ),
+      );
+
+  Widget kiela() => Container(
+        width: (kIsWeb)
+            ? MediaQuery.of(context).size.width / 2.5
+            : MediaQuery.of(context).size.width / 1.1,
+        height: MediaQuery.of(context).size.height / 2.5,
+        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1)),
+        child: Column(children: [Text("Ki é la?")]),
+      );
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
       padding: EdgeInsets.all(5),
@@ -345,13 +355,13 @@ class _AnalyseState extends State<Analyse> {
       borderColor: Color(0xFF2b5a72),
       pressedColor: Color(0xFF2b5a72).withOpacity(0.2),
       children: {
-        "Mardi": buildSegment("Mardi"),
-        "Mercredi": buildSegment("Mercredi"),
-        "Jeudi": buildSegment("Jeudi"),
-        "Vendredi": buildSegment("Vendredi"),
-        "Samedi": buildSegment("Samedi"),
-        "Dimanche": buildSegment("Dimanche"),
-        "Lundi": buildSegment("Lundi"),
+        "Mardi": (kIsWeb) ? buildSegment("Mardi") : buildSegment("Mar"),
+        "Mercredi": (kIsWeb) ? buildSegment("Mercredi") : buildSegment("Mer"),
+        "Jeudi": (kIsWeb) ? buildSegment("Jeudi") : buildSegment("Jeu"),
+        "Vendredi": (kIsWeb) ? buildSegment("Vendredi") : buildSegment("Ven"),
+        "Samedi": (kIsWeb) ? buildSegment("Samedi") : buildSegment("Sam"),
+        "Dimanche": (kIsWeb) ? buildSegment("Dimanche") : buildSegment("Dim"),
+        "Lundi": (kIsWeb) ? buildSegment("Lundi") : buildSegment("Lun"),
       },
       onValueChanged: (groupValue) {
         print(groupValue);
@@ -361,10 +371,12 @@ class _AnalyseState extends State<Analyse> {
       });
 
   Widget buildSegment(String text) => Container(
-        padding: EdgeInsets.all(6),
+        padding: (kIsWeb) ? EdgeInsets.all(7) : EdgeInsets.all(3),
         child: Text(
           text,
-          style: TextStyle(fontSize: 12),
+          style: (kIsWeb)
+              ? TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
+              : TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
       );
 

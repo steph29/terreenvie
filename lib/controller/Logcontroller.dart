@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -23,6 +23,7 @@ class _LogControllerState extends State<LogController> {
 
   var _obscureText = true;
   User? userId = FirebaseAuth.instance.currentUser;
+  final String _urlImageTEV = "assets/logoTEV.png";
 
   @override
   Widget build(BuildContext context) {
@@ -43,19 +44,33 @@ class _LogControllerState extends State<LogController> {
           Container(
             alignment: Alignment.center,
             height: 200.0,
-            child: Image.asset("logoTEV.png"),
+            child: (kIsWeb)
+                ? Image.asset("logoTEV.png")
+                : CircleAvatar(
+                    backgroundImage: AssetImage(_urlImageTEV),
+                    radius: 80,
+                  ),
+            // child: (kIsWeb)
+            //     ? CircleAvatar(
+            //         backgroundImage: AssetImage(_urlImageTEV),
+            //         radius: 80,
+            //       )
+            //     : Image.asset("logoTEV.png"),
           ),
           SizedBox(
-            height: 10.0,
+            height: (kIsWeb) ? 10 : 5,
           ),
           Container(
+            padding: EdgeInsets.all(15),
             child: Text(
               "Une adresse mail PAR PERSONNE. Si la votre est déjà utilisée, vous pouvez utiliser le modèle suivant: prenom.nom@tev.bzh ",
-              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Color(0xFF2b5a72), fontSize: (kIsWeb) ? 20 : 15),
             ),
           ),
           SizedBox(
-            height: 10.0,
+            height: (kIsWeb) ? 5 : 10,
           ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 30.0),
@@ -196,18 +211,24 @@ class _LogControllerState extends State<LogController> {
             height: 10.0,
           ),
           Container(
+            padding: EdgeInsets.all(15),
             child: Text(
               "Si c'est votre première venue, allez sur 'S'inscrire' en haut à gauche.",
-              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Color(0xFF2b5a72), fontSize: (kIsWeb) ? 15 : 20),
             ),
           ),
           SizedBox(
-            height: 10.0,
+            height: (kIsWeb) ? 2 : 10,
           ),
           Container(
+            padding: EdgeInsets.all(15),
             child: Text(
               "Le tableau de bord permet de voir vos créneaux à tout moment du jour et de la nuit, il n'y a donc plus d'emails récapitulatifs.",
-              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Color(0xFF2b5a72), fontSize: (kIsWeb) ? 15 : 20),
             ),
           ),
         ],

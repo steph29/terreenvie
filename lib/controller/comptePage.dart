@@ -39,9 +39,14 @@ class _ComptePageState extends State<ComptePage> {
                           height: 30,
                         ),
                         buildSegmentControl(),
+                        SizedBox(
+                          height: (kIsWeb) ? 30 : 5,
+                        ),
                         Container(
+                          padding: EdgeInsets.all(15),
                           child: Text(
                             "Entrées, crêpes, montage, restauration... le choix est grand, pensez à descendre ! ",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Color(0xFF2b5a72),
                                 fontSize: 17,
@@ -49,7 +54,7 @@ class _ComptePageState extends State<ComptePage> {
                           ),
                         ),
                         SizedBox(
-                          height: 30,
+                          height: (kIsWeb) ? 30 : 5,
                         ),
 
                         // Liste des cards
@@ -64,20 +69,20 @@ class _ComptePageState extends State<ComptePage> {
   }
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
-      padding: EdgeInsets.all(15),
+      padding: EdgeInsets.all(0),
       groupValue: groupValue,
       selectedColor: Color(0xFF2b5a72),
       unselectedColor: Colors.white,
       borderColor: Color(0xFF2b5a72),
       pressedColor: Color(0xFF2b5a72).withOpacity(0.2),
       children: {
-        "Mardi": buildSegment("Mardi"),
-        "Mercredi": buildSegment("Mercredi"),
-        "Jeudi": buildSegment("Jeudi"),
-        "Vendredi": buildSegment("Vendredi"),
-        "Samedi": buildSegment("Samedi"),
-        "Dimanche": buildSegment("Dimanche"),
-        "Lundi": buildSegment("Lundi"),
+        "Mardi": (kIsWeb) ? buildSegment("Mardi") : buildSegment("Mar"),
+        "Mercredi": (kIsWeb) ? buildSegment("Mercredi") : buildSegment("Mer"),
+        "Jeudi": (kIsWeb) ? buildSegment("Jeudi") : buildSegment("Jeu"),
+        "Vendredi": (kIsWeb) ? buildSegment("Vendredi") : buildSegment("Ven"),
+        "Samedi": (kIsWeb) ? buildSegment("Samedi") : buildSegment("Sam"),
+        "Dimanche": (kIsWeb) ? buildSegment("Dimanche") : buildSegment("Dim"),
+        "Lundi": (kIsWeb) ? buildSegment("Lundi") : buildSegment("Lun"),
       },
       onValueChanged: (groupValue) {
         print(groupValue);
@@ -254,48 +259,45 @@ class _ComptePageState extends State<ComptePage> {
                     color: Color(0xFFf2f0e7),
                     child: Container(
                       constraints:
-                          const BoxConstraints(minHeight: 0, maxHeight: 500.0),
+                          BoxConstraints(minHeight: 0, maxHeight: 500.0),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20)),
                       margin: EdgeInsets.all(5),
                       padding: EdgeInsets.all(5),
-                      child: Stack(
-                        children: [
-                          Column(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.min,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
                                     poste,
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontSize: 25,
+                                    style: TextStyle(
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xFF2b5a72)),
                                   ),
-                                ],
-                              ),
-                              Text(
-                                desc,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    color: Color(0xFF2b5a72)),
-                              ),
-                              Column(
-                                children: [
-                                  buildButtonList(
-                                      poste, hor, desc, posteId, snapshot, i)
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                                ]),
+                            Text(
+                              desc,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Color(0xFF2b5a72)),
+                            ),
+                            Column(
+                              children: [
+                                SingleChildScrollView(
+                                  child: buildButtonList(
+                                      poste, hor, desc, posteId, snapshot, i),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -344,10 +346,12 @@ class _ComptePageState extends State<ComptePage> {
       );
 
   Widget buildSegment(String text) => Container(
-        padding: EdgeInsets.all(12),
+        padding: (kIsWeb) ? EdgeInsets.all(12) : EdgeInsets.all(3),
         child: Text(
           text,
-          style: TextStyle(fontSize: 20),
+          style: (kIsWeb)
+              ? TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+              : TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       );
 

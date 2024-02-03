@@ -22,7 +22,7 @@ class _EditHoraireState extends State<EditHoraire> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Ajouter les horaires"),
-        backgroundColor: Color(0xFF2b5a72),
+        backgroundColor: Color(0xFFf2f0e7),
       ),
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 400, vertical: 50),
