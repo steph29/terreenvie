@@ -1,0 +1,15 @@
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatLoggingTestUtils.swift":
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatLoggingTestUtils.d"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatLoggingTestUtils.o"
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatLoggingTestUtils.dia"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatLoggingTestUtils.swiftdeps"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatsBundle.swift":
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatsBundle.o"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatsBundle.d"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatsBundle.swiftdeps"
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatsBundle.dia"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatController.swift":
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatController.dia"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatController.swiftdeps"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatController.o"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/x86_64/HeartbeatController.d"

@@ -1,0 +1,29 @@
+version: "Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)"
+options: "147c2fc75e5eb12d6b5a4702a7e06c252378462ad351c8d33c9e1902e6d5b111"
+build_start_time: [1706999620, 505200000]
+build_end_time: [1706999629, 20138000]
+inputs:
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/Heartbeat.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatController.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatLoggingTestUtils.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatStorage.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatsBundle.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatsPayload.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/RingBuffer.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/Storage.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/StorageFactory.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/WeakContainer.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/_ObjC_HeartbeatController.swift"
+  : [1706646554, 0]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/_ObjC_HeartbeatsPayload.swift"
+  : [1706646554, 0]

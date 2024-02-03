@@ -60,7 +60,26 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logoTEV.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/logoTEV.png"
+    background_color: "#FFFFFF"
+    theme_color: "#FFFFFF"
+  windows:
+    generate: true
+    image_path: "assets/logoTEV.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/logoTEV.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter packages.
@@ -71,9 +90,7 @@ flutter:
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
 assets:
-  - assets/logo-tev.svg
-  - assets/logoTEV.png
-  - assets/hands.json
+  - assets/
   - assets/fonts/arial-unicode-ms.ttf
   - assets/fonts/OpenSans-Regular.ttf
   - .env

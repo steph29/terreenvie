@@ -1,12 +1,9 @@
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'package:terreenvie/controller/MainAppController.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:terreenvie/model/environnement.dart';
 import 'firebase_options.dart';
 
 //final DotEnv rootEnv = DotEnv();

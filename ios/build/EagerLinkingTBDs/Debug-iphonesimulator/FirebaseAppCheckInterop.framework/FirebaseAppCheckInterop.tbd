@@ -1,0 +1,10 @@
+--- !tapi-tbd
+tbd-version:     4
+targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+flags:           [ not_app_extension_safe ]
+install-name:    '@rpath/FirebaseAppCheckInterop.framework/FirebaseAppCheckInterop'
+exports:
+  - targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
+    symbols:         [ _FirebaseAppCheckInteropVersionNumber, _FirebaseAppCheckInteropVersionString ]
+    objc-classes:    [ PodsDummy_FirebaseAppCheckInterop ]
+...

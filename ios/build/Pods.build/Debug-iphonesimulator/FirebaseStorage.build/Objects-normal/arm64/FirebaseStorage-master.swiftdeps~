@@ -1,0 +1,35 @@
+version: "Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)"
+options: "a49a1d5e57773f0e77d1775ac79e6fcef428720d91e1d743af6530ec3c660747"
+build_start_time: [1706979039, 854320000]
+build_end_time: [1706979040, 4275000]
+inputs:
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/AsyncAwait.swift": !private [1706978353, 437292549]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageDeleteTask.swift"
+  : !private [1706978353, 425633724]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageGetDownloadURLTask.swift"
+  : !private [1706978353, 427991470]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageGetMetadataTask.swift"
+  : !private [1706978353, 435241474]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageListTask.swift"
+  : !private [1706978353, 436170215]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StoragePath.swift": !private [1706978353, 426545507]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageTaskState.swift"
+  : !private [1706978353, 431963828]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageTokenAuthorizer.swift"
+  : !private [1706978353, 433516865]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageUpdateMetadataTask.swift"
+  : !private [1706978353, 431129319]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StorageUtils.swift": !private [1706978353, 430048921]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Result.swift": !private [1706978353, 424232713]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Storage.swift": !private [1706978353, 413810658]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageComponent.swift": !private [1706978353, 420818672]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageConstants.swift": !private [1706978353, 440822596]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageDownloadTask.swift": !private [1706978353, 418408069]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageError.swift": !private [1706978353, 442696752]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageListResult.swift": !private [1706978353, 419804732]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageMetadata.swift": !private [1706978353, 439558482]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageObservableTask.swift": !private [1706978353, 415917887]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageReference.swift": !private [1706978353, 441849337]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageTask.swift": !private [1706978353, 421920459]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageTaskSnapshot.swift": !private [1706978353, 414641834]
+  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageUploadTask.swift": !private [1706978353, 438514410]

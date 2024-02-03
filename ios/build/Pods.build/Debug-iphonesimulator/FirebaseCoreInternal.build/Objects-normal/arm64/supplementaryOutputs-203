@@ -1,0 +1,15 @@
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatsPayload.swift":
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatsPayload.d"
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatsPayload.dia"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatsPayload.o"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatsPayload.swiftdeps"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/HeartbeatStorage.swift":
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatStorage.swiftdeps"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatStorage.o"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatStorage.d"
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/HeartbeatStorage.dia"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/RingBuffer.swift":
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/RingBuffer.o"
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/RingBuffer.dia"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/RingBuffer.d"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCoreInternal.build/Objects-normal/arm64/RingBuffer.swiftdeps"

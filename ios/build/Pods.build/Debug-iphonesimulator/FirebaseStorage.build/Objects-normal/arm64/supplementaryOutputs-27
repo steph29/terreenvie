@@ -1,0 +1,30 @@
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageReference.swift":
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageReference.dia"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageReference.o"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageReference.d"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageReference.swiftdeps"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageTask.swift":
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTask.dia"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTask.o"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTask.swiftdeps"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTask.d"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageTaskSnapshot.swift":
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTaskSnapshot.dia"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTaskSnapshot.o"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTaskSnapshot.d"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageTaskSnapshot.swiftdeps"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageObservableTask.swift":
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageObservableTask.dia"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageObservableTask.d"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageObservableTask.o"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageObservableTask.swiftdeps"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/StorageMetadata.swift":
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageMetadata.swiftdeps"
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageMetadata.dia"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageMetadata.o"
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StorageMetadata.d"
+"/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Sources/Internal/StoragePath.swift":
+  dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StoragePath.d"
+  object: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StoragePath.o"
+  swift-dependencies: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StoragePath.swiftdeps"
+  diagnostics: "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/Objects-normal/arm64/StoragePath.dia"

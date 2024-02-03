@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -31,7 +31,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Inscription"),
-        backgroundColor: Color(0xFF2b5a72),
+        backgroundColor: Color(0xFFf2f0e7),
       ),
       body: SingleChildScrollView(
           child: Column(
@@ -101,9 +101,11 @@ class _SignUpPageState extends State<SignUpPage> {
             height: 10.0,
           ),
           Container(
+            padding: EdgeInsets.all(15),
             child: Text(
               "Votre mot de passe DOIT contenir 6 caractères minimum.",
-              style: TextStyle(color: Color(0xFF2b5a72), fontSize: 20),
+              style: TextStyle(
+                  color: Color(0xFF2b5a72), fontSize: (kIsWeb ? 20 : 15)),
             ),
           ),
           SizedBox(
@@ -223,8 +225,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                primary: Color(
-                    0xFF2b5a72), // Définit la couleur de fond sur transparent
+                backgroundColor: Color(
+                    0xFFf2f0e7), // Définit la couleur de fond sur transparent
                 elevation: 0, // Supprime l'ombre du bouton
               ),
               child: Text("Inscription"),
@@ -242,8 +244,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   MaterialPageRoute(builder: (context) => LogController()));
             },
             style: ElevatedButton.styleFrom(
-              primary: Color(
-                  0xFF2b5a72), // Définit la couleur de fond sur transparent
+              backgroundColor: Color(
+                  0xFFf2f0e7), // Définit la couleur de fond sur transparent
               elevation: 0, // Supprime l'ombre du bouton
             ),
             child: Text("Vous avez déjà un compte, connectez-vous !"),

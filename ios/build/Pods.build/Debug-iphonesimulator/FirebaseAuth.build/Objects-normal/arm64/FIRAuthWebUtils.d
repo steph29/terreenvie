@@ -1,0 +1,18 @@
+dependencies: \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Utilities/FIRAuthWebUtils.m \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Utilities/FIRAuthWebUtils.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthBackend.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCRequest.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCResponse.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/RPC/FIRGetProjectConfigRequest.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRIdentityToolkitRequest.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRequestConfiguration.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAppCheck/Interop/FIRAppCheckInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRAuth.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRAuthAPNSTokenType.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRAuthErrors.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/RPC/FIRGetProjectConfigResponse.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Utilities/FIRAuthErrorUtils.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRMultiFactorInfo.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Utilities/FIRAuthInternalErrors.h
