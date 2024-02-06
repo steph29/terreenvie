@@ -1,10 +1,14 @@
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdf/src/pdf/implementation/pdf_document/pdf_document.dart';
 import 'dart:io';
+import 'custom_pdf.dart';
 
-Future<void> saveAndLaunchFile(List<int> bytes, String FileName) async {
-  final path = (await getExternalStorageDirectory())!.path;
-  final file = File('$path/$FileName');
-  await file.writeAsBytes(bytes, flush: true);
-  OpenFile.open('$path/$FileName');
+CustomPdf getInstance() => CustomMobilePdf();
+
+class CustomMobilePdf implements CustomPdf {
+  @override
+  // ignore: non_constant_identifier_names
+  Future<void> pdf(PdfDocument document) async {
+    File('Bénévole_pdf_mobile.pdf').writeAsBytesSync(await document.save());
+    throw UnimplementedError();
+  }
 }
