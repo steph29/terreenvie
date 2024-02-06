@@ -1,12 +1,11 @@
-// import 'dart:html';
 import 'dart:async';
+import 'PDF/custom_pdf.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'dart:typed_data';
 
 class Users {
   final String id;
@@ -188,9 +187,7 @@ class _AnalyseState extends State<Analyse> {
                 print(totalCount);
                 return Expanded(
                     child: Container(
-                  width: (kIsWeb)
-                      ? MediaQuery.of(context).size.width / 1.1
-                      : MediaQuery.of(context).size.width / 6,
+                  width: MediaQuery.of(context).size.width / 1.1,
                   height: MediaQuery.of(context).size.height / 6,
                   child: ListView(
                     children: items.map((item) {
@@ -243,16 +240,14 @@ class _AnalyseState extends State<Analyse> {
                 List<List<dynamic>> items = snapshot.data!;
                 return Expanded(
                     child: Container(
-                  width: (kIsWeb)
-                      ? MediaQuery.of(context).size.width / 1.1
-                      : MediaQuery.of(context).size.width / 6,
+                  width: MediaQuery.of(context).size.width / 1.1,
                   height: MediaQuery.of(context).size.height / 6,
                   child: ListView(
                     children: items.map((item) {
                       // Créez des Widgets à partir des données de chaque élément
                       return ListTile(
                         title: Text(
-                            'Nom, prénom, Email : ${item[0]} ${item[1]} ${item[2]}'),
+                            'Nom, prénom, Email, téléphone : ${item[0]} ${item[1]} ${item[2]} , ${item[3]}'),
                       );
                     }).toList(),
                   ),
@@ -312,7 +307,7 @@ class _AnalyseState extends State<Analyse> {
               ),
               Expanded(
                 child: Container(
-                  width: MediaQuery.of(context).size.width / 6,
+                  width: MediaQuery.of(context).size.width / 1.1,
                   height: MediaQuery.of(context).size.height / 3,
                   child: ListView.builder(
                     itemCount: userPosts.length,
@@ -483,8 +478,9 @@ class _AnalyseState extends State<Analyse> {
     final page = document.pages.add();
     final Size pageSize = page.getClientSize();
 
-    page.graphics.drawImage(PdfBitmap(await _readImageData('logoTEV.png')),
-        Rect.fromLTWH(0, 0, 40, 40));
+    // page.graphics.drawImage(
+    //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
+    //     Rect.fromLTWH(0, 0, 40, 40));
 
     PdfGrid grid = PdfGrid();
     grid.style = PdfGridStyle(
@@ -518,15 +514,44 @@ class _AnalyseState extends State<Analyse> {
         bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
     //Save the document
-    List<int> bytes = await document.save();
-    //Dispose the document
-    document.dispose();
-    //Download the output file
-    // AnchorElement(
-    //     href:
-    //         "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
-    //   ..setAttribute("download", "Bénévole_de_TEV.pdf")
-    //   ..click();
+    CustomPdf().pdf(document);
+  }
+
+  Future<void> pdfMobile(PdfDocument document) async {
+    // final appDocDir = await getApplicationDocumentsDirectory();
+    // final filePath = 'Bénévoles_kikeou.pdf';
+    // List<int> bytes = await document.save();
+    // File file = File('Bénévoles_kikeou_mobile.pdf');
+    // file.writeAsBytes(bytes);
+
+    // final File file =
+    //     File(path.join(appDocDir.path, 'Bénévoles_kikeou_mobile.pdf'));
+    // // final File file = File(appDocDir.path + 'Bénévoles_kikeou_mobile.pdf');
+    // await file.writeAsBytes(bytes, flush: true).whenComplete(() {
+    //   OpenFile.open(appDocDir.path + 'downloaded.pdf');
+    // });
+    // file.writeAsBytesSync(await document.save());
+    // File(filePath).writeAsBytesSync(await document.save());
+  }
+
+  Future<void> downloadFile(PdfDocument fileUrl) async {
+    // final response = await http.get(fileUrl as Uri);
+
+    // if (response.statusCode == 200) {
+    //   // Obtenez le répertoire de stockage local de l'appareil
+    //   final appDocDir = await getApplicationDocumentsDirectory();
+
+    //   // Obtenez le chemin d'accès complet où vous souhaitez enregistrer le fichier
+    //   final filePath = '${appDocDir.path}/test.pdf';
+
+    //   // Écrivez le contenu téléchargé dans un fichier local
+    //   // File file = File(filePath);
+    //   // await file.writeAsBytes(response.bodyBytes);
+
+    //   print('Fichier téléchargé avec succès à $filePath');
+    // } else {
+    //   throw Exception('Échec du téléchargement du fichier');
+    // }
   }
 
   Future<Uint8List> _readImageData(String name) async {
@@ -554,6 +579,7 @@ class _AnalyseState extends State<Analyse> {
         userData['nom'].toUpperCase(),
         userData['prenom'],
         userData['email'],
+        userData['tel'],
       ]);
     }
 
@@ -565,41 +591,35 @@ class _AnalyseState extends State<Analyse> {
     PdfDocument document = PdfDocument();
     // Add a new page to the document.
     final page = document.pages.add();
-    final Size pageSize = page.getClientSize();
 
     PdfGrid grid = PdfGrid();
     grid.style = PdfGridStyle(
         font: PdfStandardFont(PdfFontFamily.helvetica, 12),
         cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    grid.columns.add(count: 3);
+    grid.columns.add(count: 4);
     grid.headers.add(1);
 
     PdfGridRow headers = grid.headers[0];
     headers.cells[0].value = 'Nom';
     headers.cells[1].value = 'Prenom';
     headers.cells[2].value = 'Email';
+    headers.cells[3].value = 'Téléphone';
 
     for (var i = 0; i < itemsUser.length; i++) {
       PdfGridRow row = grid.rows.add();
       row.cells[0].value = itemsUser[i][0];
       row.cells[1].value = itemsUser[i][1];
       row.cells[2].value = itemsUser[i][2];
+      row.cells[3].value = itemsUser[i][3];
     }
 
     grid.draw(
         page: document.pages.add(),
-        bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
+        bounds: Rect.fromLTWH(
+            0, 55, page.getClientSize().width, page.getClientSize().height));
 
     //Save the document
-    List<int> bytes = await document.save();
-    //Dispose the document
-    document.dispose();
-    //Download the output file
-    // AnchorElement(
-    //     href:
-    //         "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
-    //   ..setAttribute("download", "Bénévole_de_TEV.pdf")
-    //   ..click();
+    CustomPdf().pdf(document);
   }
 
   Future<void> loadUserNames() async {
