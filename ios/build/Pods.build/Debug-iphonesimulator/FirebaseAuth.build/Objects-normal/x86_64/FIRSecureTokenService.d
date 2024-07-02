@@ -10,6 +10,9 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRAuthTokenResult.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Auth/FIRAuth_Internal.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Interop/FIRAuthInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthBackend.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCRequest.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCResponse.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseCore/Extension/FIRLogger.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCore.build/module.modulemap \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseCore/FirebaseCore-umbrella.h \
@@ -19,11 +22,13 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FirebaseCore.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIROptions.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIRVersion.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthBackend.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCRequest.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCResponse.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRequestConfiguration.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAppCheck/Interop/FIRAppCheckInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAppCheckInterop.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop-umbrella.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FIRAppCheckInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FIRAppCheckProtocol.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FIRAppCheckTokenResultInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FirebaseAppCheckInterop.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/RPC/FIRSecureTokenRequest.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/RPC/FIRSecureTokenResponse.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseCore/Extension/FirebaseCoreInternal.h \

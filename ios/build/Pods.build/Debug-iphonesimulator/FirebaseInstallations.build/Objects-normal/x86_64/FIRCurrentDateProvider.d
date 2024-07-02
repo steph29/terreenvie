@@ -1,0 +1,4 @@
+dependencies: \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseInstallations.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseInstallations/FirebaseInstallations/Source/Library/InstallationsIDController/FIRCurrentDateProvider.m \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseInstallations/FirebaseInstallations/Source/Library/InstallationsIDController/FIRCurrentDateProvider.h

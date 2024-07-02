@@ -1,8 +1,8 @@
 dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/firebase_auth.build/module.modulemap \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.6.3/ios/Classes/FLTIdTokenChannelStreamHandler.m \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.17.4/ios/Classes/FLTIdTokenChannelStreamHandler.m \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/firebase_auth/firebase_auth-prefix.pch \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.6.3/ios/Classes/Private/FLTIdTokenChannelStreamHandler.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.17.4/ios/Classes/Private/FLTIdTokenChannelStreamHandler.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Modules/module.modulemap \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/Flutter.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/FlutterAppDelegate.h \
@@ -64,6 +64,9 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRPhoneMultiFactorAssertion.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRPhoneMultiFactorGenerator.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRPhoneMultiFactorInfo.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRTOTPMultiFactorAssertion.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRTOTPMultiFactorGenerator.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRTOTPSecret.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Public/FirebaseDatabase/FirebaseDatabase.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseDatabase.build/module.modulemap \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseDatabase/FirebaseDatabase-umbrella.h \
@@ -75,43 +78,90 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Public/FirebaseDatabase/FIRMutableData.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Public/FirebaseDatabase/FIRServerValue.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Public/FirebaseDatabase/FIRTransactionResult.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FirebaseFirestore.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Modules/module.modulemap \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FirebaseFirestore-umbrella.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRAggregateQuery.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRAggregateSource.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRAggregateQuerySnapshot.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRCollectionReference.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRQuery.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRFirestoreSource.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRListenerRegistration.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRDocumentChange.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRDocumentReference.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRDocumentSnapshot.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRFieldPath.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRFieldValue.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRFilter.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRFirestore.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRFirestoreErrors.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRFirestoreSettings.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRGeoPoint.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRLoadBundleTask.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRLocalCacheSettings.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRQuerySnapshot.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRSnapshotMetadata.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRTimestamp.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRTransaction.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRTransactionOptions.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/XCFrameworkIntermediates/FirebaseFirestore/Base/FirebaseFirestore.framework/Headers/FIRWriteBatch.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/FirebaseDatabase/FirebaseDatabase.framework/Headers/FirebaseDatabase-Swift.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FirebaseFirestore.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseFirestore.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseFirestoreInternal.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseFirestoreInternal/FirebaseFirestoreInternal-umbrella.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRAggregateField.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRAggregateQuery.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRAggregateSource.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRAggregateQuerySnapshot.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRCollectionReference.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRQuery.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRFirestoreSource.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRListenerRegistration.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRDocumentChange.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRDocumentReference.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRDocumentSnapshot.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FirebaseFirestore.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRFieldPath.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRFieldValue.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRFilter.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRFirestore.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRFirestoreErrors.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRFirestoreSettings.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRGeoPoint.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRLoadBundleTask.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRLocalCacheSettings.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRQuerySnapshot.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRSnapshotMetadata.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRTimestamp.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRTransaction.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRTransactionOptions.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRWriteBatch.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestoreInternal/Firestore/Source/Public/FirebaseFirestore/FIRPersistentCacheIndexManager.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseFirestore/FirebaseFirestore-umbrella.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRAggregateField.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRAggregateQuery.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRAggregateQuerySnapshot.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRAggregateSource.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRCollectionReference.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRDocumentChange.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRDocumentReference.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRDocumentSnapshot.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRFieldPath.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRFieldValue.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRFilter.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRFirestore.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRFirestoreErrors.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRFirestoreSettings.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRFirestoreSource.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRGeoPoint.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRListenerRegistration.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRLoadBundleTask.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRLocalCacheSettings.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRPersistentCacheIndexManager.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRQuery.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRQuerySnapshot.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRSnapshotMetadata.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRTimestamp.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRTransaction.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRTransactionOptions.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseFirestore/FirebaseFirestoreInternal/FirebaseFirestore/FIRWriteBatch.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/FirebaseFirestore/FirebaseFirestore.framework/Headers/FirebaseFirestore-Swift.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseInstallations/FirebaseInstallations/Source/Library/Public/FirebaseInstallations/FirebaseInstallations.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseInstallations.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseInstallations/FirebaseInstallations-umbrella.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseInstallations/FirebaseInstallations/Source/Library/Public/FirebaseInstallations/FIRInstallations.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseInstallations/FirebaseInstallations/Source/Library/Public/FirebaseInstallations/FIRInstallationsAuthTokenResult.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseInstallations/FirebaseInstallations/Source/Library/Public/FirebaseInstallations/FIRInstallationsErrors.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseMessaging/FirebaseMessaging/Sources/Public/FirebaseMessaging/FirebaseMessaging.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseMessaging.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseMessaging/FirebaseMessaging-umbrella.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseMessaging/FirebaseMessaging/Sources/Public/FirebaseMessaging/FIRMessaging.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseMessaging/FirebaseMessaging/Sources/Public/FirebaseMessaging/FIRMessagingExtensionHelper.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseStorage/FirebaseStorage-umbrella.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseStorage.build/module.modulemap \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseStorage/FirebaseStorage/Typedefs/FIRStorageTypedefs.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/build/ios/Debug-iphonesimulator/FirebaseStorage/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.6.3/ios/Classes/Public/FLTFirebaseAuthPlugin.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.17.4/ios/Classes/Public/CustomPigeonHeader.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.17.4/ios/Classes/Public/firebase_auth_messages.g.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.17.4/ios/Classes/Private/PigeonParser.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.17.4/ios/Classes/Public/FLTFirebaseAuthPlugin.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/firebase_core.build/module.modulemap \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/firebase_core/firebase_core-umbrella.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebaseCorePlugin.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebasePlugin.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/messages.g.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebasePluginRegistry.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_auth-4.6.3/ios/Classes/Public/messages.g.h
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebaseCorePlugin.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebasePlugin.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/messages.g.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebasePluginRegistry.h

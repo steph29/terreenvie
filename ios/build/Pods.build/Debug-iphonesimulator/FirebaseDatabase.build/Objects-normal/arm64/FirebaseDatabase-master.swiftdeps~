@@ -1,0 +1,15 @@
+version: "Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)"
+options: "4a69e83539a7d4aebf290b2ccf72b18589413f8c0590b338ca71ae7b8bd8002d"
+build_start_time: [1707381497, 191996000]
+build_end_time: [1707381497, 357559000]
+inputs:
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Swift/Sources/Codable/DataSnapshot+ReadDecodable.swift"
+  : !private [1707380578, 749657002]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Swift/Sources/Codable/DatabaseReference+WriteEncodable.swift"
+  : !private [1707380578, 751468186]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Swift/Sources/Codable/EncoderDecoder.swift"
+  : !private [1707380578, 748823236]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Swift/Sources/Codable/ServerTimestamp.swift"
+  : !private [1707380578, 750644833]
+  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Swift/Sources/SPMSwiftHeaderWorkaround.swift"
+  : !private [1707380578, 752432223]

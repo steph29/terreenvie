@@ -22,8 +22,6 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseCore/Extension/FIRLibrary.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseCore/Extension/FIRLogger.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseCore/Extension/FIROptionsInternal.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseAppCheck/Interop/FIRAppCheckInterop.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseAppCheck/Interop/FIRAppCheckTokenResultInterop.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseAuth/Interop/FIRAuthInterop.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Api/Private/FIRDatabaseQuery_Private.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Core/FQueryParams.h \
@@ -41,4 +39,10 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Public/FirebaseDatabase/FIRDataSnapshot.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Utilities/Tuples/FTupleUserCallback.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Core/FRepoManager.h \
-  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Api/FIRDatabaseConfig.h
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseDatabase/FirebaseDatabase/Sources/Api/FIRDatabaseConfig.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAppCheckInterop.build/module.modulemap \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseAppCheckInterop/FirebaseAppCheckInterop-umbrella.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FIRAppCheckInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FIRAppCheckProtocol.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FIRAppCheckTokenResultInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAppCheckInterop/FirebaseAppCheck/Interop/Public/FirebaseAppCheckInterop/FirebaseAppCheckInterop.h

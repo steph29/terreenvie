@@ -3,9 +3,32 @@ tbd-version:     4
 targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
 flags:           [ not_app_extension_safe ]
 install-name:    '@rpath/FirebaseDatabase.framework/FirebaseDatabase'
+swift-abi-version: 7
 exports:
+  - targets:         [ x86_64-ios-simulator ]
+    symbols:         [ _Swift50Overrides, _Swift51Overrides ]
   - targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
-    symbols:         [ _APLevelDBErrorDomain, _FFIsLoggingEnabled, _FSRWebSocketErrorDomain, 
+    symbols:         [ '_$s16FirebaseDatabase15ServerTimestampV12wrappedValue10Foundation4DateVSgvM', 
+                       '_$s16FirebaseDatabase15ServerTimestampV12wrappedValue10Foundation4DateVSgvg', 
+                       '_$s16FirebaseDatabase15ServerTimestampV12wrappedValue10Foundation4DateVSgvpMV', 
+                       '_$s16FirebaseDatabase15ServerTimestampV12wrappedValue10Foundation4DateVSgvs', 
+                       '_$s16FirebaseDatabase15ServerTimestampV12wrappedValueAC10Foundation4DateVSg_tcfC', 
+                       '_$s16FirebaseDatabase15ServerTimestampV23__derived_struct_equalsySbAC_ACtFZ', 
+                       '_$s16FirebaseDatabase15ServerTimestampV4fromACs7Decoder_p_tKcfC', 
+                       '_$s16FirebaseDatabase15ServerTimestampV4hash4intoys6HasherVz_tF', 
+                       '_$s16FirebaseDatabase15ServerTimestampV5value10Foundation4DateVSgvM', 
+                       '_$s16FirebaseDatabase15ServerTimestampV5value10Foundation4DateVSgvg', 
+                       '_$s16FirebaseDatabase15ServerTimestampV5value10Foundation4DateVSgvpMV', 
+                       '_$s16FirebaseDatabase15ServerTimestampV5value10Foundation4DateVSgvpfi', 
+                       '_$s16FirebaseDatabase15ServerTimestampV5value10Foundation4DateVSgvs', 
+                       '_$s16FirebaseDatabase15ServerTimestampV6encode2toys7Encoder_p_tKF', 
+                       '_$s16FirebaseDatabase15ServerTimestampV9hashValueSivg', '_$s16FirebaseDatabase15ServerTimestampV9hashValueSivpMV', 
+                       '_$s16FirebaseDatabase15ServerTimestampVMa', '_$s16FirebaseDatabase15ServerTimestampVMn', 
+                       '_$s16FirebaseDatabase15ServerTimestampVN', '_$s16FirebaseDatabase15ServerTimestampVSEAAMc', 
+                       '_$s16FirebaseDatabase15ServerTimestampVSHAAMc', '_$s16FirebaseDatabase15ServerTimestampVSQAAMc', 
+                       '_$s16FirebaseDatabase15ServerTimestampVSeAAMc', '_$sSo15FIRDataSnapshotC16FirebaseDatabaseE4data2as7decoderxxm_0C11SharedSwift0C11DataDecoderCtKSeRzlF', 
+                       '_$sSo20FIRDatabaseReferenceC16FirebaseDatabaseE8setValue4from7encoder10completionyx_0C11SharedSwift0C11DataEncoderCys5Error_pSgcSgtKSERzlF', 
+                       _APLevelDBErrorDomain, _FFIsLoggingEnabled, _FSRWebSocketErrorDomain, 
                        _FirebaseDatabaseVersionNumber, _FirebaseDatabaseVersionString, 
                        _base1_2List_free, _base1_2List_new, _base1_2List_next, _canBeRepresentedAsLong, 
                        _f_b64_ntop, _f_b64_pton, _firebaseJobsTroll, _kDotInfoConnected, 

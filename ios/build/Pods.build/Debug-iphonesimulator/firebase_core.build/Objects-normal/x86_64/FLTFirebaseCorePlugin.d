@@ -1,8 +1,8 @@
 dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/firebase_core.build/module.modulemap \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebaseCorePlugin.m \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebaseCorePlugin.m \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/firebase_core/firebase_core-prefix.pch \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebaseCorePlugin.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebaseCorePlugin.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Modules/module.modulemap \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/Flutter.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/FlutterAppDelegate.h \
@@ -20,7 +20,7 @@ dependencies: \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/FlutterHeadlessDartRunner.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/FlutterPluginAppLifeCycleDelegate.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/FlutterViewController.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebasePlugin.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebasePlugin.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCore.build/module.modulemap \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseCore/FirebaseCore-umbrella.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIRApp.h \
@@ -29,5 +29,5 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FirebaseCore.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIROptions.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIRVersion.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/messages.g.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebasePluginRegistry.h
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/messages.g.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebasePluginRegistry.h

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:terreenvie/controller/PDF/web.dart';
+
 import 'PDF/custom_pdf.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -208,7 +210,7 @@ class _AnalyseState extends State<Analyse> {
               onPressed: () async {
                 await _createPDF();
               },
-              child: Text("Générer PDF"),
+              child: Text("Télécharger la liste"),
             ),
           ],
         ),
@@ -258,7 +260,7 @@ class _AnalyseState extends State<Analyse> {
               onPressed: () async {
                 await _createPDFuser();
               },
-              child: Text("Générer PDF user"),
+              child: Text("Télécharger la liste des bénévoles inscrits"),
             ),
           ],
         ),
@@ -514,7 +516,7 @@ class _AnalyseState extends State<Analyse> {
         bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
     //Save the document
-    CustomPdf().pdf(document);
+    CustomWebPdf().pdf(document);
   }
 
   Future<void> pdfMobile(PdfDocument document) async {
@@ -560,6 +562,7 @@ class _AnalyseState extends State<Analyse> {
   }
 
   Future<List<List<dynamic>>> getAllUsers() async {
+    itemsUser = [];
     QuerySnapshot<Map<String, dynamic>> userSnapshot =
         await FirebaseFirestore.instance.collection('users').get();
 
@@ -619,7 +622,8 @@ class _AnalyseState extends State<Analyse> {
             0, 55, page.getClientSize().width, page.getClientSize().height));
 
     //Save the document
-    CustomPdf().pdf(document);
+    //CustomPdf().pdf(document);
+    CustomWebPdf().pdf(document);
   }
 
   Future<void> loadUserNames() async {

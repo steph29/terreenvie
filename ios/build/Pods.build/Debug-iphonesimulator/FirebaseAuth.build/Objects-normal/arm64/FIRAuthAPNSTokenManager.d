@@ -26,6 +26,7 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/GoogleUtilities/GoogleUtilities/Network/Public/GoogleUtilities/GULNetworkMessageCode.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/GoogleUtilities/GoogleUtilities/Network/Public/GoogleUtilities/GULNetworkURLSession.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/GoogleUtilities/GoogleUtilities/Reachability/Public/GoogleUtilities/GULReachabilityChecker.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/GoogleUtilities/GoogleUtilities/UserDefaults/Public/GoogleUtilities/GULUserDefaults.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseCore/Extension/FirebaseCoreInternal.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCore.build/module.modulemap \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseCore/FirebaseCore-umbrella.h \
@@ -47,6 +48,9 @@ dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Auth/FIRAuthGlobalWorkQueue.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Auth/FIRAuth_Internal.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Interop/FIRAuthInterop.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthBackend.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCRequest.h \
+  /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Backend/FIRAuthRPCResponse.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRAuth.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRAuthAPNSTokenType.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Public/FirebaseAuth/FIRAuthErrors.h \

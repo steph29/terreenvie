@@ -19,10 +19,16 @@
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthNotificationManager.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoFinalizeMFAPhoneRequestInfo.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoFinalizeMFAPhoneResponseInfo.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoFinalizeMFATOTPEnrollmentRequestInfo.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoFinalizeMFATOTPEnrollmentResponseInfo.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoFinalizeMFATOTPSignInRequestInfo.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoMFAEnrollment.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoStartMFAPhoneRequestInfo.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoStartMFAPhoneResponseInfo.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoStartMFATOTPEnrollmentRequestInfo.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProtoStartMFATOTPEnrollmentResponseInfo.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthProvider.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthRecaptchaVerifier.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthRequestConfiguration.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthSerialTaskQueue.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRAuthSettings.o
@@ -56,6 +62,8 @@
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGetOOBConfirmationCodeResponse.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGetProjectConfigRequest.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGetProjectConfigResponse.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGetRecaptchaConfigRequest.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGetRecaptchaConfigResponse.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGitHubAuthCredential.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGitHubAuthProvider.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRGoogleAuthCredential.o
@@ -93,6 +101,10 @@
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRStartMFAEnrollmentResponse.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRStartMFASignInRequest.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRStartMFASignInResponse.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRTOTPMultiFactorAssertion.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRTOTPMultiFactorGenerator.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRTOTPMultiFactorInfo.o
+/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRTOTPSecret.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRTwitterAuthCredential.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRTwitterAuthProvider.o
 /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/FIRUser.o
