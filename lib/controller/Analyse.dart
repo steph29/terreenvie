@@ -585,7 +585,6 @@ class _AnalyseState extends State<Analyse> {
         userData['tel'],
       ]);
     }
-
     return itemsUser;
   }
 
