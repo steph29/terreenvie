@@ -36,6 +36,9 @@ class _SignUpPageState extends State<SignUpPage> {
       body: SingleChildScrollView(
           child: Column(
         children: [
+          SizedBox(
+            height: (kIsWeb) ? 5 : 10,
+          ),
           Container(
             alignment: Alignment.center,
             height: 200.0,

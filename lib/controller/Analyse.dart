@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:terreenvie/controller/PDF/web.dart';
-
-import 'PDF/custom_pdf.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -73,7 +71,9 @@ class _AnalyseState extends State<Analyse> {
         // TODO : Réarranger en fonction de la taille des écrans
         body: SingleChildScrollView(
             padding: EdgeInsets.all(20),
-            child: (kIsWeb) ? isWeb() : isMobile()));
+            child: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                ? isWeb()
+                : isMobile()));
   }
 
   Widget isMobile() => Column(
@@ -118,7 +118,7 @@ class _AnalyseState extends State<Analyse> {
         decoration: BoxDecoration(
           color: Colors.pinkAccent.withOpacity(0.1),
         ),
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
@@ -220,7 +220,7 @@ class _AnalyseState extends State<Analyse> {
         decoration: BoxDecoration(
           color: Colors.yellowAccent.withOpacity(0.1),
         ),
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
@@ -267,7 +267,7 @@ class _AnalyseState extends State<Analyse> {
       );
 
   Widget kifekoi() => Container(
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
@@ -336,7 +336,7 @@ class _AnalyseState extends State<Analyse> {
       );
 
   Widget kiela() => Container(
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
@@ -368,10 +368,12 @@ class _AnalyseState extends State<Analyse> {
       });
 
   Widget buildSegment(String text) => Container(
-        padding: (kIsWeb) ? EdgeInsets.all(7) : EdgeInsets.all(3),
+        padding: (kIsWeb || MediaQuery.of(context).size.width > 920)
+            ? EdgeInsets.all(7)
+            : EdgeInsets.all(3),
         child: Text(
           text,
-          style: (kIsWeb)
+          style: (kIsWeb || MediaQuery.of(context).size.width > 920)
               ? TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
               : TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),

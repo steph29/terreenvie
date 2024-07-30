@@ -134,10 +134,10 @@ class _MainAppControllerState extends State<MainAppController> {
                         },
                         items: [
                           BottomNavigationBarItem(
-                              icon: Icon(Icons.home), label: 'Tableau de bord'),
+                              icon: Icon(Icons.home), label: 'Mes créneaux'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.calendar_today),
-                              label: 'Choisir ses postes'),
+                              label: 'Choisir mes postes'),
                           // BottomNavigationBarItem(
                           //     icon: Icon(Icons.contact_mail), label: 'Contact'),
                           BottomNavigationBarItem(
@@ -163,10 +163,10 @@ class _MainAppControllerState extends State<MainAppController> {
                         },
                         items: [
                           BottomNavigationBarItem(
-                              icon: Icon(Icons.home), label: 'Tableau de bord'),
+                              icon: Icon(Icons.home), label: 'Mes créneaux'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.calendar_today),
-                              label: 'Choisir ses postes'),
+                              label: 'Choisir mes postes'),
                           // BottomNavigationBarItem(
                           //     icon: Icon(Icons.contact_mail), label: 'Contact'),
                           BottomNavigationBarItem(
@@ -213,10 +213,10 @@ class _MainAppControllerState extends State<MainAppController> {
                           destinations: [
                             NavigationRailDestination(
                                 icon: Icon(Icons.home),
-                                label: Text('Tableau de bord')),
+                                label: Text('Mes créneaux')),
                             NavigationRailDestination(
                                 icon: Icon(Icons.calendar_today),
-                                label: Text('Choisir ses postes')),
+                                label: Text('Choisir mes postes')),
                             // NavigationRailDestination(
                             //     icon: Icon(Icons.contact_mail),
                             //     label: Text('Contact')),
@@ -245,10 +245,10 @@ class _MainAppControllerState extends State<MainAppController> {
                           destinations: [
                             NavigationRailDestination(
                                 icon: Icon(Icons.home),
-                                label: Text('Tableau de bord')),
+                                label: Text('Mes créneaux')),
                             NavigationRailDestination(
                                 icon: Icon(Icons.calendar_today),
-                                label: Text('Choisir ses postes')),
+                                label: Text('Choisir mes postes')),
                             // NavigationRailDestination(
                             //     icon: Icon(Icons.contact_mail),
                             //     label: Text('Contact')),

@@ -19,7 +19,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("Votre tableau de bord"),
+          title: Text("Mes créneaux"),
           backgroundColor: Color(0xFFf2f0e7),
         ),
         body: SingleChildScrollView(
