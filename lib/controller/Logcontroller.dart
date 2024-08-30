@@ -67,7 +67,7 @@ class _LogControllerState extends State<LogController> {
           Container(
             padding: EdgeInsets.all(15),
             child: Text(
-              "1 bénévole = 1 adresse email. Si tu n'as pas d'adresse mail ou si tu en partages une, tu peux utiliser le modèle suivant: prenom.nom@tev.bzh ",
+              "1 bénévole = 1 adresse email. Si tu n'as pas d'adresse mail ou si tu en partages une, tu peux utiliser le modèle suivant: prenom.nom@tev.bzh Merci de t'inscrire et de bien conserver ton mot de passe pour retrouver ensuite tes créneaux sélectionnés ",
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: Color(0xFF2b5a72), fontSize: (kIsWeb) ? 20 : 15),
@@ -231,7 +231,7 @@ class _LogControllerState extends State<LogController> {
           Container(
             padding: EdgeInsets.all(15),
             child: Text(
-              "Le tableau de bord permet de voir vos créneaux à tout moment du jour et de la nuit, il n'y a donc plus d'emails récapitulatifs.",
+              "Le tableau de bord permet de voir tes créneaux à tout moment du jour et de la nuit, il n'y a donc plus d'emails récapitulatifs.",
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontWeight: FontWeight.bold,
