@@ -341,9 +341,37 @@ class _AnalyseState extends State<Analyse> {
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
         decoration: BoxDecoration(color: Colors.green.withOpacity(0.1)),
-        child: Column(children: [Text("Ki é la?")]),
+        child: Column(children: [Text("Ki é la?"), EtatDesLieux()]),
       );
 
+  Widget EtatDesLieux() => FutureBuilder<Map<String, int>>(
+        future: getVolunteers(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(
+              strokeWidth: 4,
+            );
+          } else if (snapshot.hasError) {
+            return Text('Erreur : ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Text('Aucune donnée disponible.');
+          }
+          Map<String, int> items = snapshot.data!;
+          return Expanded(
+              child: Container(
+            width: MediaQuery.of(context).size.width / 1.1,
+            height: MediaQuery.of(context).size.height / 6,
+            child: ListView(
+              children: items.entries.map((entry) {
+                // Affiche le nom du poste et son nombre d'occurrences
+                return ListTile(
+                  title: Text('${entry.key} : ${entry.value} bénévoles'),
+                );
+              }).toList(),
+            ),
+          ));
+        },
+      );
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
       padding: EdgeInsets.all(5),
       groupValue: groupValue,
@@ -561,6 +589,33 @@ class _AnalyseState extends State<Analyse> {
   Future<Uint8List> _readImageData(String name) async {
     final data = await rootBundle.load('$name');
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  }
+
+  Future<Map<String, int>> getVolunteers() async {
+    // Récupère les documents depuis Firestore
+    final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
+        await FirebaseFirestore.instance.collection('pos_ben').get();
+
+    // Crée un Map pour compter les occurrences de chaque poste
+    Map<String, int> posteCount = {};
+
+    // Parcours des documents Firestore
+    postsSnapshot.docs.forEach((doc) {
+      final data = doc.data();
+      // Parcours de chaque poste dans le document
+      for (var i = 0; i < data['pos_id'].length; i++) {
+        String nomPoste = data['pos_id'][i]['poste'] as String;
+
+        // Incrémente le compteur pour chaque poste
+        if (posteCount.containsKey(nomPoste)) {
+          posteCount[nomPoste] = posteCount[nomPoste]! + 1;
+        } else {
+          posteCount[nomPoste] = 1;
+        }
+      }
+    });
+
+    return posteCount;
   }
 
   Future<List<List<dynamic>>> getAllUsers() async {
