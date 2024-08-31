@@ -23,7 +23,7 @@ class _ComptePageState extends State<ComptePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Faites votre sélection"),
+          title: Text("Fais ta sélection"),
           backgroundColor: Color(0xFFf2f0e7),
         ),
         body: SingleChildScrollView(

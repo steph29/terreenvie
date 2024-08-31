@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'PDF/custom_pdf.dart';
+import 'package:terreenvie/controller/PDF/web.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -71,7 +71,9 @@ class _AnalyseState extends State<Analyse> {
         // TODO : Réarranger en fonction de la taille des écrans
         body: SingleChildScrollView(
             padding: EdgeInsets.all(20),
-            child: (kIsWeb) ? isWeb() : isMobile()));
+            child: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                ? isWeb()
+                : isMobile()));
   }
 
   Widget isMobile() => Column(
@@ -116,7 +118,7 @@ class _AnalyseState extends State<Analyse> {
         decoration: BoxDecoration(
           color: Colors.pinkAccent.withOpacity(0.1),
         ),
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
@@ -208,7 +210,7 @@ class _AnalyseState extends State<Analyse> {
               onPressed: () async {
                 await _createPDF();
               },
-              child: Text("Générer PDF"),
+              child: Text("Télécharger la liste"),
             ),
           ],
         ),
@@ -218,7 +220,7 @@ class _AnalyseState extends State<Analyse> {
         decoration: BoxDecoration(
           color: Colors.yellowAccent.withOpacity(0.1),
         ),
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
@@ -258,14 +260,14 @@ class _AnalyseState extends State<Analyse> {
               onPressed: () async {
                 await _createPDFuser();
               },
-              child: Text("Générer PDF user"),
+              child: Text("Télécharger la liste des bénévoles inscrits"),
             ),
           ],
         ),
       );
 
   Widget kifekoi() => Container(
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
@@ -334,14 +336,42 @@ class _AnalyseState extends State<Analyse> {
       );
 
   Widget kiela() => Container(
-        width: (kIsWeb)
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
             ? MediaQuery.of(context).size.width / 2.5
             : MediaQuery.of(context).size.width / 1.1,
         height: MediaQuery.of(context).size.height / 2.5,
         decoration: BoxDecoration(color: Colors.green.withOpacity(0.1)),
-        child: Column(children: [Text("Ki é la?")]),
+        child: Column(children: [Text("Ki é la?"), EtatDesLieux()]),
       );
 
+  Widget EtatDesLieux() => FutureBuilder<Map<String, int>>(
+        future: getVolunteers(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(
+              strokeWidth: 4,
+            );
+          } else if (snapshot.hasError) {
+            return Text('Erreur : ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Text('Aucune donnée disponible.');
+          }
+          Map<String, int> items = snapshot.data!;
+          return Expanded(
+              child: Container(
+            width: MediaQuery.of(context).size.width / 1.1,
+            height: MediaQuery.of(context).size.height / 6,
+            child: ListView(
+              children: items.entries.map((entry) {
+                // Affiche le nom du poste et son nombre d'occurrences
+                return ListTile(
+                  title: Text('${entry.key} : ${entry.value} bénévoles'),
+                );
+              }).toList(),
+            ),
+          ));
+        },
+      );
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
       padding: EdgeInsets.all(5),
       groupValue: groupValue,
@@ -366,10 +396,12 @@ class _AnalyseState extends State<Analyse> {
       });
 
   Widget buildSegment(String text) => Container(
-        padding: (kIsWeb) ? EdgeInsets.all(7) : EdgeInsets.all(3),
+        padding: (kIsWeb || MediaQuery.of(context).size.width > 920)
+            ? EdgeInsets.all(7)
+            : EdgeInsets.all(3),
         child: Text(
           text,
-          style: (kIsWeb)
+          style: (kIsWeb || MediaQuery.of(context).size.width > 920)
               ? TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
               : TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
@@ -514,7 +546,7 @@ class _AnalyseState extends State<Analyse> {
         bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
     //Save the document
-    CustomPdf().pdf(document);
+    CustomWebPdf().pdf(document);
   }
 
   Future<void> pdfMobile(PdfDocument document) async {
@@ -559,7 +591,35 @@ class _AnalyseState extends State<Analyse> {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
+  Future<Map<String, int>> getVolunteers() async {
+    // Récupère les documents depuis Firestore
+    final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
+        await FirebaseFirestore.instance.collection('pos_ben').get();
+
+    // Crée un Map pour compter les occurrences de chaque poste
+    Map<String, int> posteCount = {};
+
+    // Parcours des documents Firestore
+    postsSnapshot.docs.forEach((doc) {
+      final data = doc.data();
+      // Parcours de chaque poste dans le document
+      for (var i = 0; i < data['pos_id'].length; i++) {
+        String nomPoste = data['pos_id'][i]['poste'] as String;
+
+        // Incrémente le compteur pour chaque poste
+        if (posteCount.containsKey(nomPoste)) {
+          posteCount[nomPoste] = posteCount[nomPoste]! + 1;
+        } else {
+          posteCount[nomPoste] = 1;
+        }
+      }
+    });
+
+    return posteCount;
+  }
+
   Future<List<List<dynamic>>> getAllUsers() async {
+    itemsUser = [];
     QuerySnapshot<Map<String, dynamic>> userSnapshot =
         await FirebaseFirestore.instance.collection('users').get();
 
@@ -582,7 +642,6 @@ class _AnalyseState extends State<Analyse> {
         userData['tel'],
       ]);
     }
-
     return itemsUser;
   }
 
@@ -619,7 +678,8 @@ class _AnalyseState extends State<Analyse> {
             0, 55, page.getClientSize().width, page.getClientSize().height));
 
     //Save the document
-    CustomPdf().pdf(document);
+    //CustomPdf().pdf(document);
+    CustomWebPdf().pdf(document);
   }
 
   Future<void> loadUserNames() async {

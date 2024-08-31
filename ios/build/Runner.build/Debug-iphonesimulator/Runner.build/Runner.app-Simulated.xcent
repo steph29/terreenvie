@@ -3,6 +3,8 @@
 <plist version="1.0">
 <dict>
 	<key>application-identifier</key>
-	<string>L325WJD5P6.com.example.terreenvie</string>
+	<string>L325WJD5P6.com.terreenvie.terreenvie</string>
+	<key>aps-environment</key>
+	<string>development</string>
 </dict>
 </plist>

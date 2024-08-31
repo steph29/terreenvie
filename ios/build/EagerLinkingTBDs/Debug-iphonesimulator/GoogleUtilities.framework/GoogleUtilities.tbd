@@ -29,5 +29,6 @@ exports:
                        GULKeychainStorage, GULKeychainUtils, GULLoggerWrapper, GULMutableDictionary, 
                        GULNetwork, GULNetworkInfo, GULNetworkURLSession, GULReachabilityChecker, 
                        GULSceneDelegateSwizzler, GULSceneZeroingWeakContainer, GULSecureCoding, 
-                       GULURLSessionDataResponse, GULZeroingWeakContainer, PodsDummy_GoogleUtilities ]
+                       GULURLSessionDataResponse, GULUserDefaults, GULZeroingWeakContainer, 
+                       PodsDummy_GoogleUtilities ]
 ...

@@ -1,9 +1,9 @@
 dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/firebase_core.build/module.modulemap \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebasePluginRegistry.m \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebasePluginRegistry.m \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/firebase_core/firebase_core-prefix.pch \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebasePluginRegistry.h \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/FLTFirebasePlugin.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebasePluginRegistry.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/FLTFirebasePlugin.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/FirebaseCore.build/module.modulemap \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/FirebaseCore/FirebaseCore-umbrella.h \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIRApp.h \

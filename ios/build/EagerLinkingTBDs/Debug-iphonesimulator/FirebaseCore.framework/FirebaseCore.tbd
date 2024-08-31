@@ -7,7 +7,7 @@ exports:
   - targets:         [ x86_64-ios-simulator, arm64-ios-simulator ]
     symbols:         [ _FIRAuthStateDidChangeInternalNotification, _FIRAuthStateDidChangeInternalNotificationAppKey, 
                        _FIRAuthStateDidChangeInternalNotificationTokenKey, _FIRAuthStateDidChangeInternalNotificationUIDKey, 
-                       _FIRFirebaseVersion, _FIRHeaderValueFromHeartbeatsPayload, 
+                       _FIRFirebaseVersion, _FIRGetLoggerLevel, _FIRHeaderValueFromHeartbeatsPayload, 
                        _FIRIsLoggableLevel, _FIRLogBasic, _FIRLogDebug, _FIRLogError, 
                        _FIRLogInfo, _FIRLogNotice, _FIRLogWarning, _FIRLoggerInitializeASL, 
                        _FIRResetLogger, _FIRSetAnalyticsDebugMode, _FIRSetLoggerLevel, 

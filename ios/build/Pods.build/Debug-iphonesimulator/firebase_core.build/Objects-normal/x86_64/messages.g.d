@@ -1,8 +1,8 @@
 dependencies: \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/build/Pods.build/Debug-iphonesimulator/firebase_core.build/module.modulemap \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/messages.g.m \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/messages.g.m \
   /Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/Target\ Support\ Files/firebase_core/firebase_core-prefix.pch \
-  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.14.0/ios/Classes/messages.g.h \
+  /Users/stephaneverardo/.pub-cache/hosted/pub.dev/firebase_core-2.25.4/ios/Classes/messages.g.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Modules/module.modulemap \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/Flutter.h \
   /Users/stephaneverardo/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Headers/FlutterAppDelegate.h \

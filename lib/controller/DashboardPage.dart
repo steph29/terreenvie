@@ -19,7 +19,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("Votre tableau de bord"),
+          title: Text("Mes créneaux"),
           backgroundColor: Color(0xFFf2f0e7),
         ),
         body: SingleChildScrollView(
@@ -58,7 +58,7 @@ class _DashboardPageState extends State<DashboardPage> {
           if (snapshot.data!.docs.isEmpty) {
             return Center(
                 child: Text(
-                    "Vous n'avez pas encore de créneau sélectionné. Allez dans l'onglet Choisir ses postes"));
+                    "Tu n'as pas encore de créneau sélectionné. Vas dans l'onglet Choisir mes postes "));
           }
           if (snapshot.data != null) {
             return Center(

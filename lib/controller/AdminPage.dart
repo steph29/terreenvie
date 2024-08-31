@@ -357,7 +357,12 @@ class _AdminPageState extends State<AdminPage> {
         return Card(
           child: ListTile(
             title: Text(
-              hord + ' - ' + horf + ' avec ' + nben.toString() + ' benevoles',
+              hord +
+                  ' - ' +
+                  horf +
+                  ' avec ' +
+                  nben.toString() +
+                  ((nben == 1) ? ' bénévole' : ' bénévoles'),
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,

@@ -3,13 +3,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
-import 'package:terreenvie/controller/MainAppController.dart';
+//import 'api/firebase_api.dart';
+import 'controller/MainAppController.dart';
 import 'firebase_options.dart';
 
 //final DotEnv rootEnv = DotEnv();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // (kIsWeb) ? null : await FirebaseApi().initNotifications();
   runApp(const MyApp());
 }
 

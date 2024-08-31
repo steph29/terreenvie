@@ -1,8 +1,6 @@
 // ignore: file_names
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get/get.dart';
-import 'package:terreenvie/controller/Logcontroller.dart';
 
 signUpserv(String userEmail, String userPassword, String userName,
     String userPrenom, String userPhone, String profil, String role) async {
