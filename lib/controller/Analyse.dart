@@ -345,7 +345,7 @@ class _AnalyseState extends State<Analyse> {
       );
 
   Widget EtatDesLieux() => FutureBuilder<Map<String, int>>(
-        future: getVolunteers(),
+        future: getVolunteersPerPoste(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator(
@@ -591,7 +591,7 @@ class _AnalyseState extends State<Analyse> {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
-  Future<Map<String, int>> getVolunteers() async {
+  Future<Map<String, int>> getVolunteersPerPoste() async {
     // Récupère les documents depuis Firestore
     final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
         await FirebaseFirestore.instance.collection('pos_ben').get();
