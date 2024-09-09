@@ -344,8 +344,10 @@ class _AnalyseState extends State<Analyse> {
         child: Column(children: [Text("Ki é la?"), EtatDesLieux()]),
       );
 
-  Widget EtatDesLieux() => FutureBuilder<Map<String, int>>(
-        future: getVolunteersPerPoste(),
+  Widget EtatDesLieux() =>
+      FutureBuilder<Map<String, Map<String, Map<String, int>>>>(
+        future:
+            getVolunteersPerPosteByDayAndPosteAndTime(), // Utilise la fonction corrigée
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator(
@@ -356,22 +358,45 @@ class _AnalyseState extends State<Analyse> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Text('Aucune donnée disponible.');
           }
-          Map<String, int> items = snapshot.data!;
-          return Expanded(
-              child: Container(
+
+          Map<String, Map<String, Map<String, int>>> items = snapshot.data!;
+
+          return Container(
             width: MediaQuery.of(context).size.width / 1.1,
-            height: MediaQuery.of(context).size.height / 6,
+            height: MediaQuery.of(context).size.height / 3,
             child: ListView(
-              children: items.entries.map((entry) {
-                // Affiche le nom du poste et son nombre d'occurrences
-                return ListTile(
-                  title: Text('${entry.key} : ${entry.value} bénévoles'),
+              children: items.entries.map((dayEntry) {
+                String jour = dayEntry.key;
+                Map<String, Map<String, int>> horairesMap = dayEntry.value;
+
+                // ExpansionTile pour chaque jour
+                return ExpansionTile(
+                  title: Text('Jour: $jour'),
+                  children: horairesMap.entries.map((timeEntry) {
+                    String horaires = timeEntry.key;
+                    Map<String, int> postes = timeEntry.value;
+
+                    // ExpansionTile pour chaque horaire
+                    return ExpansionTile(
+                      title: Text('Poste: $horaires'),
+                      children: postes.entries.map((posteEntry) {
+                        String nomPoste = posteEntry.key;
+                        int count = posteEntry.value;
+
+                        // ListTile pour chaque poste
+                        return ListTile(
+                          title: Text('$nomPoste : $count bénévoles'),
+                        );
+                      }).toList(),
+                    );
+                  }).toList(),
                 );
               }).toList(),
             ),
-          ));
+          );
         },
       );
+
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
       padding: EdgeInsets.all(5),
       groupValue: groupValue,
@@ -591,31 +616,77 @@ class _AnalyseState extends State<Analyse> {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
-  Future<Map<String, int>> getVolunteersPerPoste() async {
+  Future<Map<String, Map<String, Map<String, int>>>>
+      getVolunteersPerPosteByDayAndPosteAndTime() async {
     // Récupère les documents depuis Firestore
     final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
         await FirebaseFirestore.instance.collection('pos_ben').get();
 
-    // Crée un Map pour compter les occurrences de chaque poste
-    Map<String, int> posteCount = {};
+    // Crée une Map pour compter les occurrences de chaque poste par jour et par horaires
+    Map<String, Map<String, Map<String, int>>> dayPosteTimeCount = {};
 
     // Parcours des documents Firestore
     postsSnapshot.docs.forEach((doc) {
       final data = doc.data();
+
+      // Vérifie que le champ 'pos_id' existe et n'est pas null
+      if (data['pos_id'] == null) {
+        print("Attention : champ 'pos_id' manquant pour le document ${doc.id}");
+        return; // Passe au document suivant
+      }
+
       // Parcours de chaque poste dans le document
       for (var i = 0; i < data['pos_id'].length; i++) {
-        String nomPoste = data['pos_id'][i]['poste'] as String;
+        final posteData = data['pos_id'][i];
 
-        // Incrémente le compteur pour chaque poste
-        if (posteCount.containsKey(nomPoste)) {
-          posteCount[nomPoste] = posteCount[nomPoste]! + 1;
+        // Vérifie que le champ 'jour' existe et n'est pas null dans 'pos_id'
+        if (posteData['jour'] == null) {
+          print(
+              "Attention : champ 'jour' manquant pour le document ${doc.id}, index $i");
+          continue; // Passe à la prochaine entrée
+        }
+
+        String jour = posteData['jour'] as String;
+
+        // Vérifie que le champ 'horaires' existe et n'est pas null dans 'pos_id'
+        if (posteData['debut'] == null) {
+          print(
+              "Attention : champ 'debut' manquant pour le document ${doc.id}, index $i");
+          continue; // Passe à la prochaine entrée
+        }
+
+        String horaires = posteData['debut'] as String;
+
+        // Vérifie que le champ 'poste' existe et n'est pas null
+        if (posteData['poste'] == null) {
+          print(
+              "Attention : champ 'poste' manquant pour le document ${doc.id}, index $i");
+          continue; // Passe à la prochaine entrée
+        }
+
+        String nomPoste = posteData['poste'] as String;
+
+        // Initialiser le sous-Map pour ce jour s'il n'existe pas encore
+        if (!dayPosteTimeCount.containsKey(jour)) {
+          dayPosteTimeCount[jour] = {};
+        }
+
+        // Initialiser le sous-Map pour ce poste s'il n'existe pas encore pour ce jour
+        if (!dayPosteTimeCount[jour]!.containsKey(nomPoste)) {
+          dayPosteTimeCount[jour]![nomPoste] = {};
+        }
+
+        // Incrémente le compteur pour chaque poste à des horaires spécifiques
+        if (dayPosteTimeCount[jour]![nomPoste]!.containsKey(horaires)) {
+          dayPosteTimeCount[jour]![nomPoste]![horaires] =
+              dayPosteTimeCount[jour]![nomPoste]![horaires]! + 1;
         } else {
-          posteCount[nomPoste] = 1;
+          dayPosteTimeCount[jour]![nomPoste]![horaires] = 1;
         }
       }
     });
 
-    return posteCount;
+    return dayPosteTimeCount;
   }
 
   Future<List<List<dynamic>>> getAllUsers() async {
