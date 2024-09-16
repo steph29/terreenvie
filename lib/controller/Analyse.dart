@@ -344,54 +344,71 @@ class _AnalyseState extends State<Analyse> {
         child: Column(children: [Text("Ki é la?"), EtatDesLieux()]),
       );
 
-  Widget EtatDesLieux() =>
-      FutureBuilder<Map<String, Map<String, Map<String, int>>>>(
-        future:
-            getVolunteersPerPosteByDayAndPosteAndTime(), // Utilise la fonction corrigée
+  Widget EtatDesLieux() => FutureBuilder<
+          Map<String, Map<String, Map<String, List<Map<String, String>>>>>>(
+        future: getVolunteersPerPosteWithUserDetails(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(
-              strokeWidth: 4,
+            return Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 4,
+              ),
             );
           } else if (snapshot.hasError) {
-            return Text('Erreur : ${snapshot.error}');
+            return Center(
+              child: Text('Erreur : ${snapshot.error}'),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Text('Aucune donnée disponible.');
+            return Center(
+              child: Text('Aucune donnée disponible.'),
+            );
           }
 
-          Map<String, Map<String, Map<String, int>>> items = snapshot.data!;
+          Map<String, Map<String, Map<String, List<Map<String, String>>>>>
+              items = snapshot.data!;
 
-          return Container(
-            width: MediaQuery.of(context).size.width / 1.1,
-            height: MediaQuery.of(context).size.height / 3,
-            child: ListView(
-              children: items.entries.map((dayEntry) {
-                String jour = dayEntry.key;
-                Map<String, Map<String, int>> horairesMap = dayEntry.value;
+          return Expanded(
+            // Ajout du SingleChildScrollView pour éviter le débordement
+            child: ListView.builder(
+              shrinkWrap:
+                  true, // Permet au ListView de s'adapter à la hauteur de son contenu
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                String jour = items.keys.elementAt(index);
+                Map<String, Map<String, List<Map<String, String>>>> postesMap =
+                    items[jour]!;
 
-                // ExpansionTile pour chaque jour
                 return ExpansionTile(
                   title: Text('Jour: $jour'),
-                  children: horairesMap.entries.map((timeEntry) {
-                    String horaires = timeEntry.key;
-                    Map<String, int> postes = timeEntry.value;
+                  children: postesMap.entries.map((posteEntry) {
+                    String nomPoste = posteEntry.key;
+                    Map<String, List<Map<String, String>>> horairesMap =
+                        posteEntry.value;
 
-                    // ExpansionTile pour chaque horaire
                     return ExpansionTile(
-                      title: Text('Poste: $horaires'),
-                      children: postes.entries.map((posteEntry) {
-                        String nomPoste = posteEntry.key;
-                        int count = posteEntry.value;
+                      title: Text('Poste: $nomPoste'),
+                      children: horairesMap.entries.map((horaireEntry) {
+                        String horaires = horaireEntry.key;
+                        List<Map<String, String>> benevoles =
+                            horaireEntry.value;
 
-                        // ListTile pour chaque poste
-                        return ListTile(
-                          title: Text('$nomPoste : $count bénévoles'),
+                        return ExpansionTile(
+                          title: Text(
+                              'Horaires: $horaires (${benevoles.length} bénévoles)'),
+                          children: benevoles.map((benevole) {
+                            String nom = benevole['nom']!;
+                            String prenom = benevole['prenom']!;
+
+                            return ListTile(
+                              title: Text('$prenom $nom'),
+                            );
+                          }).toList(),
                         );
                       }).toList(),
                     );
                   }).toList(),
                 );
-              }).toList(),
+              },
             ),
           );
         },
@@ -616,77 +633,70 @@ class _AnalyseState extends State<Analyse> {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
-  Future<Map<String, Map<String, Map<String, int>>>>
-      getVolunteersPerPosteByDayAndPosteAndTime() async {
+  Future<Map<String, Map<String, Map<String, List<Map<String, String>>>>>>
+      getVolunteersPerPosteWithUserDetails() async {
     // Récupère les documents depuis Firestore
     final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
         await FirebaseFirestore.instance.collection('pos_ben').get();
 
-    // Crée une Map pour compter les occurrences de chaque poste par jour et par horaires
-    Map<String, Map<String, Map<String, int>>> dayPosteTimeCount = {};
+    // Map pour compter les occurrences et stocker les détails des bénévoles par jour, poste et horaires
+    Map<String, Map<String, Map<String, List<Map<String, String>>>>>
+        dayPosteTimeVolunteers = {};
 
-    // Parcours des documents Firestore
-    postsSnapshot.docs.forEach((doc) {
+    // Parcours des documents Firestore dans la collection 'pos_ben'
+    for (var doc in postsSnapshot.docs) {
       final data = doc.data();
 
-      // Vérifie que le champ 'pos_id' existe et n'est pas null
       if (data['pos_id'] == null) {
         print("Attention : champ 'pos_id' manquant pour le document ${doc.id}");
-        return; // Passe au document suivant
+        continue;
       }
 
       // Parcours de chaque poste dans le document
       for (var i = 0; i < data['pos_id'].length; i++) {
         final posteData = data['pos_id'][i];
 
-        // Vérifie que le champ 'jour' existe et n'est pas null dans 'pos_id'
-        if (posteData['jour'] == null) {
+        // Vérifie la présence des champs requis (jour, horaires, poste, ben_id)
+        if (posteData['jour'] == null ||
+            posteData['debut'] == null ||
+            posteData['poste'] == null ||
+            data['ben_id'] == null) {
           print(
-              "Attention : champ 'jour' manquant pour le document ${doc.id}, index $i");
-          continue; // Passe à la prochaine entrée
+              "Attention : champ manquant pour le document ${doc.id}, index $i");
+          continue;
         }
 
         String jour = posteData['jour'] as String;
-
-        // Vérifie que le champ 'horaires' existe et n'est pas null dans 'pos_id'
-        if (posteData['debut'] == null) {
-          print(
-              "Attention : champ 'debut' manquant pour le document ${doc.id}, index $i");
-          continue; // Passe à la prochaine entrée
-        }
-
         String horaires = posteData['debut'] as String;
-
-        // Vérifie que le champ 'poste' existe et n'est pas null
-        if (posteData['poste'] == null) {
-          print(
-              "Attention : champ 'poste' manquant pour le document ${doc.id}, index $i");
-          continue; // Passe à la prochaine entrée
-        }
-
         String nomPoste = posteData['poste'] as String;
+        String benId = data['ben_id'] as String;
 
-        // Initialiser le sous-Map pour ce jour s'il n'existe pas encore
-        if (!dayPosteTimeCount.containsKey(jour)) {
-          dayPosteTimeCount[jour] = {};
+        // Récupère les informations du bénévole depuis la collection 'users'
+        DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
+            .instance
+            .collection('users')
+            .doc(benId)
+            .get();
+        if (!userDoc.exists) {
+          print("Bénévole non trouvé pour ben_id: $benId");
+          continue;
         }
+        final userData = userDoc.data();
+        String nom = userData?['nom'] ?? 'Nom inconnu';
+        String prenom = userData?['prenom'] ?? 'Prénom inconnu';
 
-        // Initialiser le sous-Map pour ce poste s'il n'existe pas encore pour ce jour
-        if (!dayPosteTimeCount[jour]!.containsKey(nomPoste)) {
-          dayPosteTimeCount[jour]![nomPoste] = {};
-        }
+        // Initialiser les sous-Map pour le jour, poste et horaires s'ils n'existent pas encore
+        dayPosteTimeVolunteers[jour] ??= {};
+        dayPosteTimeVolunteers[jour]![nomPoste] ??= {};
+        dayPosteTimeVolunteers[jour]![nomPoste]![horaires] ??= [];
 
-        // Incrémente le compteur pour chaque poste à des horaires spécifiques
-        if (dayPosteTimeCount[jour]![nomPoste]!.containsKey(horaires)) {
-          dayPosteTimeCount[jour]![nomPoste]![horaires] =
-              dayPosteTimeCount[jour]![nomPoste]![horaires]! + 1;
-        } else {
-          dayPosteTimeCount[jour]![nomPoste]![horaires] = 1;
-        }
+        // Ajoute le bénévole (nom et prénom) à la liste pour ce poste et horaires
+        dayPosteTimeVolunteers[jour]![nomPoste]![horaires]!
+            .add({'nom': nom, 'prenom': prenom});
       }
-    });
+    }
 
-    return dayPosteTimeCount;
+    return dayPosteTimeVolunteers;
   }
 
   Future<List<List<dynamic>>> getAllUsers() async {
