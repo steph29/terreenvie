@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'kikeou.dart';
 
 class Users {
   final String id;
@@ -112,108 +113,6 @@ class _AnalyseState extends State<Analyse> {
             children: [kifekoi(), kiela()],
           )
         ],
-      );
-
-  Widget Kikeou() => Container(
-        decoration: BoxDecoration(
-          color: Colors.pinkAccent.withOpacity(0.1),
-        ),
-        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
-            ? MediaQuery.of(context).size.width / 2.5
-            : MediaQuery.of(context).size.width / 1.1,
-        height: MediaQuery.of(context).size.height / 2.5,
-        child: Column(
-          children: [
-            Text("Ki ké où "),
-            buildSegmentControl(),
-            new DropdownButton<String>(
-                items: <String>[
-                  'Animation Sonores',
-                  'Ateliers animation enfants',
-                  'Barriere',
-                  'benevoles volants',
-                  'Bénévole Volant',
-                  'Benevoles volants',
-                  'Buvette principale',
-                  'Chapiteau',
-                  'Conferences',
-                  'Decoration',
-                  'Demontage / Nettoyage',
-                  'Electricite',
-                  'Entree',
-                  'Exposants',
-                  'Faire les crepes',
-                  'Flechage',
-                  'Flechage / Signalétique',
-                  'Montage',
-                  'Plomberie',
-                  'Restauration Benevoles',
-                  'Restauration Visiteurs',
-                  'Secours',
-                  'Sono',
-                  'Stand',
-                  'Surveillance',
-                  'Tisanerie',
-                  'Toilettes seches',
-                  'Vaisselle',
-                  'Ventes de crepes'
-                ].map((String value) {
-                  //La fonction crée un objet qui aura la même valeur et le même texte, à partir du tableau d'objet
-                  return new DropdownMenuItem<String>(
-                    value: value,
-                    child: new Text(value),
-                  );
-                }).toList(),
-                hint: const Text(
-                  'Quel poste voulez-vous sélectionner ?',
-                ),
-                value: selectedPoste,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedPoste = newValue;
-                  });
-                }),
-            FutureBuilder<List<List<dynamic>>>(
-              future: fetchData(groupValue),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(
-                    strokeWidth: 4,
-                  );
-                } else if (snapshot.hasError) {
-                  return Text('Erreur : ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('Aucune donnée disponible.');
-                }
-                List<List<dynamic>> items = snapshot.data!;
-                print(totalCount);
-                return Expanded(
-                    child: Container(
-                  width: MediaQuery.of(context).size.width / 1.1,
-                  height: MediaQuery.of(context).size.height / 6,
-                  child: ListView(
-                    children: items.map((item) {
-                      // Créez des Widgets à partir des données de chaque élément
-                      return ListTile(
-                        title: Text(
-                            'Nom, prénom, tél : ${item[0]} ${item[1]} ${item[2]}'),
-                        subtitle: Text(
-                            'Poste: le ${item[3]} à ${item[4]} de ${item[5]} à ${item[6]}'),
-                        // Ajoutez d'autres éléments ici en fonction de votre structure de données
-                      );
-                    }).toList(),
-                  ),
-                ));
-              },
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await _createPDF();
-              },
-              child: Text("Télécharger la liste"),
-            ),
-          ],
-        ),
       );
 
   Widget Listedeski() => Container(
@@ -449,100 +348,36 @@ class _AnalyseState extends State<Analyse> {
         ),
       );
 
-  Future<List<List>> fetchData(String groupValue) async {
-    items = [];
-    Widget? itemWidget = null;
-    totalCount = 0;
-    QuerySnapshot<Map<String, dynamic>> posBenSnapshot =
-        await FirebaseFirestore.instance.collection('pos_ben').get();
+  Future<List<List<dynamic>>> fetchVolunteersForPoste(String poste) async {
+    // Récupère les bénévoles à partir du document pos_ben
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('pos_ben')
+        .where('pos_id.poste', isEqualTo: poste)
+        .get();
 
-    // Convertissez les documents en une liste pour trier les résultats
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-        posBenSnapshot.docs;
+    // Retourne une liste des informations des bénévoles sous forme de tableau dynamique
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return [
+        data['nom'], // Nom
+        data['prenom'], // Prénom
+        data['telephone'], // Téléphone
+        data['jour'], // Jour
+        data['poste'], // Poste
+        data['horaire_debut'], // Heure début
+        data['horaire_fin'], // Heure fin
+      ];
+    }).toList();
+  }
 
-    // Triez les documents en fonction du champ "poste" à l'index 0, puis du champ "jour"
-    documents.sort((a, b) {
-      String posteA = a.get('pos_id')[0]['poste'] ?? '';
-      String posteB = b.get('pos_id')[0]['poste'] ?? '';
-      String jourA = a.get('pos_id')[0]['jour'] ?? 0;
-      String jourB = b.get('pos_id')[0]['jour'] ?? 0;
-      String heureA = a.get('pos_id')[0]['debut'] ?? 0;
-      String HeureB = b.get('pos_id')[0]['debut'] ?? 0;
+  Future<List<String>> fetchPostes() async {
+    // Récupère les postes à partir du document pos_hor
+    final QuerySnapshot<Map<String, dynamic>> snapshot =
+        await FirebaseFirestore.instance.collection('pos_hor').get();
 
-      int posteComparison = posteA.compareTo(posteB);
-      int jourComparaison = jourA.compareTo(jourB);
-
-      if (posteComparison == 0) {
-        // Si les postes sont identiques, comparez par jour
-        if (jourComparaison == 0) {
-          return heureA.compareTo(HeureB);
-        } else {
-          return jourA.compareTo(jourB);
-        }
-      } else {
-        return posteComparison;
-      }
-    });
-
-    for (QueryDocumentSnapshot<Map<String, dynamic>> document in documents) {
-      Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-      // Accédez à la liste "pos_id"
-      List<dynamic>? posIdList = data['pos_id'];
-      if (posIdList != null && posIdList.isNotEmpty) {
-        // Accédez au premier élément (index 0) de "pos_id"
-        Map<String, dynamic>? firstPosId = posIdList[0];
-        if (firstPosId != null) {
-          // Accédez au champ "jour" dans le premier élément de "pos_id"
-          String? jour = firstPosId['jour'];
-          String? poste = firstPosId['poste'];
-
-          if (jour != null && jour == groupValue) {
-            // Si le champ "jour" correspond à groupValue, ajoutez cet élément à la liste
-            if (poste != null && poste == selectedPoste) {
-              String? benevoleId = data['ben_id'] as String?;
-
-              if (benevoleId != null) {
-                DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(benevoleId)
-                        .get();
-
-                if (userSnapshot.exists) {
-                  Map<String, dynamic> userData =
-                      userSnapshot.data() as Map<String, dynamic>;
-
-                  itemWidget = ListTile(
-                    title: Text(
-                        'Nom et prénom de l\'utilisateur: ${userData['nom']} ${userData['prenom']}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            'Élément du poste: ${data['pos_id'][0]['poste']} de ${data['pos_id'][0]['debut']} à ${data['pos_id'][0]['fin']} le ${data['pos_id'][0]['jour']}'), // Remplacez "votre_champ" par le champ que vous souhaitez afficher
-                        // Ajoutez d'autres champs de "pos_ben" ici si nécessaire
-                      ],
-                    ),
-                  );
-                  items.add([
-                    userData['nom'].toUpperCase(),
-                    userData['prenom'],
-                    userData['tel'],
-                    data['pos_id'][0]['jour'],
-                    data['pos_id'][0]['poste'],
-                    data['pos_id'][0]['debut'],
-                    data['pos_id'][0]['fin']
-                  ]);
-                  totalCount++;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return items;
+    // Retourne la liste des postes
+    return snapshot.docs.map((doc) => doc['poste'] as String).toList();
   }
 
   Future<void> _createPDF() async {
