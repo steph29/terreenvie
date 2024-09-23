@@ -30,6 +30,24 @@ class Poste {
   });
 }
 
+class BenevoleAvecPoste {
+  final String nom;
+  final String prenom;
+  final String poste;
+  final String jour;
+
+  BenevoleAvecPoste({
+    required this.nom,
+    required this.prenom,
+    required this.poste,
+    required this.jour,
+  });
+  @override
+  String toString() {
+    return '$prenom $nom, Poste: $poste, Jour: $jour';
+  }
+}
+
 class Analyse extends StatefulWidget {
   const Analyse({Key? key}) : super(key: key);
 
@@ -54,6 +72,7 @@ class _AnalyseState extends State<Analyse> {
   List<Poste> userPosts = [];
   List<List<dynamic>> userse = [];
   List<Poste> postesUsers = [];
+  List<BenevoleAvecPoste> benevolesAvecPostes = [];
 
   @override
   void initState() {
@@ -85,7 +104,8 @@ class _AnalyseState extends State<Analyse> {
           space(),
           Listedeski(),
           space(),
-          kiela()
+          kiela(),
+          ListTotal(),
         ],
       );
 
@@ -93,7 +113,8 @@ class _AnalyseState extends State<Analyse> {
         height: 30,
       );
 
-  Widget isWeb() => Column(
+  Widget isWeb() => SingleChildScrollView(
+          child: Column(
         children: [
           SizedBox(
             height: 5,
@@ -111,9 +132,16 @@ class _AnalyseState extends State<Analyse> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [kifekoi(), kiela()],
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [ListTotal()],
           )
         ],
-      );
+      ));
 
   Widget Listedeski() => Container(
         decoration: BoxDecoration(
@@ -657,4 +685,139 @@ class _AnalyseState extends State<Analyse> {
     final data = await rootBundle.load('$name');
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
+
+// Fonction pour récupérer les bénévoles avec leurs postes
+  Future<List<BenevoleAvecPoste>> getVolunteersWithPosts() async {
+    List<BenevoleAvecPoste> benevolesAvecPostes = [];
+
+    // Récupère les documents de la collection 'pos_ben'
+    final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
+        await FirebaseFirestore.instance.collection('pos_ben').get();
+
+    // Parcours des documents 'pos_ben'
+    for (var postDoc in postsSnapshot.docs) {
+      final postData = postDoc.data();
+
+      // Assurez-vous que ben_id existe
+      if (postData.containsKey('ben_id')) {
+        String benId = postData['ben_id'] as String;
+
+        // Récupère les informations du bénévole correspondant depuis la collection 'user'
+        DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
+            .instance
+            .collection('users')
+            .doc(benId)
+            .get();
+
+        final userData = userDoc.data();
+        if (userData != null) {
+          String nom = userData['nom'] as String;
+          String prenom = userData['prenom'] as String;
+
+          // Vérifiez si 'pos_id' est une liste
+          if (postData['pos_id'] is List) {
+            List<dynamic> postes = postData['pos_id'];
+
+            // Parcours de chaque poste dans la liste
+            for (var posteItem in postes) {
+              String poste = "";
+              String jour = "";
+
+              // Vérifiez que posteItem est un Map
+              if (posteItem is Map<String, dynamic>) {
+                // Récupération des données du poste
+                if (posteItem.containsKey('poste')) {
+                  poste = posteItem['poste'] as String;
+                  // jour = posteItem['jour'] as String;
+                }
+                if (posteItem.containsKey('jour')) {
+                  jour = posteItem['jour'] as String;
+                }
+              }
+
+              // Ajoute le bénévole avec son poste dans la liste
+              benevolesAvecPostes.add(BenevoleAvecPoste(
+                  nom: nom, prenom: prenom, poste: poste, jour: jour));
+            }
+          } else {
+            print(
+                'Erreur : pos_id n\'est pas une liste pour le bénévole $benId');
+          }
+        }
+      } else {
+        print('Erreur : ben_id manquant dans le document ${postDoc.id}');
+      }
+    }
+
+    // Trie les bénévoles par poste
+    benevolesAvecPostes.sort((a, b) => a.poste.compareTo(b.poste));
+
+    return benevolesAvecPostes;
+  }
+
+  Widget ListTotal() => Container(
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 119, 0, 255).withOpacity(0.1),
+      ),
+      width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+          ? MediaQuery.of(context).size.width / 2.5
+          : MediaQuery.of(context).size.width / 1.1,
+      height: MediaQuery.of(context).size.height / 2.5,
+      child: Column(children: [
+        Text('La liste de tout le monde ! '),
+        FutureBuilder<List<BenevoleAvecPoste>>(
+          future: getVolunteersWithPosts(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text('Erreur : ${snapshot.error}'),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(
+                child: Text('Aucune donnée disponible.'),
+              );
+            }
+
+            // Récupère la liste des bénévoles
+            List<BenevoleAvecPoste> volunteers = snapshot.data!;
+
+            // Nombre total de bénévoles
+            int totalVolunteers = volunteers.length;
+
+            return Expanded(
+                child: Column(
+              children: [
+                // Affiche le nombre total de bénévoles
+                Text(
+                  'Nombre total de postes occupés : $totalVolunteers',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 16),
+
+                // Affiche la liste des bénévoles, classés par poste
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: volunteers.length,
+                    itemBuilder: (context, index) {
+                      final volunteer = volunteers[index];
+                      return ListTile(
+                        title: Text('${volunteer.prenom} ${volunteer.nom}'),
+                        subtitle: Text(
+                            'Poste : ${volunteer.poste}, le ${volunteer.jour}'),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ));
+          },
+        )
+      ]));
 }
