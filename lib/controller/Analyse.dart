@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'kikeou.dart';
+import 'package:terreenvie/model/BenevoleListWidgetState.dart';
 
 class Users {
   final String id;
@@ -105,7 +106,7 @@ class _AnalyseState extends State<Analyse> {
           Listedeski(),
           space(),
           kiela(),
-          ListTotal(),
+          ListTotal()
         ],
       );
 
@@ -138,7 +139,7 @@ class _AnalyseState extends State<Analyse> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [ListTotal()],
+            children: [ListTotal(), BenevoleListWidget()],
           )
         ],
       ));
