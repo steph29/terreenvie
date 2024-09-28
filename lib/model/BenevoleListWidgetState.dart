@@ -266,7 +266,6 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
         }
       }
     }
-
     // Trier par nom puis par prénom
     items.sort((a, b) {
       int nomComparison = a[0].compareTo(b[0]);
