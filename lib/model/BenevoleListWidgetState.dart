@@ -55,8 +55,9 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
             .collection('users')
             .doc(benId)
             .get();
-
-        if (userSnapshot.exists) {
+             
+              
+           if (userSnapshot.exists) {
           // Convertir les données en Map<String, dynamic>
           Map<String, dynamic>? userData =
               userSnapshot.data() as Map<String, dynamic>?;
