@@ -62,8 +62,12 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
               userSnapshot.data() as Map<String, dynamic>?;
 
           if (userData != null) {
-            uniqueBenevoles
-                .add({'nom': userData['nom'], 'prenom': userData['prenom']});
+            uniqueBenevoles.add({
+              'nom': userData['nom'],
+              'prenom': userData['prenom'],
+              'tel': userData['tel'],
+              'email': userData['email']
+            });
           }
         }
       }
@@ -95,7 +99,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
                 return pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
                   child: pw.Text(
-                      '${benevole['prenom']} ${benevole['nom']} - Email: ${benevole['email']}, Téléphone: ${benevole['telephone']}'),
+                      '${benevole['prenom']} ${benevole['nom']} - Email: ${benevole['email']}, Téléphone: ${benevole['tel']}'),
                 );
               },
             ),
@@ -154,7 +158,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              'Email: ${benevole['email']}, Téléphone: ${benevole['telephone']}',
+                              'Email: ${benevole['email']}, Téléphone: ${benevole['tel']}',
                             ),
                           );
                         },
@@ -193,17 +197,21 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     grid.style = PdfGridStyle(
         font: PdfStandardFont(PdfFontFamily.helvetica, 12),
         cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    grid.columns.add(count: 2);
+    grid.columns.add(count: 4);
     grid.headers.add(1);
 
     PdfGridRow headers = grid.headers[0];
     headers.cells[0].value = 'Nom';
     headers.cells[1].value = 'Prenom';
+    headers.cells[2].value = 'Tel';
+    headers.cells[3].value = 'Email';
 
     for (var i = 0; i < items.length; i++) {
       PdfGridRow row = grid.rows.add();
       row.cells[0].value = items[i][0];
       row.cells[1].value = items[i][1];
+      row.cells[2].value = items[i][2];
+      row.cells[3].value = items[i][3];
     }
 
     grid.draw(
@@ -250,7 +258,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
             // Créer une clé unique (nom + prénom) pour détecter les doublons
             String fullName =
-                '${userData['nom'].toUpperCase()} ${userData['prenom']}';
+                '${userData['nom'].toUpperCase()} ${userData['prenom']} ${userData['email']}';
 
             // Vérifier si la clé existe déjà dans le Set
             if (!uniqueBenevoles.contains(fullName)) {
@@ -259,6 +267,8 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
               items.add([
                 userData['nom'].toUpperCase(),
                 userData['prenom'],
+                userData['tel'],
+                userData['email']
               ]);
               totalCount++;
             }

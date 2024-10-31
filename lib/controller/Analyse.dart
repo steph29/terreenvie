@@ -106,7 +106,8 @@ class _AnalyseState extends State<Analyse> {
           Listedeski(),
           space(),
           kiela(),
-          ListTotal()
+          ListTotal(),
+          BenevoleListWidget()
         ],
       );
 
