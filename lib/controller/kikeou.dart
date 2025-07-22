@@ -4,9 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'Analyse.dart';
 
 class Kikeou extends StatefulWidget {
   @override
@@ -220,7 +218,6 @@ class _KikeouState extends State<Kikeou> {
 
   Future<List<List>> fetchData(String? groupValue) async {
     items = [];
-    Widget? itemWidget = null;
     totalCount = 0;
 
     // Si selectedPoste est null, ne pas récupérer les données

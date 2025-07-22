@@ -28,33 +28,34 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cupertino_icons: ^1.0.2
-  easy_sidemenu: ^0.4.2
-  firebase_auth: ^4.1.2
-  firebase_core: ^2.28.0
-  firebase_database: ^10.0.6
-  firebase_storage: ^11.0.10
+  easy_sidemenu: ^0.7.0
+  firebase_auth: ^5.6.0
+  firebase_core: ^3.14.0
+  firebase_database: ^11.3.7
+  firebase_storage: ^12.4.7
   flutter:
     sdk: flutter
   provider: ^6.0.5
   url_launcher: ^6.1.11
   get: ^4.6.5
-  cloud_firestore: ^4.16.0
-  lottie: ^2.2.0
+  cloud_firestore: ^5.6.9
+  lottie: ^3.3.1
   scroll_date_picker: ^3.6.1
-  fl_chart: ^0.62.0
+  fl_chart: ^1.0.0
   pdf: ^3.10.1
   webview_flutter: ^4.2.4
-  flutter_widget_from_html_core: ^0.8.0
-  google_fonts: ^4.0.4
+  flutter_widget_from_html_core: ^0.16.0
+  google_fonts: ^6.2.1
   path_provider: ^2.1.1
-  syncfusion_flutter_pdf: ^22.2.12
+  syncfusion_flutter_pdf: ^29.2.10
   open_file: ^3.3.2
   flutter_dotenv: ^5.1.0
   http: ^1.2.0
-  firebase_messaging: ^14.8.0
-  flutter_launcher_icons: ^0.13.1
-  web: ^0.5.1
-  printing: ^5.12.0
+  firebase_messaging: ^15.2.8
+  flutter_launcher_icons: ^0.14.3
+  web: ^1.1.1
+  printing: ^5.14.2
+  rxdart: ^0.28.0
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -81,7 +82,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
 

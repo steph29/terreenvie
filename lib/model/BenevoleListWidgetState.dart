@@ -115,70 +115,64 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: benevoles.isEmpty
-          ? Container(
-              child: CircularProgressIndicator(),
-              width: (kIsWeb || MediaQuery.of(context).size.width > 920)
-                  ? MediaQuery.of(context).size.width / 2.5
-                  : MediaQuery.of(context).size.width / 1.1,
-              height: MediaQuery.of(context).size.height / 2.5,
-            )
-          : Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Container(
-                width: (kIsWeb || MediaQuery.of(context).size.width > 920)
-                    ? MediaQuery.of(context).size.width / 2.5
-                    : MediaQuery.of(context).size.width / 1.1,
-                height: MediaQuery.of(context).size.height / 2.5,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200], // Couleur de fond du container
-                  borderRadius: BorderRadius.circular(5.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 6.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Expanded(
-                        child: Container(
-                      width: MediaQuery.of(context).size.width / 1.1,
-                      height: MediaQuery.of(context).size.height / 6,
-                      child: ListView.builder(
-                        itemCount: benevoles.length,
-                        itemBuilder: (context, index) {
-                          final benevole = benevoles[index];
-                          return ListTile(
-                            title: Text(
-                              '${benevole['prenom']} ${benevole['nom']}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(
-                              'Email: ${benevole['email']}, Téléphone: ${benevole['tel']}',
-                            ),
-                          );
-                        },
-                      ),
-                    )),
-                    // Ajout du bouton dans un container aligné en bas
-                    ElevatedButton(
-                      onPressed: () async {
-                        // Appeler fetchData avant la génération du PDF
-                        await fetchData(); // Passer un paramètre si nécessaire
-
-                        // Ensuite, générer le PDF avec les données récupérées
-                        await _createPDF();
-                      },
-                      child: Text("Télécharger la liste des entrée"),
-                    ),
-                  ],
-                ),
-              ),
+      child: Container(
+        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+            ? MediaQuery.of(context).size.width / 2.5
+            : MediaQuery.of(context).size.width / 1.1,
+        height: MediaQuery.of(context).size.height / 2.5,
+        decoration: BoxDecoration(
+          color: Colors.grey[200], // Couleur de fond du container
+          borderRadius: BorderRadius.circular(5.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6.0,
+              offset: Offset(0, 2),
             ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text('La liste des bénévoles de cette année'),
+            Expanded(
+                child: benevoles.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : Container(
+                        width: MediaQuery.of(context).size.width / 1.1,
+                        height: MediaQuery.of(context).size.height / 6,
+                        child: ListView.builder(
+                          itemCount: benevoles.length,
+                          itemBuilder: (context, index) {
+                            final benevole = benevoles[index];
+                            return Column(children: [
+                              ListTile(
+                                title: Text(
+                                  '${benevole['prenom']} ${benevole['nom']}',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Text(
+                                  'Email: ${benevole['email']}, Téléphone: ${benevole['tel']}',
+                                ),
+                              ),
+                            ]);
+                          },
+                        ),
+                      )),
+            // Ajout du bouton dans un container aligné en bas
+            ElevatedButton(
+              onPressed: () async {
+                // Appeler fetchData avant la génération du PDF
+                await fetchData(); // Passer un paramètre si nécessaire
+
+                // Ensuite, générer le PDF avec les données récupérées
+                await _createPDF();
+              },
+              child: Text("Télécharger la liste des entrée"),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

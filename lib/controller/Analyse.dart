@@ -8,6 +8,7 @@ import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'kikeou.dart';
 import 'package:terreenvie/model/BenevoleListWidgetState.dart';
+import 'RadarChartScreen.dart';
 
 class Users {
   final String id;
@@ -107,7 +108,25 @@ class _AnalyseState extends State<Analyse> {
           space(),
           kiela(),
           ListTotal(),
-          BenevoleListWidget()
+          BenevoleListWidget(),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(5.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 6.0,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                ? MediaQuery.of(context).size.width / 2.5
+                : MediaQuery.of(context).size.width / 1.1,
+            height: MediaQuery.of(context).size.height / 2.5,
+            child: RadarChartScreen(),
+          ),
         ],
       );
 
@@ -141,7 +160,42 @@ class _AnalyseState extends State<Analyse> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [ListTotal(), BenevoleListWidget()],
-          )
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(5.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 6.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                    ? MediaQuery.of(context).size.width / 2.5
+                    : MediaQuery.of(context).size.width / 1.1,
+                height: MediaQuery.of(context).size.height / 2.5,
+                child: RadarChartScreen(),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.yellowAccent.withOpacity(0.1),
+                ),
+                width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                    ? MediaQuery.of(context).size.width / 2.5
+                    : MediaQuery.of(context).size.width / 1.1,
+                height: MediaQuery.of(context).size.height / 2.5,
+              )
+            ],
+          ),
         ],
       ));
 
