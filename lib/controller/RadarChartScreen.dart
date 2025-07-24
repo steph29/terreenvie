@@ -34,6 +34,19 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialiser groupValue sur le jour d'aujourd'hui (français)
+    final joursFrancais = [
+      'Lundi',
+      'Mardi',
+      'Mercredi',
+      'Jeudi',
+      'Vendredi',
+      'Samedi',
+      'Dimanche'
+    ];
+    final today = DateTime.now();
+    // DateTime.weekday: 1 = lundi, 7 = dimanche
+    groupValue = joursFrancais[today.weekday - 1];
     _fetchPostes(); // Récupérer les intitulés des postes au démarrage
   }
 
@@ -61,41 +74,48 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
   Future<void> _fetchHoraires() async {
     if (groupValue == null) return;
     try {
-      // On suppose que chaque poste a les mêmes horaires pour un jour donné
       final posHorSnapshot = await _posHorRef.get();
       Set<String> horairesSet = {};
       for (var doc in posHorSnapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        if (data['jour'] == groupValue &&
-            data['debut'] != null &&
-            data['fin'] != null) {
-          // On ajoute tous les créneaux horaires (par heure)
-          int debut = int.tryParse(data['debut'].toString().split(':')[0]) ?? 8;
-          int fin = int.tryParse(data['fin'].toString().split(':')[0]) ?? 20;
-          for (int h = debut; h < fin; h++) {
-            horairesSet.add(h.toString().padLeft(2, '0') + ':00');
+        if (data['jour'] == groupValue && data['hor'] != null) {
+          for (var h in data['hor']) {
+            if (h is Map && h['debut'] != null) {
+              horairesSet.add(h['debut'].toString());
+            }
           }
         }
       }
       if (horairesSet.isEmpty) {
         // Valeur par défaut si rien trouvé
         horairesSet = {
-          '08:00',
-          '09:00',
-          '10:00',
-          '11:00',
-          '12:00',
-          '13:00',
-          '14:00',
-          '15:00',
-          '16:00',
-          '17:00',
-          '18:00',
-          '19:00',
-          '20:00'
+          '08h00',
+          '09h00',
+          '10h00',
+          '11h00',
+          '12h00',
+          '13h00',
+          '14h00',
+          '15h00',
+          '16h00',
+          '17h00',
+          '18h00',
+          '19h00',
+          '20h00'
         };
       }
-      _horaires = horairesSet.toList()..sort();
+      // Tri intelligent : par heure si possible
+      List<String> horairesList = horairesSet.toList();
+      horairesList.sort((a, b) {
+        // Extraire l'heure en int pour trier
+        int getHour(String s) {
+          final match = RegExp(r'^(\d{1,2})').firstMatch(s);
+          return match != null ? int.parse(match.group(1)!) : 0;
+        }
+
+        return getHour(a).compareTo(getHour(b));
+      });
+      _horaires = horairesList;
       _selectedHoraireIndex = 0;
       setState(() {});
     } catch (e) {
@@ -103,32 +123,72 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
     }
   }
 
+  String normalizeHour(String s) {
+    // Garde uniquement les chiffres et les lettres h ou : puis remplace : par h
+    return s.replaceAll(RegExp(r'[^0-9h:]'), '').replaceAll(':', 'h');
+  }
+
   Future<void> _fetchData() async {
     if (groupValue == null || _horaires.isEmpty) return;
     String selectedHoraire = _horaires[_selectedHoraireIndex];
     try {
-      final nbBenSnapshot = await _posHorRef.doc('hor').get();
-      final nbBenData = nbBenSnapshot.data() as Map<String, dynamic>?;
-      final nbBen = nbBenData?['nbBen'] ?? 1;
       List<double> values = List.filled(_postes.length, 0.0);
+      // Nouveau : compter le nombre de bénévoles par poste pour le créneau sélectionné
       final posBenSnapshot = await _posBenRef.get();
-      for (var posDoc in posBenSnapshot.docs) {
-        final daySnapshot =
-            await _posBenRef.doc(posDoc.id).collection(groupValue!).get();
-        for (var doc in daySnapshot.docs) {
-          final data = doc.data() as Map<String, dynamic>;
-          // On suppose que la clé de l'heure est présente dans les données
-          for (int i = 0; i < _postes.length; i++) {
-            String posteId = _postes[i];
-            if (posteId != '—' &&
-                data.containsKey(posteId) &&
-                data['heure'] == selectedHoraire) {
-              int count = data[posteId];
-              double percentage = (count / nbBen) * 100;
-              values[i] = percentage;
+      // Compteur par poste
+      Map<String, int> countByPoste = {for (var p in _postes) p: 0};
+      for (var doc in posBenSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['pos_id'] != null && data['pos_id'] is List) {
+          for (var affectation in data['pos_id']) {
+            if (affectation is Map) {
+              final poste = affectation['poste']?.toString();
+              final jour = affectation['jour']?.toString();
+              final debut = affectation['debut']?.toString();
+              if (poste != null &&
+                  jour == groupValue &&
+                  normalizeHour(debut ?? '') ==
+                      normalizeHour(selectedHoraire)) {
+                if (countByPoste.containsKey(poste)) {
+                  countByPoste[poste] = countByPoste[poste]! + 1;
+                }
+              }
             }
           }
         }
+      }
+      // Récupérer le nombre de places par poste/créneau dans pos_hor
+      final posHorSnapshot = await _posHorRef.get();
+      Map<String, int> placesByPoste = {
+        for (var p in _postes) p: 1
+      }; // Valeur par défaut 1 pour éviter division par zéro
+      for (var doc in posHorSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['jour'] == groupValue &&
+            data['poste'] != null &&
+            data['hor'] != null) {
+          String poste = data['poste'].toString();
+          for (var h in data['hor']) {
+            if (h is Map &&
+                h['debut'] != null &&
+                normalizeHour(h['debut'].toString()) ==
+                    normalizeHour(selectedHoraire)) {
+              int nbTot = 1;
+              if (h['tot'] != null) {
+                nbTot = int.tryParse(h['tot'].toString()) ?? 1;
+              }
+              placesByPoste[poste] = nbTot;
+            }
+          }
+        }
+      }
+      // Calcul du taux de remplissage (en pourcentage)
+      for (int i = 0; i < _postes.length; i++) {
+        String poste = _postes[i];
+        int count = countByPoste[poste] ?? 0;
+        int nbPlaces = placesByPoste[poste] ?? 1;
+        double percentage = (count / nbPlaces) * 100;
+        values[i] = percentage;
       }
       setState(() {
         _dataValues = values;

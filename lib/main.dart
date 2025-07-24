@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
-    _messageStreamController.listen((message) {
+    _messageSubscription = _messageStreamController.listen((message) {
       setState(() {
         if (message.notification != null) {
           // Si le message contient un titre et un corps de notification

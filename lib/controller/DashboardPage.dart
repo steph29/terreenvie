@@ -107,11 +107,12 @@ class _DashboardPageState extends State<DashboardPage> {
       shrinkWrap: true,
       itemCount: poste.length,
       itemBuilder: (context, j) {
-        var hord = snapshot.data?.docs[i]['pos_id'][j]["debut"];
-        var horf = snapshot.data?.docs[i]['pos_id'][j]["fin"];
-        var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
-        var postes = snapshot.data?.docs[i]['pos_id'][j]['poste'];
-        var idPoste = snapshot.data?.docs[i]['pos_id'][j]['posteId'];
+        var affectation = snapshot.data?.docs[i]['pos_id'][j];
+        var hord = affectation["debut"];
+        var horf = affectation["fin"];
+        var jour = affectation['jour'];
+        var postes = affectation['poste'];
+        var idPoste = affectation['posteId'];
 
         return Card(
           child: ListTile(
@@ -134,13 +135,50 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               icon: Icon(Icons.delete),
               onPressed: () async {
-                updatePosHor(idPoste, hord, horf);
-                // UpdateBen(idPoste, posteId, hord, horf);
-
+                // 1. Supprimer l'affectation dans pos_ben
                 await FirebaseFirestore.instance
                     .collection("pos_ben")
                     .doc(posteId.toString())
-                    .delete();
+                    .update({
+                  'pos_id': FieldValue.arrayRemove([affectation])
+                });
+
+                // 2. Incrémenter nbBen dans pos_hor
+                final doc = await FirebaseFirestore.instance
+                    .collection('pos_hor')
+                    .doc(idPoste.toString())
+                    .get();
+                if (doc.exists) {
+                  List<dynamic> horList = List.from(doc.data()!['hor']);
+                  for (var h in horList) {
+                    if (h['debut'] == hord && h['fin'] == horf) {
+                      h['nbBen'] = (h['nbBen'] ?? 0) + 1;
+                      break;
+                    }
+                  }
+                  await FirebaseFirestore.instance
+                      .collection('pos_hor')
+                      .doc(idPoste.toString())
+                      .update({'hor': horList});
+                }
+
+                // 3. Si le tableau pos_id est vide, supprimer le document pos_ben
+                final posBenDoc = await FirebaseFirestore.instance
+                    .collection("pos_ben")
+                    .doc(posteId.toString())
+                    .get();
+                if (posBenDoc.exists) {
+                  final data = posBenDoc.data();
+                  if (data != null &&
+                      (data['pos_id'] == null ||
+                          (data['pos_id'] as List).isEmpty)) {
+                    await FirebaseFirestore.instance
+                        .collection("pos_ben")
+                        .doc(posteId.toString())
+                        .delete();
+                  }
+                }
+                setState(() {});
               },
             ),
           ),

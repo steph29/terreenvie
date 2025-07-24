@@ -439,8 +439,35 @@ class _ComptePageState extends State<ComptePage> {
       );
 
   void insertNewPoste(String posteId, String poste, String debut, String desc,
-      String fin, String jour) {
-    FirebaseFirestore.instance.collection("pos_ben").doc().set({
+      String fin, String jour) async {
+    // Vérifier si l'utilisateur a déjà ce créneau
+    final query = await FirebaseFirestore.instance
+        .collection("pos_ben")
+        .where("ben_id", isEqualTo: userId?.uid)
+        .get();
+
+    bool alreadyExists = false;
+    for (var doc in query.docs) {
+      List<dynamic> posIds = doc['pos_id'] ?? [];
+      for (var pos in posIds) {
+        if (pos['poste'] == poste &&
+            pos['debut'] == debut &&
+            pos['fin'] == fin &&
+            pos['jour'] == jour) {
+          alreadyExists = true;
+          break;
+        }
+      }
+      if (alreadyExists) break;
+    }
+
+    if (alreadyExists) {
+      // Afficher un message ou ne rien faire
+      return;
+    }
+
+    // Ajouter le créneau
+    await FirebaseFirestore.instance.collection("pos_ben").doc().set({
       "createdAt": DateTime.now(),
       "pos_id": FieldValue.arrayUnion([
         {
@@ -457,47 +484,23 @@ class _ComptePageState extends State<ComptePage> {
   }
 
   void updateCheckedValue(String posteId, bool checked, int nben, String debut,
-      String fin, String poste, String desc) {
-    FirebaseFirestore.instance
+      String fin, String poste, String desc) async {
+    final doc = await FirebaseFirestore.instance
         .collection('pos_hor')
         .doc(posteId.toString())
-        .update({
-      "jour": groupValue,
-      "poste": poste,
-      "desc": desc,
-      "hor": FieldValue.arrayRemove([
-        {"debut": debut, "fin": fin, "nbBen": nben, "check": !checked}
-      ]),
-    }).then((value) {
-      FirebaseFirestore.instance
+        .get();
+    if (doc.exists) {
+      List<dynamic> horList = List.from(doc.data()!['hor']);
+      for (var h in horList) {
+        if (h['debut'] == debut && h['fin'] == fin) {
+          h['nbBen'] = checked ? (h['nbBen'] ?? 0) - 1 : (h['nbBen'] ?? 0) + 1;
+          break;
+        }
+      }
+      await FirebaseFirestore.instance
           .collection('pos_hor')
           .doc(posteId.toString())
-          .update({
-        "jour": groupValue.toString(),
-        "poste": poste.toString(),
-        "desc": desc,
-        'hor': FieldValue.arrayUnion([
-          {
-            "check": false,
-            "debut": debut,
-            "fin": fin,
-            "nbBen": checked ? nben - 1 : nben + 1,
-          }
-        ])
-      }).then((value) {
-        FirebaseFirestore.instance
-            .collection('pos_hor')
-            .doc(posteId.toString())
-            .get()
-            .then((snapshot) {
-          var horList = snapshot.data()!['hor'] as List<dynamic>;
-          horList.sort((a, b) => a['debut'].compareTo(b['debut']));
-          FirebaseFirestore.instance
-              .collection('pos_hor')
-              .doc(posteId.toString())
-              .update({'hor': horList});
-        });
-      });
-    });
+          .update({'hor': horList});
+    }
   }
 }
