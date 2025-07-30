@@ -134,66 +134,63 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               icon: Icon(Icons.delete),
               onPressed: () async {
-                updatePosHor(idPoste, hord, horf);
-                // UpdateBen(idPoste, posteId, hord, horf);
-
+                // 1. Supprimer l'affectation spécifique dans pos_ben
                 await FirebaseFirestore.instance
                     .collection("pos_ben")
                     .doc(posteId.toString())
-                    .delete();
+                    .update({
+                  'pos_id': FieldValue.arrayRemove([
+                    {
+                      "debut": hord,
+                      "fin": horf,
+                      "poste": postes,
+                      "jour": jour,
+                      "posteId": idPoste
+                    }
+                  ])
+                });
+
+                // 2. Incrémenter nbBen dans pos_hor
+                final doc = await FirebaseFirestore.instance
+                    .collection('pos_hor')
+                    .doc(idPoste.toString())
+                    .get();
+                if (doc.exists) {
+                  List<dynamic> horList = List.from(doc.data()!['hor']);
+                  for (var h in horList) {
+                    if (h['debut'] == hord && h['fin'] == horf) {
+                      h['nbBen'] = (h['nbBen'] ?? 0) + 1;
+                      break;
+                    }
+                  }
+                  await FirebaseFirestore.instance
+                      .collection('pos_hor')
+                      .doc(idPoste.toString())
+                      .update({'hor': horList});
+                }
+
+                // 3. Si le tableau pos_id est vide, supprimer le document pos_ben
+                final posBenDoc = await FirebaseFirestore.instance
+                    .collection("pos_ben")
+                    .doc(posteId.toString())
+                    .get();
+                if (posBenDoc.exists) {
+                  final data = posBenDoc.data();
+                  if (data != null &&
+                      (data['pos_id'] == null ||
+                          (data['pos_id'] as List).isEmpty)) {
+                    await FirebaseFirestore.instance
+                        .collection("pos_ben")
+                        .doc(posteId.toString())
+                        .delete();
+                  }
+                }
+                setState(() {});
               },
             ),
           ),
         );
       });
 
-  void updatePosHor(String posteId, String debut, String fin) {
-    FirebaseFirestore.instance
-        .collection('pos_hor')
-        .doc(posteId)
-        .get()
-        .then((snapshot) {
-      var horList = snapshot.data()!['hor'] as List<dynamic>;
-      for (var hor in horList) {
-        if (hor['debut'] == debut && hor['fin'] == fin) {
-          hor['nbBen'] = hor['nbBen'] + 1;
-          break;
-        }
-      }
-      FirebaseFirestore.instance
-          .collection('pos_hor')
-          .doc(posteId)
-          .update({'hor': horList});
-    });
-  }
-
-  Widget UpdateBen(String idPoste, String posteId, String debut, String fin) =>
-      StreamBuilder(
-        //  On récupère les informations de posteId
-
-        stream: FirebaseFirestore.instance.collection("pos_ben").where("pos_id",
-            arrayContains: {"posteId": idPoste, "debut": debut}).snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          print(FieldPath.documentId);
-
-          if (snapshot.hasError) {
-            return Text("Something went wrong");
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CupertinoActivityIndicator());
-          }
-          if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text("No data found"));
-          }
-          if (snapshot != null && snapshot.data != null) {
-            // var doc = snapshot.data.docs.first;
-            // var documentId = doc.id;
-            // print("hello");
-            List<String> postesIds =
-                snapshot.data!.docs.map((doc) => doc.id).toList();
-            // On met à jour les informations dans pos_hor
-          }
-          return Container();
-        },
-      );
+  // Les fonctions updatePosHor et UpdateBen ont été remplacées par la logique intégrée dans onPressed
 }

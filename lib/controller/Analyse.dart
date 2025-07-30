@@ -1,11 +1,11 @@
 import 'dart:async';
-// import 'package:terreenvie/controller/PDF/web.dart';
+import 'package:terreenvie/controller/PDF/web.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
-// import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'kikeou.dart';
 import 'package:terreenvie/model/BenevoleListWidgetState.dart';
 import 'RadarChartScreen.dart';
