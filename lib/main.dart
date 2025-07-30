@@ -5,13 +5,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'controller/MainAppController.dart';
 import 'firebase_options.dart';
+import 'api/firebase_api.dart';
 
 //final DotEnv rootEnv = DotEnv();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // (kIsWeb) ? null : await FirebaseApi().initNotifications();
+  if (!kIsWeb) {
+    await FirebaseApi().initNotifications();
+  }
   runApp(const MyApp());
 }
 

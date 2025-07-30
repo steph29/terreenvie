@@ -11,6 +11,8 @@ import 'LogOutController.dart';
 import 'Logcontroller.dart';
 import 'SignUpPage.dart';
 import 'comptePage.dart';
+import 'NotificationsPage.dart';
+import 'AdminNotificationsPage.dart';
 
 class MainAppController extends StatefulWidget {
   @override
@@ -81,6 +83,16 @@ class _MainAppControllerState extends State<MainAppController> {
       child: Analyse(),
     ),
     Container(
+      color: Colors.blue.shade100,
+      alignment: Alignment.center,
+      child: NotificationsPage(),
+    ),
+    Container(
+      color: Colors.green.shade100,
+      alignment: Alignment.center,
+      child: AdminNotificationsPage(),
+    ),
+    Container(
       color: Colors.pink.shade100,
       alignment: Alignment.center,
       child: TerreEnVie(),
@@ -106,6 +118,11 @@ class _MainAppControllerState extends State<MainAppController> {
     //   alignment: Alignment.center,
     //   child: ContactPage(),
     // ),
+    Container(
+      color: Colors.blue.shade100,
+      alignment: Alignment.center,
+      child: NotificationsPage(),
+    ),
     Container(
       color: Colors.blue.shade100,
       alignment: Alignment.center,
@@ -146,6 +163,11 @@ class _MainAppControllerState extends State<MainAppController> {
                           BottomNavigationBarItem(
                               icon: Icon(Icons.auto_graph), label: 'Analyse'),
                           BottomNavigationBarItem(
+                              icon: Icon(Icons.notifications),
+                              label: 'Notifications'),
+                          BottomNavigationBarItem(
+                              icon: Icon(Icons.send), label: 'Envoyer Notif'),
+                          BottomNavigationBarItem(
                               icon: Icon(Icons.web), label: 'Terre En Vie'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.exit_to_app),
@@ -169,6 +191,9 @@ class _MainAppControllerState extends State<MainAppController> {
                               label: 'Choisir mes postes'),
                           // BottomNavigationBarItem(
                           //     icon: Icon(Icons.contact_mail), label: 'Contact'),
+                          BottomNavigationBarItem(
+                              icon: Icon(Icons.notifications),
+                              label: 'Notifications'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.web),
                               label:

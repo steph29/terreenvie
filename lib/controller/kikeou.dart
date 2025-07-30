@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:terreenvie/controller/PDF/web.dart';
+import 'package:flutter/material.dart';
+// import 'package:terreenvie/controller/PDF/web.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
-import 'package:syncfusion_flutter_pdf/pdf.dart';
+// import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'Analyse.dart';
 
 class Kikeou extends StatefulWidget {
@@ -127,7 +127,7 @@ class _KikeouState extends State<Kikeou> {
 
               ElevatedButton(
                 onPressed: () async {
-                  await _createPDF();
+                  // await _createPDF();
                 },
                 child: Text("Télécharger la liste"),
               ),
@@ -172,51 +172,51 @@ class _KikeouState extends State<Kikeou> {
               : TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
       );
-  Future<void> _createPDF() async {
-    // Create a new PDF document.
-    PdfDocument document = PdfDocument();
-    // Add a new page to the document.
-    final page = document.pages.add();
-    final Size pageSize = page.getClientSize();
+  // Future<void> _createPDF() async {
+  //     // Create a new PDF document.
+  //     PdfDocument document = PdfDocument();
+  //     // Add a new page to the document.
+  //     final page = document.pages.add();
+  //     final Size pageSize = page.getClientSize();
 
-    // page.graphics.drawImage(
-    //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
-    //     Rect.fromLTWH(0, 0, 40, 40));
+  //     // page.graphics.drawImage(
+  //     //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
+  //     //     Rect.fromLTWH(0, 0, 40, 40));
 
-    PdfGrid grid = PdfGrid();
-    grid.style = PdfGridStyle(
-        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    grid.columns.add(count: 7);
-    grid.headers.add(1);
+  //     PdfGrid grid = PdfGrid();
+  //     grid.style = PdfGridStyle(
+  //         font: PdfStandardFont(PdfFontFamily.helvetica, 12),
+  //         cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
+  //     grid.columns.add(count: 7);
+  //     grid.headers.add(1);
 
-    PdfGridRow headers = grid.headers[0];
-    headers.cells[0].value = 'Nom';
-    headers.cells[1].value = 'Prenom';
-    headers.cells[2].value = 'Téléphone';
-    headers.cells[3].value = 'Jour';
-    headers.cells[4].value = 'poste';
-    headers.cells[5].value = 'debut';
-    headers.cells[6].value = 'fin';
+  //     PdfGridRow headers = grid.headers[0];
+  //     headers.cells[0].value = 'Nom';
+  //     headers.cells[1].value = 'Prenom';
+  //     headers.cells[2].value = 'Téléphone';
+  //     headers.cells[3].value = 'Jour';
+  //     headers.cells[4].value = 'poste';
+  //     headers.cells[5].value = 'debut';
+  //     headers.cells[6].value = 'fin';
 
-    for (var i = 0; i < items.length; i++) {
-      PdfGridRow row = grid.rows.add();
-      row.cells[0].value = items[i][0];
-      row.cells[1].value = items[i][1];
-      row.cells[2].value = items[i][2];
-      row.cells[3].value = items[i][3];
-      row.cells[4].value = items[i][4];
-      row.cells[5].value = items[i][5];
-      row.cells[6].value = items[i][6];
-    }
+  //     for (var i = 0; i < items.length; i++) {
+  //       PdfGridRow row = grid.rows.add();
+  //       row.cells[0].value = items[i][0];
+  //       row.cells[1].value = items[i][1];
+  //       row.cells[2].value = items[i][2];
+  //       row.cells[3].value = items[i][3];
+  //       row.cells[4].value = items[i][4];
+  //       row.cells[5].value = items[i][5];
+  //       row.cells[6].value = items[i][6];
+  //     }
 
-    grid.draw(
-        page: document.pages.add(),
-        bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
+  //     grid.draw(
+  //         page: document.pages.add(),
+  //         bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
-    //Save the document
-    CustomWebPdf().pdf(document);
-  }
+  //     //Save the document
+  //     CustomWebPdf().pdf(document);
+  // }
 
   Future<List<List>> fetchData(String? groupValue) async {
     items = [];

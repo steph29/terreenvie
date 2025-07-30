@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:printing/printing.dart'; // Pour imprimer et générer un PDF
-import 'package:pdf/widgets.dart' as pw; // Package pour créer un PDF
+// import 'package:printing/printing.dart'; // Pour imprimer et générer un PDF
+// import 'package:pdf/widgets.dart' as pw; // Package pour créer un PDF
 import 'dart:async';
 import 'package:terreenvie/controller/PDF/web.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show Uint8List, rootBundle;
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class BenevoleListWidget extends StatefulWidget {
   const BenevoleListWidget({Key? key}) : super(key: key);
@@ -83,33 +79,33 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
   // Fonction pour générer le PDF
   Future<void> _generatePdf() async {
-    final pdf = pw.Document();
+    // final pdf = pw.Document();
 
-    // Ajouter une page avec la liste des bénévoles
-    pdf.addPage(
-      pw.Page(
-        build: (context) => pw.Column(
-          children: [
-            pw.Text('Liste des bénévoles', style: pw.TextStyle(fontSize: 24)),
-            pw.SizedBox(height: 20),
-            pw.ListView.builder(
-              itemCount: benevoles.length,
-              itemBuilder: (context, index) {
-                final benevole = benevoles[index];
-                return pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
-                  child: pw.Text(
-                      '${benevole['prenom']} ${benevole['nom']} - Email: ${benevole['email']}, Téléphone: ${benevole['tel']}'),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+    // // Ajouter une page avec la liste des bénévoles
+    // pdf.addPage(
+    //   pw.Page(
+    //     build: (context) => pw.Column(
+    //       children: [
+    //         pw.Text('Liste des bénévoles', style: pw.TextStyle(fontSize: 24)),
+    //         pw.SizedBox(height: 20),
+    //         pw.ListView.builder(
+    //           itemCount: benevoles.length,
+    //           itemBuilder: (context, index) {
+    //             final benevole = benevoles[index];
+    //             return pw.Padding(
+    //               padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
+    //               child: pw.Text(
+    //                   '${benevole['prenom']} ${benevole['nom']} - Email: ${benevole['email']}, Téléphone: ${benevole['tel']}'),
+    //             );
+    //           },
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    // );
 
-    // Afficher l'aperçu avant impression
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    // // Afficher l'aperçu avant impression
+    // await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
   @override
@@ -171,7 +167,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
                         await fetchData(); // Passer un paramètre si nécessaire
 
                         // Ensuite, générer le PDF avec les données récupérées
-                        await _createPDF();
+                        // await _createPDF();
                       },
                       child: Text("Télécharger la liste des entrée"),
                     ),
@@ -182,45 +178,45 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     );
   }
 
-  Future<void> _createPDF() async {
-    // Create a new PDF document.
-    PdfDocument document = PdfDocument();
-    // Add a new page to the document.
-    final page = document.pages.add();
-    final Size pageSize = page.getClientSize();
+  // Future<void> _createPDF() async {
+  //   // Create a new PDF document.
+  //   PdfDocument document = PdfDocument();
+  //   // Add a new page to the document.
+  //   final page = document.pages.add();
+  //   final Size pageSize = page.getClientSize();
 
-    // page.graphics.drawImage(
-    //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
-    //     Rect.fromLTWH(0, 0, 40, 40));
+  //   // page.graphics.drawImage(
+  //   //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
+  //   //     Rect.fromLTWH(0, 0, 40, 40));
 
-    PdfGrid grid = PdfGrid();
-    grid.style = PdfGridStyle(
-        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    grid.columns.add(count: 4);
-    grid.headers.add(1);
+  //   PdfGrid grid = PdfGrid();
+  //   grid.style = PdfGridStyle(
+  //       font: PdfStandardFont(PdfFontFamily.helvetica, 12),
+  //       cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
+  //   grid.columns.add(count: 4);
+  //   grid.headers.add(1);
 
-    PdfGridRow headers = grid.headers[0];
-    headers.cells[0].value = 'Nom';
-    headers.cells[1].value = 'Prenom';
-    headers.cells[2].value = 'Tel';
-    headers.cells[3].value = 'Email';
+  //   PdfGridRow headers = grid.headers[0];
+  //   headers.cells[0].value = 'Nom';
+  //   headers.cells[1].value = 'Prenom';
+  //   headers.cells[2].value = 'Tel';
+  //   headers.cells[3].value = 'Email';
 
-    for (var i = 0; i < items.length; i++) {
-      PdfGridRow row = grid.rows.add();
-      row.cells[0].value = items[i][0];
-      row.cells[1].value = items[i][1];
-      row.cells[2].value = items[i][2];
-      row.cells[3].value = items[i][3];
-    }
+  //   for (var i = 0; i < items.length; i++) {
+  //     PdfGridRow row = grid.rows.add();
+  //     row.cells[0].value = items[i][0];
+  //     row.cells[1].value = items[i][1];
+  //     row.cells[2].value = items[i][2];
+  //     row.cells[3].value = items[i][3];
+  //   }
 
-    grid.draw(
-        page: document.pages.add(),
-        bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
+  //   grid.draw(
+  //       page: document.pages.add(),
+  //       bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
-    //Save the document
-    CustomWebPdf().pdf(document);
-  }
+  //   //Save the document
+  //   CustomWebPdf().pdf(document);
+  // }
 
   Future<List<List>> fetchData() async {
     items = [];

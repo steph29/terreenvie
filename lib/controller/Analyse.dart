@@ -1,13 +1,14 @@
 import 'dart:async';
-import 'package:terreenvie/controller/PDF/web.dart';
+// import 'package:terreenvie/controller/PDF/web.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
-import 'package:syncfusion_flutter_pdf/pdf.dart';
+// import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'kikeou.dart';
 import 'package:terreenvie/model/BenevoleListWidgetState.dart';
+import 'RadarChartScreen.dart';
 
 class Users {
   final String id;
@@ -58,6 +59,14 @@ class Analyse extends StatefulWidget {
 
 class _AnalyseState extends State<Analyse> {
   String groupValue = "Samedi";
+
+  // Données centralisées pour les améliorations de performance
+  List<Map<String, dynamic>> posHorData = [];
+  List<Map<String, dynamic>> posBenData = [];
+  List<Map<String, dynamic>> usersData = [];
+  bool isLoading = true;
+
+  // Variables pour la compatibilité avec le code existant
   List<List<dynamic>> test = [];
   List<List<dynamic>> items = [];
   List<List<dynamic>> itemsUser = [];
@@ -78,8 +87,48 @@ class _AnalyseState extends State<Analyse> {
   @override
   void initState() {
     super.initState();
-    // Charger la liste des noms d'utilisateurs depuis Firebase
-    loadUserNames();
+    _loadAllData();
+  }
+
+  Future<void> _loadAllData() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      // Charger toutes les données nécessaires en une seule fois
+      final posHorSnapshot = await FirebaseFirestore.instance
+          .collection('pos_hor')
+          .where('jour', isEqualTo: groupValue)
+          .get();
+      posHorData = posHorSnapshot.docs
+          .map((d) => d.data() as Map<String, dynamic>)
+          .toList();
+
+      final posBenSnapshot =
+          await FirebaseFirestore.instance.collection('pos_ben').get();
+      posBenData = posBenSnapshot.docs
+          .map((d) => d.data() as Map<String, dynamic>)
+          .toList();
+
+      final usersSnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      usersData = usersSnapshot.docs
+          .map((d) => d.data() as Map<String, dynamic>)
+          .toList();
+
+      // Initialiser les variables de compatibilité
+      await loadUserNames();
+      await Listedeski();
+      await kifekoi();
+      await kiela();
+    } catch (e) {
+      print('Erreur lors du chargement des données: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -89,16 +138,23 @@ class _AnalyseState extends State<Analyse> {
           title: Text("Ki ké où?"),
           backgroundColor: Color(0xFFf2f0e7),
         ),
-        // TODO : Réarranger en fonction de la taille des écrans
-        body: SingleChildScrollView(
-            padding: EdgeInsets.all(20),
-            child: (kIsWeb || MediaQuery.of(context).size.width > 920)
-                ? isWeb()
-                : isMobile()));
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: EdgeInsets.all(20),
+                child: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                    ? isWeb()
+                    : isMobile()));
   }
 
   Widget isMobile() => Column(
         children: [
+          // Graphique radar
+          Container(
+            height: 400,
+            child: RadarChartScreen(),
+          ),
+          space(),
           Kikeou(),
           space(),
           kifekoi(),
@@ -120,6 +176,14 @@ class _AnalyseState extends State<Analyse> {
         children: [
           SizedBox(
             height: 5,
+          ),
+          // Graphique radar en haut
+          Container(
+            height: 400,
+            child: RadarChartScreen(),
+          ),
+          SizedBox(
+            height: 20,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -412,86 +476,86 @@ class _AnalyseState extends State<Analyse> {
 
   Future<void> _createPDF() async {
     // Create a new PDF document.
-    PdfDocument document = PdfDocument();
+    // PdfDocument document = PdfDocument();
     // Add a new page to the document.
-    final page = document.pages.add();
-    final Size pageSize = page.getClientSize();
+    // final page = document.pages.add();
+    // final Size pageSize = page.getClientSize();
 
     // page.graphics.drawImage(
     //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
     //     Rect.fromLTWH(0, 0, 40, 40));
 
-    PdfGrid grid = PdfGrid();
-    grid.style = PdfGridStyle(
-        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    grid.columns.add(count: 7);
-    grid.headers.add(1);
+    // PdfGrid grid = PdfGrid();
+    // grid.style = PdfGridStyle(
+    //     font: PdfStandardFont(PdfFontFamily.helvetica, 12),
+    //     cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
+    // grid.columns.add(count: 7);
+    // grid.headers.add(1);
 
-    PdfGridRow headers = grid.headers[0];
-    headers.cells[0].value = 'Nom';
-    headers.cells[1].value = 'Prenom';
-    headers.cells[2].value = 'Téléphone';
-    headers.cells[3].value = 'Jour';
-    headers.cells[4].value = 'poste';
-    headers.cells[5].value = 'debut';
-    headers.cells[6].value = 'fin';
+    // PdfGridRow headers = grid.headers[0];
+    // headers.cells[0].value = 'Nom';
+    // headers.cells[1].value = 'Prenom';
+    // headers.cells[2].value = 'Téléphone';
+    // headers.cells[3].value = 'Jour';
+    // headers.cells[4].value = 'poste';
+    // headers.cells[5].value = 'debut';
+    // headers.cells[6].value = 'fin';
 
-    for (var i = 0; i < items.length; i++) {
-      PdfGridRow row = grid.rows.add();
-      row.cells[0].value = items[i][0];
-      row.cells[1].value = items[i][1];
-      row.cells[2].value = items[i][2];
-      row.cells[3].value = items[i][3];
-      row.cells[4].value = items[i][4];
-      row.cells[5].value = items[i][5];
-      row.cells[6].value = items[i][6];
-    }
+    // for (var i = 0; i < items.length; i++) {
+    //   PdfGridRow row = grid.rows.add();
+    //   row.cells[0].value = items[i][0];
+    //   row.cells[1].value = items[i][1];
+    //   row.cells[2].value = items[i][2];
+    //   row.cells[3].value = items[i][3];
+    //   row.cells[4].value = items[i][4];
+    //   row.cells[5].value = items[i][5];
+    //   row.cells[6].value = items[i][6];
+    // }
 
-    grid.draw(
-        page: document.pages.add(),
-        bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
+    // grid.draw(
+    //     page: document.pages.add(),
+    //     bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
     //Save the document
-    CustomWebPdf().pdf(document);
+    // CustomWebPdf().pdf(document);
   }
 
-  Future<void> pdfMobile(PdfDocument document) async {
-    // final appDocDir = await getApplicationDocumentsDirectory();
-    // final filePath = 'Bénévoles_kikeou.pdf';
-    // List<int> bytes = await document.save();
-    // File file = File('Bénévoles_kikeou_mobile.pdf');
-    // file.writeAsBytes(bytes);
+  // Future<void> pdfMobile(PdfDocument document) async {
+  //   // final appDocDir = await getApplicationDocumentsDirectory();
+  //   // final filePath = 'Bénévoles_kikeou.pdf';
+  //   // List<int> bytes = await document.save();
+  //   // File file = File('Bénévoles_kikeou_mobile.pdf');
+  //   // file.writeAsBytes(bytes);
 
-    // final File file =
-    //     File(path.join(appDocDir.path, 'Bénévoles_kikeou_mobile.pdf'));
-    // // final File file = File(appDocDir.path + 'Bénévoles_kikeou_mobile.pdf');
-    // await file.writeAsBytes(bytes, flush: true).whenComplete(() {
-    //   OpenFile.open(appDocDir.path + 'downloaded.pdf');
-    // });
-    // file.writeAsBytesSync(await document.save());
-    // File(filePath).writeAsBytesSync(await document.save());
-  }
+  //   // final File file =
+  //   //     File(path.join(appDocDir.path, 'Bénévoles_kikeou_mobile.pdf'));
+  //   // // final File file = File(appDocDir.path + 'Bénévoles_kikeou_mobile.pdf');
+  //   // await file.writeAsBytes(bytes, flush: true).whenComplete(() {
+  //   //   OpenFile.open(appDocDir.path + 'downloaded.pdf');
+  //   // });
+  //   // file.writeAsBytesSync(await document.save());
+  //   // File(filePath).writeAsBytesSync(await document.save());
+  // }
 
-  Future<void> downloadFile(PdfDocument fileUrl) async {
-    // final response = await http.get(fileUrl as Uri);
+  // Future<void> downloadFile(PdfDocument fileUrl) async {
+  //   // final response = await http.get(fileUrl as Uri);
 
-    // if (response.statusCode == 200) {
-    //   // Obtenez le répertoire de stockage local de l'appareil
-    //   final appDocDir = await getApplicationDocumentsDirectory();
+  //   // if (response.statusCode == 200) {
+  //   //   // Obtenez le répertoire de stockage local de l'appareil
+  //   //   final appDocDir = await getApplicationDocumentsDirectory();
 
-    //   // Obtenez le chemin d'accès complet où vous souhaitez enregistrer le fichier
-    //   final filePath = '${appDocDir.path}/test.pdf';
+  //   //   // Obtenez le chemin d'accès complet où vous souhaitez enregistrer le fichier
+  //   //   final filePath = '${appDocDir.path}/test.pdf';
 
-    //   // Écrivez le contenu téléchargé dans un fichier local
-    //   // File file = File(filePath);
-    //   // await file.writeAsBytes(response.bodyBytes);
+  //   //   // Écrivez le contenu téléchargé dans un fichier local
+  //   //   // File file = File(filePath);
+  //   //   // await file.writeAsBytes(response.bodyBytes);
 
-    //   print('Fichier téléchargé avec succès à $filePath');
-    // } else {
-    //   throw Exception('Échec du téléchargement du fichier');
-    // }
-  }
+  //   //   print('Fichier téléchargé avec succès à $filePath');
+  //   // } else {
+  //   //   throw Exception('Échec du téléchargement du fichier');
+  //   // }
+  // }
 
   Future<Uint8List> _readImageData(String name) async {
     final data = await rootBundle.load('$name');
@@ -566,26 +630,23 @@ class _AnalyseState extends State<Analyse> {
 
   Future<List<List<dynamic>>> getAllUsers() async {
     itemsUser = [];
-    QuerySnapshot<Map<String, dynamic>> userSnapshot =
-        await FirebaseFirestore.instance.collection('users').get();
 
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-        userSnapshot.docs;
+    // Utiliser les données centralisées au lieu de faire un appel Firestore
+    List<Map<String, dynamic>> documents = usersData;
+
     documents.sort((a, b) {
-      String nomA = (a.get('nom') ?? '').toUpperCase();
-      String nomB = (b.get('nom') ?? '').toUpperCase();
+      String nomA = (a['nom'] ?? '').toString().toUpperCase();
+      String nomB = (b['nom'] ?? '').toString().toUpperCase();
 
       return nomA.compareTo(nomB);
     });
 
-    for (QueryDocumentSnapshot<Map<String, dynamic>> document in documents) {
-      Map<String, dynamic> userData = document.data();
-
+    for (Map<String, dynamic> userData in documents) {
       itemsUser.add([
-        userData['nom'].toUpperCase(),
-        userData['prenom'],
-        userData['email'],
-        userData['tel'],
+        (userData['nom'] ?? '').toString().toUpperCase(),
+        userData['prenom'] ?? '',
+        userData['email'] ?? '',
+        userData['tel'] ?? '',
       ]);
     }
     return itemsUser;
@@ -593,51 +654,48 @@ class _AnalyseState extends State<Analyse> {
 
   Future<void> _createPDFuser() async {
     // Create a new PDF document.
-    PdfDocument document = PdfDocument();
+    // PdfDocument document = PdfDocument();
     // Add a new page to the document.
-    final page = document.pages.add();
+    // final page = document.pages.add();
 
-    PdfGrid grid = PdfGrid();
-    grid.style = PdfGridStyle(
-        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    grid.columns.add(count: 4);
-    grid.headers.add(1);
+    // PdfGrid grid = PdfGrid();
+    // grid.style = PdfGridStyle(
+    //     font: PdfStandardFont(PdfFontFamily.helvetica, 12),
+    //     cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
+    // grid.columns.add(count: 4);
+    // grid.headers.add(1);
 
-    PdfGridRow headers = grid.headers[0];
-    headers.cells[0].value = 'Nom';
-    headers.cells[1].value = 'Prenom';
-    headers.cells[2].value = 'Email';
-    headers.cells[3].value = 'Téléphone';
+    // PdfGridRow headers = grid.headers[0];
+    // headers.cells[0].value = 'Nom';
+    // headers.cells[1].value = 'Prenom';
+    // headers.cells[2].value = 'Email';
+    // headers.cells[3].value = 'Téléphone';
 
-    for (var i = 0; i < itemsUser.length; i++) {
-      PdfGridRow row = grid.rows.add();
-      row.cells[0].value = itemsUser[i][0];
-      row.cells[1].value = itemsUser[i][1];
-      row.cells[2].value = itemsUser[i][2];
-      row.cells[3].value = itemsUser[i][3];
-    }
+    // for (var i = 0; i < itemsUser.length; i++) {
+    //   PdfGridRow row = grid.rows.add();
+    //   row.cells[0].value = itemsUser[i][0];
+    //   row.cells[1].value = itemsUser[i][1];
+    //   row.cells[2].value = itemsUser[i][2];
+    //   row.cells[3].value = itemsUser[i][3];
+    // }
 
-    grid.draw(
-        page: document.pages.add(),
-        bounds: Rect.fromLTWH(
-            0, 55, page.getClientSize().width, page.getClientSize().height));
+    // grid.draw(
+    //     page: document.pages.add(),
+    //     bounds: Rect.fromLTWH(
+    //         0, 55, page.getClientSize().width, page.getClientSize().height));
 
     //Save the document
-    //CustomPdf().pdf(document);
-    CustomWebPdf().pdf(document);
+    // CustomPdf().pdf(document);
+    // CustomWebPdf().pdf(document);
   }
 
   Future<void> loadUserNames() async {
-    final QuerySnapshot<Map<String, dynamic>> userSnapshot =
-        await FirebaseFirestore.instance.collection('users').get();
-
-    final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-        userSnapshot.docs;
+    // Utiliser les données centralisées au lieu de faire un appel Firestore
+    final List<Map<String, dynamic>> documents = usersData;
 
     documents.sort((a, b) {
-      String nomA = (a.get('nom') ?? '').toUpperCase();
-      String nomB = (b.get('nom') ?? '').toUpperCase();
+      String nomA = (a['nom'] ?? '').toString().toUpperCase();
+      String nomB = (b['nom'] ?? '').toString().toUpperCase();
 
       return nomA.compareTo(nomB);
     });
@@ -646,9 +704,9 @@ class _AnalyseState extends State<Analyse> {
       users = documents
           .map(
             (doc) => Users(
-              id: doc.id,
-              nom: doc['nom'] as String,
-              prenom: doc['prenom'] as String,
+              id: doc['id'] ?? doc['uid'] ?? '',
+              nom: doc['nom'] as String? ?? '',
+              prenom: doc['prenom'] as String? ?? '',
             ),
           )
           .toList();
@@ -658,28 +716,27 @@ class _AnalyseState extends State<Analyse> {
 
   Future<List<Poste>> getUserPosts(String userName) async {
     postesUsers = [];
-    final QuerySnapshot<Map<String, dynamic>> postsSnapshot =
-        await FirebaseFirestore.instance
-            .collection('pos_ben')
-            .where('ben_id', isEqualTo: userName)
-            .get();
 
-    postsSnapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      for (var i = 0; i < data['pos_id'].length; i++) {
-        String nomPoste = data['pos_id'][i]['poste'] as String;
-        String jour = data['pos_id'][i]['jour'] as String;
-        String heureDebut = data['pos_id'][i]['debut'] as String;
-        String heureFin = data['pos_id'][i]['fin'] as String;
+    // Utiliser les données centralisées au lieu de faire un appel Firestore
+    for (Map<String, dynamic> doc in posBenData) {
+      if (doc['ben_id'] == userName) {
+        List<dynamic> posIds = doc['pos_id'] ?? [];
 
-        postesUsers.add(Poste(
-          nomPoste: nomPoste,
-          jour: jour,
-          heureDebut: heureDebut,
-          heureFin: heureFin,
-        ));
+        for (var i = 0; i < posIds.length; i++) {
+          String nomPoste = posIds[i]['poste'] ?? '';
+          String jour = posIds[i]['jour'] ?? '';
+          String heureDebut = posIds[i]['debut'] ?? '';
+          String heureFin = posIds[i]['fin'] ?? '';
+
+          postesUsers.add(Poste(
+            nomPoste: nomPoste,
+            jour: jour,
+            heureDebut: heureDebut,
+            heureFin: heureFin,
+          ));
+        }
       }
-    }).toList();
+    }
     return postesUsers;
   }
 
