@@ -1,9 +1,0 @@
-version: "Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)"
-options: "6433060c3f8a4daca8afa232bc9e0f243f9c3f8be451362ace8aa083a70a5f71"
-build_start_time: [1708891719, 687482000]
-build_end_time: [1708892062, 198362000]
-inputs:
-  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseSharedSwift/FirebaseSharedSwift/Sources/FirebaseRemoteConfigValueDecoding.swift"
-  : [1708888749, 783292408]
-  ? "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Pods/FirebaseSharedSwift/FirebaseSharedSwift/Sources/third_party/FirebaseDataEncoder/FirebaseDataEncoder.swift"
-  : [1708888749, 782218632]

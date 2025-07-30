@@ -26,7 +26,7 @@ migrate_working_dir/
 **/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
-.flutter-plugins-dependencies
+.flutter-plugins-dependencies*
 .packages
 .pub-cache/
 .pub/
@@ -45,3 +45,47 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+node_modules
+
+# iOS build files
+ios/build/
+ios/Flutter/Generated*.xcconfig
+ios/Flutter/flutter_export_environment*.sh
+ios/Pods/
+ios/Podfile.lock
+
+# Android build files
+android/build/
+android/app/build/
+android/.gradle/
+
+# macOS build files
+macos/build/
+
+# Linux build files
+linux/build/
+
+# Windows build files
+windows/build/
+
+# Generated files
+*.d
+*.dia
+*.o
+*.hmap
+*.modulemap
+*.swiftdeps
+*.swiftmodule
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# iCloud files
+*.icloud
+
+# Firebase config files
+google-services.json
+GoogleService-Info.plist
+firebase_app_id_file.json

@@ -1,6 +1,0 @@
-version: "Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)"
-options: "846981bfb23066897cb015ddef194b832faf62e5fa99b57b133ec3a1bec29084"
-build_start_time: [1707515407, 442401000]
-build_end_time: [1707515407, 676391000]
-inputs:
-  "/Users/stephaneverardo/Documents/TEV/www/terreenvie/ios/Runner/AppDelegate.swift": !private [1707511317, 359997723]
