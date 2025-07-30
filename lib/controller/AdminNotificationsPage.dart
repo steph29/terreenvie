@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../api/fcm_service.dart';
 import '../api/template_service.dart';
 
 class AdminNotificationsPage extends StatefulWidget {
+  const AdminNotificationsPage({Key? key}) : super(key: key);
+
   @override
-  _AdminNotificationsPageState createState() => _AdminNotificationsPageState();
+  State<AdminNotificationsPage> createState() => _AdminNotificationsPageState();
 }
 
 class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
-  final FCMService _fcmService = FCMService();
-  final TemplateService _templateService = TemplateService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _bodyController = TextEditingController();
-
+  final FCMService _fcmService = FCMService();
+  final TemplateService _templateService = TemplateService();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   List<Map<String, dynamic>> _users = [];
   List<Map<String, dynamic>> _selectedUserObjects = [];
   bool _sendToAll = false;
   bool _useTemplates = false;
   String? _selectedTemplate;
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadUsers();
-    _loadTemplate();
   }
 
   @override
@@ -40,16 +41,16 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
 
   Future<void> _loadUsers() async {
     try {
-      final querySnapshot = await _firestore.collection('users').get();
+      final QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('users').get();
       setState(() {
-        _users = querySnapshot.docs.map((doc) {
-          final data = doc.data();
+        _users = snapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
           return {
             'id': doc.id,
-            'nom': data['nom'] ?? '',
-            'prenom': data['prenom'] ?? '',
+            'name': '${data['prenom'] ?? ''} ${data['nom'] ?? ''}'.trim(),
             'email': data['email'] ?? '',
-            'role': data['role'] ?? '',
+            'fcmToken': data['fcmToken'] ?? '',
           };
         }).toList();
       });
@@ -58,46 +59,26 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
     }
   }
 
-  void _loadTemplate() {
-    if (_selectedTemplate != null) {
-      final template =
-          _templateService.getPredefinedTemplate(_selectedTemplate!);
-      if (template != null) {
-        _titleController.text = template['title'] ?? '';
-        _bodyController.text = template['body'] ?? '';
-      }
+  void _loadTemplate(String templateKey) {
+    final template = TemplateService.predefinedTemplates[templateKey];
+    if (template != null) {
+      setState(() {
+        _titleController.text = template['title']!;
+        _bodyController.text = template['body']!;
+        _selectedTemplate = templateKey;
+      });
     }
   }
 
   Future<void> _sendNotification() async {
-    if (_titleController.text.trim().isEmpty ||
-        _bodyController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Erreur',
-        'Veuillez remplir le titre et le corps de la notification',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    if (!_sendToAll && _selectedUserObjects.isEmpty) {
-      Get.snackbar(
-        'Erreur',
-        'Veuillez sélectionner au moins un utilisateur ou cocher "Envoyer à tous"',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
-
     try {
-      final title = _titleController.text.trim();
-      final body = _bodyController.text.trim();
+      final String title = _titleController.text.trim();
+      final String body = _bodyController.text.trim();
 
       if (_useTemplates) {
         // Utiliser les notifications personnalisées avec templates
@@ -120,27 +101,24 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
         }
       }
 
-      Get.snackbar(
-        'Succès',
-        'Notification envoyée avec succès',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-
       // Réinitialiser le formulaire
       _titleController.clear();
       _bodyController.clear();
       setState(() {
         _selectedUserObjects.clear();
         _sendToAll = false;
+        _selectedTemplate = null;
       });
+
+      Get.snackbar('Succès', 'Notification(s) envoyée(s) avec succès !',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: Duration(seconds: 3));
     } catch (e) {
-      Get.snackbar(
-        'Erreur',
-        'Erreur lors de l\'envoi de la notification: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Erreur', 'Erreur lors de l\'envoi: $e',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: Duration(seconds: 5));
     } finally {
       setState(() {
         _isLoading = false;
@@ -153,258 +131,319 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Envoi de Notifications'),
-        backgroundColor: Color.fromRGBO(43, 90, 114, 1),
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Mode de notification
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mode de notification',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Mode de notification (simple ou personnalisée)
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Mode de notification',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: RadioListTile<bool>(
+                                title: Text('Notification simple'),
+                                subtitle: Text('Même message pour tous'),
+                                value: false,
+                                groupValue: _useTemplates,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _useTemplates = value!;
+                                    _selectedTemplate = null;
+                                  });
+                                },
+                              ),
+                            ),
+                            Expanded(
+                              child: RadioListTile<bool>(
+                                title: Text('Notification personnalisée'),
+                                subtitle:
+                                    Text('Message adapté à chaque utilisateur'),
+                                value: true,
+                                groupValue: _useTemplates,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _useTemplates = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 8),
-                    RadioListTile<bool>(
-                      title: Text('Notification simple'),
-                      value: false,
-                      groupValue: _useTemplates,
-                      onChanged: (value) {
-                        setState(() {
-                          _useTemplates = value!;
-                          _selectedTemplate = null;
-                          _titleController.clear();
-                          _bodyController.clear();
-                        });
-                      },
-                    ),
-                    RadioListTile<bool>(
-                      title:
-                          Text('Notification personnalisée (avec templates)'),
-                      value: true,
-                      groupValue: _useTemplates,
-                      onChanged: (value) {
-                        setState(() {
-                          _useTemplates = value!;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            SizedBox(height: 16),
-
-            // Templates prédéfinis (si mode personnalisé)
-            if (_useTemplates) ...[
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Templates prédéfinis',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: _templateService
-                            .getPredefinedTemplateNames()
-                            .map((templateName) {
-                          final template = _templateService
-                              .getPredefinedTemplate(templateName);
-                          final title = template?['title'] ?? '';
-                          final displayTitle = title.length > 20
-                              ? '${title.substring(0, 20)}...'
-                              : title;
-
-                          return FilterChip(
-                            label: Text(displayTitle),
-                            selected: _selectedTemplate == templateName,
-                            onSelected: (selected) {
-                              setState(() {
-                                _selectedTemplate =
-                                    selected ? templateName : null;
-                                _loadTemplate();
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ],
                   ),
                 ),
-              ),
-              SizedBox(height: 16),
-            ],
+                SizedBox(height: 16),
 
-            // Variables disponibles (si mode personnalisé)
-            if (_useTemplates) ...[
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Variables disponibles',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                // Templates prédéfinis (si mode personnalisé)
+                if (_useTemplates) ...[
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Templates prédéfinis',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: TemplateService.predefinedTemplates.keys
+                                .map((key) {
+                              final template =
+                                  TemplateService.predefinedTemplates[key]!;
+                              String displayText = template['title']!
+                                  .replaceAll('{', '')
+                                  .replaceAll('}', '');
+                              if (displayText.length > 20) {
+                                displayText =
+                                    displayText.substring(0, 20) + '...';
+                              }
+                              return ElevatedButton(
+                                onPressed: () => _loadTemplate(key),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _selectedTemplate == key
+                                      ? Colors.green
+                                      : Colors.blue,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: Text(displayText),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: _templateService.availableVariables.entries
-                            .map((entry) {
-                          return Chip(
-                            label: Text('{${entry.key}}'),
-                            backgroundColor: Colors.blue.shade100,
-                            labelStyle: TextStyle(fontSize: 12),
-                          );
-                        }).toList(),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(height: 16),
-            ],
+                  SizedBox(height: 16),
+                ],
 
-            // Formulaire de notification
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Contenu de la notification',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        labelText: 'Titre',
-                        border: OutlineInputBorder(),
+                // Variables disponibles (si mode personnalisé)
+                if (_useTemplates) ...[
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Variables disponibles',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: TemplateService.availableVariables.entries
+                                .map((entry) {
+                              return Chip(
+                                label: Text(entry.key),
+                                backgroundColor: Colors.blue.shade100,
+                                onDeleted: () {
+                                  // Copier la variable dans le presse-papiers
+                                  // (pour l'instant, on affiche juste)
+                                  Get.snackbar('Variable',
+                                      'Variable ${entry.key} disponible',
+                                      duration: Duration(seconds: 1));
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(height: 8),
+                          Text('Cliquez sur une variable pour la copier',
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
                       ),
-                      maxLines: 1,
                     ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _bodyController,
-                      decoration: InputDecoration(
-                        labelText: 'Corps du message',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 2,
-                    ),
-                  ],
+                  ),
+                  SizedBox(height: 16),
+                ],
+
+                // Titre de la notification
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Titre de la notification',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.title),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Le titre est requis';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-            ),
+                SizedBox(height: 16),
 
-            SizedBox(height: 16),
+                // Corps de la notification
+                TextFormField(
+                  controller: _bodyController,
+                  decoration: InputDecoration(
+                    labelText: 'Description (2 lignes max)',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.message),
+                  ),
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'La description est requise';
+                    }
+                    if (value.length > 200) {
+                      return 'La description est trop longue (max 200 caractères)';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
 
-            // Sélection des destinataires
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Destinataires',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    CheckboxListTile(
-                      title: Text('Envoyer à tous les utilisateurs'),
-                      value: _sendToAll,
-                      onChanged: (value) {
-                        setState(() {
-                          _sendToAll = value!;
-                          if (_sendToAll) {
-                            _selectedUserObjects.clear();
-                          }
-                        });
-                      },
-                    ),
-                    if (!_sendToAll) ...[
-                      SizedBox(height: 8),
-                      Text('Ou sélectionner des utilisateurs spécifiques:'),
-                      SizedBox(height: 8),
-                      Container(
-                        height: 200,
-                        child: ListView.builder(
-                          itemCount: _users.length,
-                          itemBuilder: (context, index) {
-                            final user = _users[index];
-                            final isSelected = _selectedUserObjects
-                                .any((u) => u['id'] == user['id']);
-
-                            return CheckboxListTile(
-                              title: Text('${user['prenom']} ${user['nom']}'),
-                              subtitle:
-                                  Text('${user['email']} (${user['role']})'),
-                              value: isSelected,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value!) {
-                                    _selectedUserObjects.add(user);
-                                  } else {
-                                    _selectedUserObjects.removeWhere(
-                                        (u) => u['id'] == user['id']);
-                                  }
-                                });
-                              },
-                            );
+                // Sélection des destinataires
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Destinataires',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 8),
+                        CheckboxListTile(
+                          title: Text('Envoyer à tous les utilisateurs'),
+                          value: _sendToAll,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _sendToAll = value ?? false;
+                              if (_sendToAll) {
+                                _selectedUserObjects.clear();
+                              }
+                            });
                           },
                         ),
-                      ),
-                    ],
-                  ],
+                        if (!_sendToAll) ...[
+                          SizedBox(height: 8),
+                          Text('Ou sélectionner des utilisateurs spécifiques :',
+                              style: TextStyle(fontSize: 14)),
+                          SizedBox(height: 8),
+                          Autocomplete<Map<String, dynamic>>(
+                            optionsBuilder:
+                                (TextEditingValue textEditingValue) {
+                              if (textEditingValue.text == '') {
+                                return const Iterable<
+                                    Map<String, dynamic>>.empty();
+                              }
+                              return _users.where((user) =>
+                                  user['name'].toLowerCase().contains(
+                                      textEditingValue.text.toLowerCase()) &&
+                                  !_selectedUserObjects.contains(user));
+                            },
+                            displayStringForOption: (user) => user['name'],
+                            fieldViewBuilder: (context, controller, focusNode,
+                                onFieldSubmitted) {
+                              return TextField(
+                                controller: controller,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: 'Rechercher un nom',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                              );
+                            },
+                            onSelected: (user) {
+                              setState(() {
+                                _selectedUserObjects.add(user);
+                              });
+                            },
+                          ),
+                          SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: _selectedUserObjects
+                                .map((user) => Chip(
+                                      label: Text(user['name']),
+                                      onDeleted: () {
+                                        setState(() {
+                                          _selectedUserObjects.remove(user);
+                                        });
+                                      },
+                                    ))
+                                .toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
+                SizedBox(height: 16),
 
-            SizedBox(height: 24),
-
-            // Bouton d'envoi
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _sendNotification,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(43, 90, 114, 1),
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                // Bouton d'envoi
+                ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _sendNotification,
+                  icon: _isLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : Icon(Icons.send),
+                  label: Text(_isLoading
+                      ? 'Envoi en cours...'
+                      : 'Envoyer la notification'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                  ),
                 ),
-                child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Envoyer la notification',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-              ),
+                SizedBox(height: 16),
+
+                // Informations
+                Card(
+                  color: Colors.blue.shade50,
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ℹ️ Informations',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue.shade800)),
+                        SizedBox(height: 8),
+                        Text(
+                          _useTemplates
+                              ? '• Notifications personnalisées avec variables\n'
+                                  '• Chaque utilisateur reçoit un message adapté\n'
+                                  '• Utilise les créneaux de bénévolat pour personnaliser'
+                              : '• Notifications simples (même message pour tous)\n'
+                                  '• Les utilisateurs doivent avoir accepté les notifications\n'
+                                  '• Les tokens FCM sont récupérés automatiquement',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 32), // Espace en bas pour le scroll
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

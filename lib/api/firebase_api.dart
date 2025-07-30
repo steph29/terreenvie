@@ -5,52 +5,47 @@ class FirebaseApi {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> initNotifications() async {
-    try {
-      // Demander les permissions
-      NotificationSettings settings =
-          await _firebaseMessaging.requestPermission(
-        alert: true,
-        announcement: false,
-        badge: true,
-        carPlay: false,
-        criticalAlert: false,
-        provisional: false,
-        sound: true,
-      );
+    await _firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
 
-      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        print('Notifications autorisées');
+    final fCMToken = await _firebaseMessaging.getToken();
+    print('FCM Token: $fCMToken');
 
-        // Obtenir le token FCM
-        String? token = await _firebaseMessaging.getToken();
-        print('FCM Token: $token');
+    // Écouter les messages en premier plan
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-        // Configurer les gestionnaires de messages
-        FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-        FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+    // Écouter les messages quand l'app est en arrière-plan
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
 
-        // Configurer le gestionnaire de messages en arrière-plan
-        FirebaseMessaging.onBackgroundMessage(
-            _firebaseMessagingBackgroundHandler);
-      } else {
-        print('Notifications non autorisées');
-      }
-    } catch (e) {
-      print('Erreur lors de l\'initialisation des notifications: $e');
+    // Écouter les messages quand l'app est fermée
+    final initialMessage = await _firebaseMessaging.getInitialMessage();
+    if (initialMessage != null) {
+      _handleBackgroundMessage(initialMessage);
     }
   }
 
   void _handleForegroundMessage(RemoteMessage message) {
-    print('Message reçu en premier plan: ${message.notification?.title}');
-    // Ici vous pouvez afficher une notification locale ou mettre à jour l'UI
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
+
+    if (message.notification != null) {
+      print('Message also contained a notification: ${message.notification}');
+    }
   }
 
   void _handleBackgroundMessage(RemoteMessage message) {
-    print('Message reçu en arrière-plan: ${message.notification?.title}');
-    // Ici vous pouvez naviguer vers une page spécifique
+    print('Handling a background message: ${message.messageId}');
+    print('Message data: ${message.data}');
+    print('Message notification: ${message.notification}');
   }
 
-  // Méthodes utilitaires
   Future<String?> getToken() async {
     return await _firebaseMessaging.getToken();
   }
@@ -62,10 +57,4 @@ class FirebaseApi {
   Future<void> unsubscribeFromTopic(String topic) async {
     await _firebaseMessaging.unsubscribeFromTopic(topic);
   }
-}
-
-// Gestionnaire de messages en arrière-plan (doit être au niveau global)
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Message reçu en arrière-plan: ${message.notification?.title}');
-  // Ici vous pouvez traiter le message en arrière-plan
 }

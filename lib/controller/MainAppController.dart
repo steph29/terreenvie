@@ -5,14 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:terreenvie/controller/DashboardPage.dart';
 import 'package:terreenvie/controller/TerreEnVie.dart';
+import 'package:terreenvie/controller/NotificationsPage.dart';
+import 'package:terreenvie/controller/AdminNotificationsPage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'AdminPage.dart';
 import 'Analyse.dart';
 import 'LogOutController.dart';
 import 'Logcontroller.dart';
 import 'SignUpPage.dart';
 import 'comptePage.dart';
-import 'NotificationsPage.dart';
-import 'AdminNotificationsPage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class MainAppController extends StatefulWidget {
   @override
@@ -28,10 +30,68 @@ class _MainAppControllerState extends State<MainAppController> {
     userId = FirebaseAuth.instance.currentUser;
     if (userId != null) {
       _checkUserAdminStatus();
+      _saveFcmTokenForCurrentUser(); // Sauvegarder le token FCM
     } else {
       setState(() {
         isAdminVisible = false;
       });
+    }
+  }
+
+  // Méthode pour sauvegarder automatiquement le token FCM
+  Future<void> _saveFcmTokenForCurrentUser() async {
+    try {
+      if (userId != null) {
+        String? token;
+
+        if (kIsWeb) {
+          // Sur le web, on simule un token FCM
+          token = 'WEB_TOKEN_${DateTime.now().millisecondsSinceEpoch}';
+          print('Token FCM simulé pour le web: $token');
+        } else {
+          // Sur mobile, on demande les permissions et on récupère le vrai token
+          NotificationSettings settings =
+              await FirebaseMessaging.instance.requestPermission(
+            alert: true,
+            announcement: false,
+            badge: true,
+            carPlay: false,
+            criticalAlert: false,
+            provisional: false,
+            sound: true,
+          );
+
+          if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+            // Obtenir le token FCM
+            token = await FirebaseMessaging.instance.getToken();
+            print('Token FCM mobile: $token');
+          } else {
+            print('Notifications non autorisées par l\'utilisateur');
+            return;
+          }
+        }
+
+        if (token != null) {
+          // Sauvegarder le token dans Firestore
+          await FirebaseFirestore.instance
+              .collection('users')
+              .where('UserId', isEqualTo: userId!.uid)
+              .get()
+              .then((QuerySnapshot snapshot) {
+            if (snapshot.docs.isNotEmpty) {
+              // Mettre à jour le document utilisateur avec le token FCM
+              snapshot.docs.first.reference.update({
+                'fcmToken': token,
+                'lastTokenUpdate': FieldValue.serverTimestamp(),
+              });
+              print('Token FCM sauvegardé pour l\'utilisateur: ${userId!.uid}');
+              print('Token: $token');
+            }
+          });
+        }
+      }
+    } catch (e) {
+      print('Erreur lors de la sauvegarde du token FCM: $e');
     }
   }
 
@@ -83,6 +143,15 @@ class _MainAppControllerState extends State<MainAppController> {
       child: Analyse(),
     ),
     Container(
+      color: Colors.pink.shade100,
+      alignment: Alignment.center,
+      child: TerreEnVie(),
+    ),
+    Container(
+        color: Colors.orange.shade100,
+        alignment: Alignment.center,
+        child: LogOutController()),
+    Container(
       color: Colors.blue.shade100,
       alignment: Alignment.center,
       child: NotificationsPage(),
@@ -92,15 +161,6 @@ class _MainAppControllerState extends State<MainAppController> {
       alignment: Alignment.center,
       child: AdminNotificationsPage(),
     ),
-    Container(
-      color: Colors.pink.shade100,
-      alignment: Alignment.center,
-      child: TerreEnVie(),
-    ),
-    Container(
-        color: Colors.orange.shade100,
-        alignment: Alignment.center,
-        child: LogOutController())
   ];
   final List<Widget> _pages = [
     Container(
@@ -118,11 +178,6 @@ class _MainAppControllerState extends State<MainAppController> {
     //   alignment: Alignment.center,
     //   child: ContactPage(),
     // ),
-    Container(
-      color: Colors.blue.shade100,
-      alignment: Alignment.center,
-      child: NotificationsPage(),
-    ),
     Container(
       color: Colors.blue.shade100,
       alignment: Alignment.center,
@@ -163,15 +218,16 @@ class _MainAppControllerState extends State<MainAppController> {
                           BottomNavigationBarItem(
                               icon: Icon(Icons.auto_graph), label: 'Analyse'),
                           BottomNavigationBarItem(
-                              icon: Icon(Icons.notifications),
-                              label: 'Notifications'),
-                          BottomNavigationBarItem(
-                              icon: Icon(Icons.send), label: 'Envoyer Notif'),
-                          BottomNavigationBarItem(
                               icon: Icon(Icons.web), label: 'Terre En Vie'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.exit_to_app),
                               label: 'Deconnexion'),
+                          BottomNavigationBarItem(
+                              icon: Icon(Icons.notifications),
+                              label: 'Notifications'),
+                          BottomNavigationBarItem(
+                              icon: Icon(Icons.send),
+                              label: 'Envoyer Notifications'),
                         ],
                       )
                     : BottomNavigationBar(
@@ -191,9 +247,6 @@ class _MainAppControllerState extends State<MainAppController> {
                               label: 'Choisir mes postes'),
                           // BottomNavigationBarItem(
                           //     icon: Icon(Icons.contact_mail), label: 'Contact'),
-                          BottomNavigationBarItem(
-                              icon: Icon(Icons.notifications),
-                              label: 'Notifications'),
                           BottomNavigationBarItem(
                               icon: Icon(Icons.web),
                               label:
@@ -257,6 +310,12 @@ class _MainAppControllerState extends State<MainAppController> {
                             NavigationRailDestination(
                                 icon: Icon(Icons.exit_to_app),
                                 label: Text('Deconnexion')),
+                            NavigationRailDestination(
+                                icon: Icon(Icons.notifications),
+                                label: Text('Notifications')),
+                            NavigationRailDestination(
+                                icon: Icon(Icons.send),
+                                label: Text('Envoyer Notifications')),
                           ],
                         )
                       : NavigationRail(
@@ -325,6 +384,8 @@ class _MainAppControllerState extends State<MainAppController> {
         setState(() {
           isAdminVisible = (profil == 'admin');
         });
+        // Mettre à jour le token FCM après avoir vérifié le statut admin
+        _updateFcmTokenForUser(snapshot.docs.first.reference);
       } else {
         setState(() {
           isAdminVisible = false;
@@ -333,5 +394,51 @@ class _MainAppControllerState extends State<MainAppController> {
     }).catchError((error) {
       // Gestion des erreurs
     });
+  }
+
+  // Méthode pour mettre à jour le token FCM pour un utilisateur spécifique
+  Future<void> _updateFcmTokenForUser(DocumentReference userRef) async {
+    try {
+      String? token;
+
+      if (kIsWeb) {
+        // Sur le web, on simule un token FCM
+        token = 'WEB_TOKEN_${DateTime.now().millisecondsSinceEpoch}';
+        print('Token FCM simulé pour le web: $token');
+      } else {
+        // Sur mobile, on demande les permissions et on récupère le vrai token
+        NotificationSettings settings =
+            await FirebaseMessaging.instance.requestPermission(
+          alert: true,
+          announcement: false,
+          badge: true,
+          carPlay: false,
+          criticalAlert: false,
+          provisional: false,
+          sound: true,
+        );
+
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          // Obtenir le token FCM
+          token = await FirebaseMessaging.instance.getToken();
+          print('Token FCM mobile: $token');
+        } else {
+          print('Notifications non autorisées par l\'utilisateur');
+          return;
+        }
+      }
+
+      if (token != null) {
+        // Mettre à jour le document utilisateur avec le token FCM
+        await userRef.update({
+          'fcmToken': token,
+          'lastTokenUpdate': FieldValue.serverTimestamp(),
+        });
+        print('Token FCM mis à jour pour l\'utilisateur: ${userId!.uid}');
+        print('Token: $token');
+      }
+    } catch (e) {
+      print('Erreur lors de la mise à jour du token FCM: $e');
+    }
   }
 }

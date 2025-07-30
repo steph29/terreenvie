@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-// import 'package:terreenvie/controller/PDF/web.dart';
+import 'package:terreenvie/controller/PDF/web.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
-// import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'Analyse.dart';
 
 class Kikeou extends StatefulWidget {
@@ -127,7 +128,29 @@ class _KikeouState extends State<Kikeou> {
 
               ElevatedButton(
                 onPressed: () async {
-                  // await _createPDF();
+                  // Afficher un indicateur de chargement
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Text('Génération du PDF en cours...'),
+                        ],
+                      ),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+
+                  await _createPDF();
                 },
                 child: Text("Télécharger la liste"),
               ),
@@ -172,51 +195,106 @@ class _KikeouState extends State<Kikeou> {
               : TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
       );
-  // Future<void> _createPDF() async {
-  //     // Create a new PDF document.
-  //     PdfDocument document = PdfDocument();
-  //     // Add a new page to the document.
-  //     final page = document.pages.add();
-  //     final Size pageSize = page.getClientSize();
+  Future<void> _createPDF() async {
+    // Vérifier qu'un poste et un jour sont sélectionnés
+    if (selectedPoste == null || groupValue == null) {
+      // Afficher un message d'erreur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Veuillez sélectionner un poste et un jour'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-  //     // page.graphics.drawImage(
-  //     //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
-  //     //     Rect.fromLTWH(0, 0, 40, 40));
+    // Récupérer les données à jour
+    await fetchData(groupValue);
 
-  //     PdfGrid grid = PdfGrid();
-  //     grid.style = PdfGridStyle(
-  //         font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-  //         cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-  //     grid.columns.add(count: 7);
-  //     grid.headers.add(1);
+    // Create a new PDF document.
+    PdfDocument document = PdfDocument();
+    // Add a new page to the document.
+    final page = document.pages.add();
+    final Size pageSize = page.getClientSize();
 
-  //     PdfGridRow headers = grid.headers[0];
-  //     headers.cells[0].value = 'Nom';
-  //     headers.cells[1].value = 'Prenom';
-  //     headers.cells[2].value = 'Téléphone';
-  //     headers.cells[3].value = 'Jour';
-  //     headers.cells[4].value = 'poste';
-  //     headers.cells[5].value = 'debut';
-  //     headers.cells[6].value = 'fin';
+    // En-tête du document
+    PdfGraphics graphics = page.graphics;
+    PdfStandardFont titleFont =
+        PdfStandardFont(PdfFontFamily.timesRoman, 20, style: PdfFontStyle.bold);
+    PdfStandardFont subtitleFont =
+        PdfStandardFont(PdfFontFamily.timesRoman, 14);
+    PdfStandardFont normalFont = PdfStandardFont(PdfFontFamily.timesRoman, 12);
 
-  //     for (var i = 0; i < items.length; i++) {
-  //       PdfGridRow row = grid.rows.add();
-  //       row.cells[0].value = items[i][0];
-  //       row.cells[1].value = items[i][1];
-  //       row.cells[2].value = items[i][2];
-  //       row.cells[3].value = items[i][3];
-  //       row.cells[4].value = items[i][4];
-  //       row.cells[5].value = items[i][5];
-  //       row.cells[6].value = items[i][6];
-  //     }
+    // Ajouter le logo Terre en Vie
+    try {
+      final logoData = await rootBundle.load('assets/logoTEV.png');
+      final logoImage = PdfBitmap(logoData.buffer.asUint8List());
+      graphics.drawImage(logoImage, Rect.fromLTWH(20, 20, 40, 40));
+    } catch (e) {
+      print('Erreur lors du chargement du logo: $e');
+      // Continuer sans logo si erreur
+    }
 
-  //     grid.draw(
-  //         page: document.pages.add(),
-  //         bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
+    // Titre principal
+    graphics.drawString('Terre en Vie', titleFont,
+        bounds: Rect.fromLTWH(0, 20, pageSize.width, 30),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
-  //     //Save the document
-  //     CustomWebPdf().pdf(document);
-  // }
+    // Sous-titre avec informations du poste et jour
+    String subtitle = 'Liste des bénévoles - $selectedPoste - $groupValue';
+    graphics.drawString(subtitle, subtitleFont,
+        bounds: Rect.fromLTWH(0, 50, pageSize.width, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    // Date de génération
+    String dateGeneree =
+        'Généré le ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
+    graphics.drawString(dateGeneree, normalFont,
+        bounds: Rect.fromLTWH(0, 70, pageSize.width, 15),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    // Tableau des bénévoles
+    PdfGrid grid = PdfGrid();
+    grid.style = PdfGridStyle(
+      font: PdfStandardFont(PdfFontFamily.timesRoman, 11),
+      cellPadding: PdfPaddings(left: 5, right: 5, top: 5, bottom: 5),
+    );
+    grid.columns.add(count: 4);
+    grid.headers.add(1);
+
+    // En-têtes du tableau
+    PdfGridRow headers = grid.headers[0];
+    headers.cells[0].value = 'Nom';
+    headers.cells[1].value = 'Prénom';
+    headers.cells[2].value = 'Téléphone';
+    headers.cells[3].value = 'Créneau';
+
+    // Données des bénévoles
+    for (var i = 0; i < items.length; i++) {
+      PdfGridRow row = grid.rows.add();
+      row.cells[0].value = items[i][0]; // Nom
+      row.cells[1].value = items[i][1]; // Prénom
+      row.cells[2].value = items[i][2]; // Téléphone
+      row.cells[3].value =
+          '${items[i][5]} - ${items[i][6]}'; // Créneau (début - fin)
+    }
+
+    // Dessiner le tableau
+    grid.draw(
+        page: page,
+        bounds:
+            Rect.fromLTWH(0, 100, pageSize.width - 40, pageSize.height - 120));
+
+    // Pied de page avec statistiques
+    String totalBenevoles = 'Total des bénévoles: ${items.length}';
+    graphics.drawString(totalBenevoles, normalFont,
+        bounds: Rect.fromLTWH(0, pageSize.height - 50, pageSize.width, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    // Afficher l'aperçu avant impression
+    await Printing.layoutPdf(
+        onLayout: (format) async => Uint8List.fromList(await document.save()));
+  }
 
   Future<List<List>> fetchData(String? groupValue) async {
     items = [];

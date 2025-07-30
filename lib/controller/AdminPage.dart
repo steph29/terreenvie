@@ -18,67 +18,36 @@ class AdminPage extends StatefulWidget {
 }
 
 class _AdminPageState extends State<AdminPage> {
-  TextEditingController posteContoller = TextEditingController();
-  TextEditingController descContoller = TextEditingController();
-  TextEditingController heureContoller = TextEditingController();
-  TextEditingController nbBenContoller = TextEditingController();
-
-  User? userId = FirebaseAuth.instance.currentUser;
+  List<Map<String, dynamic>> posHorData = [];
+  List<Map<String, dynamic>> usersData = [];
+  bool isLoading = true;
   String groupValue = "Samedi";
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Le coin des référents"),
-          backgroundColor: Color(0xFFf2f0e7),
-        ),
-        body: SingleChildScrollView(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                  flex: 1,
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 30,
-                        ),
-                        buildSegmentControl(),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        OutlinedButton(
-                          onPressed: () {
-                            Get.to(() => Create(), arguments: {
-                              "jour": groupValue,
-                            });
-                          },
-                          child: Text(
-                            "Je rajoute un poste",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromRGBO(43, 90, 114, 1)),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(242, 240, 231, 1),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        // Liste des cards
-                        buildCard(groupValue),
-                        SizedBox(
-                          height: 30,
-                        ),
-                      ])),
-            ],
-          ),
-        ));
+  void initState() {
+    super.initState();
+    _loadAllData();
+  }
+
+  Future<void> _loadAllData() async {
+    setState(() {
+      isLoading = true;
+    });
+    final posHorSnapshot =
+        await FirebaseFirestore.instance.collection('pos_hor').get();
+    posHorData = posHorSnapshot.docs.map((d) {
+      final data = d.data() as Map<String, dynamic>;
+      data['id'] = d.id;
+      return data;
+    }).toList();
+    final usersSnapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+    usersData = usersSnapshot.docs
+        .map((d) => d.data() as Map<String, dynamic>)
+        .toList();
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
@@ -97,243 +66,11 @@ class _AdminPageState extends State<AdminPage> {
         "Dimanche": (kIsWeb) ? buildSegment("Dimanche") : buildSegment("Dim"),
         "Lundi": (kIsWeb) ? buildSegment("Lundi") : buildSegment("Lun"),
       },
-      onValueChanged: (groupValue) {
-        print(groupValue);
+      onValueChanged: (newValue) {
         setState(() {
-          this.groupValue = groupValue;
+          groupValue = newValue;
         });
       });
-
-  Widget buildCard(String groupValue) => StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection("users")
-            .where("UserId", isEqualTo: userId!.uid)
-            .where("profil", whereIn: ["admin", "ref"]).snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return Text("Something went wrong");
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CupertinoActivityIndicator());
-          }
-          if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text("No data found"));
-          }
-          if (snapshot.data != null) {
-            List<String> adminUserIds =
-                snapshot.data!.docs.map((doc) => doc.id).toList();
-
-            return StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection("pos_hor")
-                  .where("jour", isEqualTo: groupValue)
-                  .where("ben_id", whereIn: adminUserIds)
-                  .orderBy('poste')
-                  .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasError) {
-                  print(snapshot.error);
-                  return Text("Something went wrong: ${snapshot.error}");
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CupertinoActivityIndicator());
-                }
-                if (snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text("Quartier Libre !"));
-                }
-                if (snapshot.data != null) {
-                  return Center(
-                    child: GridView.builder(
-                      controller: ScrollController(),
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (ctx, i) {
-                        var poste = snapshot.data!.docs[i]['poste'];
-                        var desc = snapshot.data!.docs[i]['desc'];
-                        var hor = snapshot.data?.docs[i]['hor'];
-                        var posteId = snapshot.data?.docs[i].id;
-                        return Card(
-                          color: Color(0xFFf2f0e7),
-                          child: Container(
-                            constraints:
-                                BoxConstraints(minHeight: 0, maxHeight: 500.0),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20)),
-                            margin: EdgeInsets.all(5),
-                            padding: EdgeInsets.all(5),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  (kIsWeb)
-                                      ? Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              poste,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xFF2b5a72)),
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                IconButton(
-                                                  onPressed: () {
-                                                    Get.to(() => AddPoste(),
-                                                        arguments: {
-                                                          "poste": poste,
-                                                          "desc": desc,
-                                                          "posteId": posteId,
-                                                        });
-                                                  },
-                                                  icon: Icon(Icons.edit),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Color(0xFFf2f0e7),
-                                                  ),
-                                                ),
-                                                // Bouton delete
-                                                IconButton(
-                                                  onPressed: () async {
-                                                    print(posteId.toString());
-                                                    await FirebaseFirestore
-                                                        .instance
-                                                        .collection("pos_hor")
-                                                        .doc(posteId.toString())
-                                                        .delete();
-                                                  },
-                                                  icon: Icon(Icons.delete),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Color(0xFFf2f0e7),
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        )
-                                      : Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              poste,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xFF2b5a72)),
-                                            ),
-                                            // Bouton Ajouter un horaire
-                                            IconButton(
-                                              onPressed: () {
-                                                Get.to(() => AddPoste(),
-                                                    arguments: {
-                                                      "poste": poste,
-                                                      "desc": desc,
-                                                      "posteId": posteId,
-                                                    });
-                                              },
-                                              icon: Icon(Icons.edit),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Color(0xFFf2f0e7),
-                                              ),
-                                            ),
-                                            // Bouton delete
-                                            IconButton(
-                                              onPressed: () async {
-                                                print(posteId.toString());
-                                                await FirebaseFirestore.instance
-                                                    .collection("pos_hor")
-                                                    .doc(posteId.toString())
-                                                    .delete();
-                                              },
-                                              icon: Icon(Icons.delete),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Color(0xFFf2f0e7),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                  Text(
-                                    desc,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: Color(0xFF2b5a72)),
-                                  ),
-                                  Column(
-                                    children: [
-                                      SingleChildScrollView(
-                                        child: buildList(poste, hor, desc,
-                                            posteId, snapshot, i),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      gridDelegate: (MediaQuery.of(context).size.width >= 1024)
-                          ? SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 1.0,
-                              crossAxisSpacing: 0.0,
-                              mainAxisSpacing: 5,
-                              mainAxisExtent: (groupValue == 'Lundi' ||
-                                      groupValue == 'Jeudi' ||
-                                      groupValue == 'Mardi')
-                                  ? 250
-                                  : 450,
-                            )
-                          : ((MediaQuery.of(context).size.width <= 1024 &&
-                                  MediaQuery.of(context).size.width >= 640)
-                              ? SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  childAspectRatio: 1.0,
-                                  crossAxisSpacing: 0.0,
-                                  mainAxisSpacing: 5,
-                                  mainAxisExtent: (groupValue == 'Lundi' ||
-                                          groupValue == 'Jeudi' ||
-                                          groupValue == 'Mardi')
-                                      ? 250
-                                      : 450,
-                                )
-                              : (SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 1,
-                                  childAspectRatio: 1.0,
-                                  crossAxisSpacing: 0.0,
-                                  mainAxisSpacing: 5,
-                                  mainAxisExtent: (groupValue == 'Lundi' ||
-                                          groupValue == 'Jeudi' ||
-                                          groupValue == 'Mardi')
-                                      ? 250
-                                      : 450,
-                                ))),
-                    ),
-                  );
-                }
-                return Container();
-              },
-            );
-          }
-          return Container();
-        },
-      );
 
   Widget buildSegment(String text) => Container(
         padding: (kIsWeb) ? EdgeInsets.all(12) : EdgeInsets.all(3),
@@ -345,90 +82,177 @@ class _AdminPageState extends State<AdminPage> {
         ),
       );
 
-  Widget buildList(poste, hors, desc, posteId, snapshot, i) => ListView.builder(
-      shrinkWrap: true,
-      itemCount: hors.length,
-      itemBuilder: (context, j) {
-        var horId = snapshot.data?.docs[i]['hor'][j];
-        var hord = snapshot.data?.docs[i]['hor'][j]["debut"];
-        var horf = snapshot.data?.docs[i]['hor'][j]["fin"];
-        var nben = snapshot.data?.docs[i]['hor'][j]['nbBen'];
-
-        return Card(
-          child: ListTile(
-            title: Text(
-              hord +
-                  ' - ' +
-                  horf +
-                  ' avec ' +
-                  nben.toString() +
-                  ((nben == 1) ? ' bénévole' : ' bénévoles'),
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Color(0xFF2b5a72)),
+  Widget buildCardList() {
+    // Filtrer les postes selon le jour sélectionné
+    final filteredPosHor =
+        posHorData.where((d) => d['jour'] == groupValue).toList();
+    final isWeb = kIsWeb || MediaQuery.of(context).size.width >= 1024;
+    return isWeb
+        ? GridView.builder(
+            controller: ScrollController(),
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            itemCount: filteredPosHor.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 0.0,
+              mainAxisSpacing: 5,
+              mainAxisExtent: (groupValue == 'Lundi' ||
+                      groupValue == 'Jeudi' ||
+                      groupValue == 'Mardi')
+                  ? 250
+                  : 450,
             ),
-            trailing: Container(
-              width: 70,
-              child: Row(children: [
-                // Bouton DELETE
-                Expanded(
-                  child: IconButton(
-                    onPressed: () {
-                      FirebaseFirestore.instance
-                          .collection("pos_hor")
-                          .doc(posteId.toString())
-                          .get()
-                          .then((doc) {
-                        if (doc.exists) {
-                          List<dynamic> horaires = doc.data()!['hor'];
-                          horaires.removeWhere((horaire) {
-                            return (horaire['debut'] == hord &&
-                                horaire['fin'] == horf &&
-                                horaire['nbBen'] == nben);
-                          });
+            itemBuilder: (context, i) => buildPosteCard(filteredPosHor[i]),
+          )
+        : ListView.builder(
+            shrinkWrap: true,
+            itemCount: filteredPosHor.length,
+            itemBuilder: (context, i) => buildPosteCard(filteredPosHor[i]),
+          );
+  }
 
-                          FirebaseFirestore.instance
-                              .collection("pos_hor")
-                              .doc(posteId.toString())
-                              .update({"hor": horaires}).then((value) {
-                            // Suppression réussie
-                          }).catchError((error) {
-                            // Gestion des erreurs
-                          });
-                        }
-                      });
-                    },
-                    icon: Icon(Icons.delete),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFf2f0e7),
-                    ),
-                  ),
-                ),
-                // Bouton MODIFIER
-                Expanded(
-                  child: IconButton(
-                    onPressed: () {
-                      Get.to(() => EditPoste(), arguments: {
-                        "jour": groupValue,
+  Widget buildPosteCard(Map<String, dynamic> posteData) {
+    final poste = posteData['poste'] ?? '';
+    final desc = posteData['desc'] ?? '';
+    final horList = posteData['hor'] as List? ?? [];
+    final posteId = posteData['id'] ?? '';
+    return Card(
+      color: Color(0xFFf2f0e7),
+      child: Container(
+        constraints: BoxConstraints(minHeight: 0, maxHeight: 500.0),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+        margin: EdgeInsets.all(5),
+        padding: EdgeInsets.all(5),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                poste,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2b5a72)),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      print('Édition du posteId: $posteId');
+                      // Ouvre la page d'édition du poste et attend le retour
+                      await Get.to(() => AddPoste(), arguments: {
                         "poste": poste,
                         "desc": desc,
-                        "horId": horId,
-                        "debut": hord,
-                        "fin": horf,
-                        "nbBen": nben,
                         "posteId": posteId,
                       });
+                      // Rafraîchir les données après retour de la page d'édition
+                      _loadAllData();
                     },
                     icon: Icon(Icons.edit),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFf2f0e7),
                     ),
                   ),
-                ),
-              ]),
-            ),
+                  IconButton(
+                    onPressed: () async {
+                      print('Suppression du posteId: $posteId');
+                      await FirebaseFirestore.instance
+                          .collection("pos_hor")
+                          .doc(posteId)
+                          .delete();
+                      _loadAllData();
+                    },
+                    icon: Icon(Icons.delete),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFf2f0e7),
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                desc,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF2b5a72)),
+              ),
+              Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: horList.length,
+                    itemBuilder: (context, j) {
+                      final h = horList[j];
+                      return Card(
+                        child: ListTile(
+                          title: Text(
+                            '${h['debut']} - ${h['fin']} (${h['nbBen'] ?? '-'} places restantes / ${h['tot'] ?? '-'} total)',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Color(0xFF2b5a72)),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // IconButton(
+                              //   icon: Icon(Icons.edit),
+                              //   onPressed: () {
+                              //     // Ouvre la page d’édition du créneau
+                              //   },
+                              // ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () async {
+                                  final newHorList = List.from(horList)
+                                    ..remove(h);
+                                  await FirebaseFirestore.instance
+                                      .collection('pos_hor')
+                                      .doc(posteId)
+                                      .update({'hor': newHorList});
+                                  _loadAllData();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      });
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Le coin des référents"),
+        backgroundColor: Color(0xFFf2f0e7),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: 30),
+                  buildSegmentControl(),
+                  SizedBox(height: 30),
+                  buildCardList(),
+                ],
+              ),
+            ),
+    );
+  }
 }

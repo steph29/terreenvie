@@ -7,6 +7,7 @@ import 'package:terreenvie/controller/PDF/web.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class BenevoleListWidget extends StatefulWidget {
   const BenevoleListWidget({Key? key}) : super(key: key);
@@ -182,23 +183,173 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
   Future<void> _createPDF() async {
     // Create a new PDF document.
     final pdf = pw.Document();
+
+    // Charger le logo Terre en Vie avec gestion d'erreur
+    pw.MemoryImage? logoImage;
+    try {
+      logoImage = pw.MemoryImage(
+        (await rootBundle.load('assets/logoTEV.png')).buffer.asUint8List(),
+      );
+    } catch (e) {
+      print('Erreur lors du chargement du logo: $e');
+      // Continuer sans logo si erreur
+    }
+
     // Add a new page to the document.
     pdf.addPage(
       pw.Page(
         build: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text('Liste des bénévoles', style: pw.TextStyle(fontSize: 24)),
+            // En-tête avec logo et titre
+            pw.Row(
+              children: [
+                if (logoImage != null) ...[
+                  pw.Image(logoImage, width: 60, height: 60),
+                  pw.SizedBox(width: 20),
+                ],
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Terre en Vie',
+                        style: pw.TextStyle(
+                          fontSize: 24,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.Text(
+                        'Liste des bénévoles',
+                        style: pw.TextStyle(
+                          fontSize: 18,
+                          fontWeight: pw.FontWeight.normal,
+                        ),
+                      ),
+                      pw.Text(
+                        'Généré le ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            pw.SizedBox(height: 30),
+
+            // Tableau des bénévoles
+            pw.Table(
+              border: pw.TableBorder.all(),
+              children: [
+                // En-tête du tableau
+                pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        'Nom',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        'Prénom',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        'Email',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        'Téléphone',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Données des bénévoles
+                ...benevoles
+                    .map((benevole) => pw.TableRow(
+                          children: [
+                            pw.Padding(
+                              padding: pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                benevole['nom']?.toString().toUpperCase() ?? '',
+                                style: pw.TextStyle(fontSize: 11),
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                benevole['prenom']?.toString() ?? '',
+                                style: pw.TextStyle(fontSize: 11),
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                benevole['email']?.toString() ?? '',
+                                style: pw.TextStyle(fontSize: 11),
+                              ),
+                            ),
+                            pw.Padding(
+                              padding: pw.EdgeInsets.all(8),
+                              child: pw.Text(
+                                benevole['tel']?.toString() ?? '',
+                                style: pw.TextStyle(fontSize: 11),
+                              ),
+                            ),
+                          ],
+                        ))
+                    .toList(),
+              ],
+            ),
+
             pw.SizedBox(height: 20),
-            pw.ListView.builder(
-              itemCount: benevoles.length,
-              itemBuilder: (context, index) {
-                final benevole = benevoles[index];
-                return pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
-                  child: pw.Text(
-                      '${benevole['prenom']} ${benevole['nom']} - Email: ${benevole['email']}, Téléphone: ${benevole['tel']}'),
-                );
-              },
+
+            // Pied de page avec statistiques
+            pw.Container(
+              padding: pw.EdgeInsets.all(10),
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Total des bénévoles: ${benevoles.length}',
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                  pw.Text(
+                    'Document généré automatiquement',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

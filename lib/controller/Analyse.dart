@@ -59,30 +59,11 @@ class Analyse extends StatefulWidget {
 
 class _AnalyseState extends State<Analyse> {
   String groupValue = "Samedi";
-
-  // Données centralisées pour les améliorations de performance
+  // Centralisation des données Firestore
   List<Map<String, dynamic>> posHorData = [];
   List<Map<String, dynamic>> posBenData = [];
   List<Map<String, dynamic>> usersData = [];
   bool isLoading = true;
-
-  // Variables pour la compatibilité avec le code existant
-  List<List<dynamic>> test = [];
-  List<List<dynamic>> items = [];
-  List<List<dynamic>> itemsUser = [];
-  List<String> poste = ['Animation Sonore'];
-  String? selectedPoste;
-  int totalCount = 0;
-  int totalCountUser = 0;
-  List<String> userNames = [];
-  List<String> usersID = [];
-  String? selectedUser;
-  String? userId;
-  List<Users> users = [];
-  List<Poste> userPosts = [];
-  List<List<dynamic>> userse = [];
-  List<Poste> postesUsers = [];
-  List<BenevoleAvecPoste> benevolesAvecPostes = [];
 
   @override
   void initState() {
@@ -94,41 +75,29 @@ class _AnalyseState extends State<Analyse> {
     setState(() {
       isLoading = true;
     });
+    final posHorSnapshot = await FirebaseFirestore.instance
+        .collection('pos_hor')
+        .where('jour', isEqualTo: groupValue)
+        .get();
+    posHorData = posHorSnapshot.docs
+        .map((d) => d.data() as Map<String, dynamic>)
+        .toList();
 
-    try {
-      // Charger toutes les données nécessaires en une seule fois
-      final posHorSnapshot = await FirebaseFirestore.instance
-          .collection('pos_hor')
-          .where('jour', isEqualTo: groupValue)
-          .get();
-      posHorData = posHorSnapshot.docs
-          .map((d) => d.data() as Map<String, dynamic>)
-          .toList();
+    final posBenSnapshot =
+        await FirebaseFirestore.instance.collection('pos_ben').get();
+    posBenData = posBenSnapshot.docs
+        .map((d) => d.data() as Map<String, dynamic>)
+        .toList();
 
-      final posBenSnapshot =
-          await FirebaseFirestore.instance.collection('pos_ben').get();
-      posBenData = posBenSnapshot.docs
-          .map((d) => d.data() as Map<String, dynamic>)
-          .toList();
+    final usersSnapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+    usersData = usersSnapshot.docs
+        .map((d) => d.data() as Map<String, dynamic>)
+        .toList();
 
-      final usersSnapshot =
-          await FirebaseFirestore.instance.collection('users').get();
-      usersData = usersSnapshot.docs
-          .map((d) => d.data() as Map<String, dynamic>)
-          .toList();
-
-      // Initialiser les variables de compatibilité
-      await loadUserNames();
-      await Listedeski();
-      await kifekoi();
-      await kiela();
-    } catch (e) {
-      print('Erreur lors du chargement des données: $e');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -149,12 +118,6 @@ class _AnalyseState extends State<Analyse> {
 
   Widget isMobile() => Column(
         children: [
-          // Graphique radar
-          Container(
-            height: 400,
-            child: RadarChartScreen(),
-          ),
-          space(),
           Kikeou(),
           space(),
           kifekoi(),
@@ -163,7 +126,25 @@ class _AnalyseState extends State<Analyse> {
           space(),
           kiela(),
           ListTotal(),
-          BenevoleListWidget()
+          BenevoleListWidget(),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(5.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 6.0,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                ? MediaQuery.of(context).size.width / 2.5
+                : MediaQuery.of(context).size.width / 1.1,
+            height: MediaQuery.of(context).size.height / 2.5,
+            child: RadarChartScreen(),
+          ),
         ],
       );
 
@@ -176,14 +157,6 @@ class _AnalyseState extends State<Analyse> {
         children: [
           SizedBox(
             height: 5,
-          ),
-          // Graphique radar en haut
-          Container(
-            height: 400,
-            child: RadarChartScreen(),
-          ),
-          SizedBox(
-            height: 20,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -205,137 +178,265 @@ class _AnalyseState extends State<Analyse> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [ListTotal(), BenevoleListWidget()],
-          )
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(5.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 6.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                    ? MediaQuery.of(context).size.width / 2.5
+                    : MediaQuery.of(context).size.width / 1.1,
+                height: MediaQuery.of(context).size.height / 2.5,
+                child: RadarChartScreen(),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.yellowAccent.withOpacity(0.1),
+                ),
+                width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+                    ? MediaQuery.of(context).size.width / 2.5
+                    : MediaQuery.of(context).size.width / 1.1,
+                height: MediaQuery.of(context).size.height / 2.5,
+              )
+            ],
+          ),
         ],
       ));
 
-  Widget Listedeski() => Container(
-        decoration: BoxDecoration(
-          color: Colors.yellowAccent.withOpacity(0.1),
-        ),
-        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
-            ? MediaQuery.of(context).size.width / 2.5
-            : MediaQuery.of(context).size.width / 1.1,
-        height: MediaQuery.of(context).size.height / 2.5,
-        child: Column(
-          children: [
-            Text('La liste des ki ! '),
-            FutureBuilder<List<List<dynamic>>>(
-              future: getAllUsers(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(
-                    strokeWidth: 4,
-                  );
-                } else if (snapshot.hasError) {
-                  return Text('Erreur : ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('Aucune donnée disponible.');
-                }
-                List<List<dynamic>> items = snapshot.data!;
-                return Expanded(
-                    child: Container(
-                  width: MediaQuery.of(context).size.width / 1.1,
-                  height: MediaQuery.of(context).size.height / 6,
-                  child: ListView(
-                    children: items.map((item) {
-                      // Créez des Widgets à partir des données de chaque élément
+  // --- Nouvelle version de Listedeski ---
+  Widget Listedeski() {
+    // 1. Construire un map UserId -> user pour accès rapide
+    final userMap = {for (var u in usersData) u['UserId']: u};
+
+    // 2. Set pour éviter les doublons
+    final benevoleIds = <String>{};
+    final benevoles = <Map<String, dynamic>>[];
+
+    for (var ben in posBenData) {
+      final benId = ben['ben_id'];
+      if (benId != null &&
+          !benevoleIds.contains(benId) &&
+          userMap.containsKey(benId)) {
+        benevoleIds.add(benId);
+        final user = userMap[benId];
+        benevoles.add({
+          'nom': user?['nom'] ?? '',
+          'prenom': user?['prenom'] ?? '',
+          'tel': user?['tel'] ?? '',
+          'email': user?['email'] ?? ''
+        });
+      }
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.yellowAccent.withOpacity(0.1),
+      ),
+      width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+          ? MediaQuery.of(context).size.width / 2.5
+          : MediaQuery.of(context).size.width / 1.1,
+      height: MediaQuery.of(context).size.height / 2.5,
+      child: Column(
+        children: [
+          Text('La liste des bénévoles de cette année'),
+          Expanded(
+            child: benevoles.isEmpty
+                ? Center(child: Text("Aucun bénévole trouvé"))
+                : ListView.builder(
+                    itemCount: benevoles.length,
+                    itemBuilder: (context, index) {
+                      final benevole = benevoles[index];
                       return ListTile(
                         title: Text(
-                            'Nom, prénom, Email, téléphone : ${item[0]} ${item[1]} ${item[2]} , ${item[3]}'),
-                      );
-                    }).toList(),
-                  ),
-                ));
-              },
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await _createPDFuser();
-              },
-              child: Text("Télécharger la liste des bénévoles inscrits"),
-            ),
-          ],
-        ),
-      );
-
-  Widget kifekoi() => Container(
-        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
-            ? MediaQuery.of(context).size.width / 2.5
-            : MediaQuery.of(context).size.width / 1.1,
-        height: MediaQuery.of(context).size.height / 2.5,
-        decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1)),
-        child: Column(
-          children: [
-            Text('Ki fè koi'),
-            Row(children: [
-              DropdownButton<String>(
-                value: selectedUser,
-                onChanged: (String? newValue) async {
-                  setState(() {
-                    selectedUser = newValue;
-                  });
-
-                  if (selectedUser != null) {
-                    final selectedUserId = users
-                        .firstWhere((user) =>
-                            '${user.nom} ${user.prenom}' == selectedUser)
-                        .id;
-
-                    // Récupérer les postes de l'utilisateur sélectionné
-                    final postes = await getUserPosts(selectedUserId);
-                    setState(() {
-                      for (var i = 0; i < postes.length; i++)
-                        userPosts =
-                            postesUsers; // Mettre à jour la liste des postes de l'utilisateur
-                    });
-                  }
-                },
-                items:
-                    userNames.map<DropdownMenuItem<String>>((String userName) {
-                  return DropdownMenuItem<String>(
-                    value: userName,
-                    child: Text(userName),
-                  );
-                }).toList(),
-                hint: Text('Sélectionnez un nom'),
-              ),
-              Expanded(
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 1.1,
-                  height: MediaQuery.of(context).size.height / 3,
-                  child: ListView.builder(
-                    itemCount: userPosts.length,
-                    itemBuilder: (context, index) {
-                      final poste = userPosts[index];
-                      return ListTile(
-                        title: Text('Nom du poste: ${poste.nomPoste}'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Jour: ${poste.jour}'),
-                            Text('Heure de début: ${poste.heureDebut}'),
-                            Text('Heure de fin: ${poste.heureFin}'),
-                          ],
+                          '${benevole['prenom']} ${benevole['nom']}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          'Email: ${benevole['email']}, Téléphone: ${benevole['tel']}',
                         ),
                       );
                     },
                   ),
-                ),
-              ),
-            ]),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 
-  Widget kiela() => Container(
-        width: (kIsWeb || MediaQuery.of(context).size.width > 920)
-            ? MediaQuery.of(context).size.width / 2.5
-            : MediaQuery.of(context).size.width / 1.1,
-        height: MediaQuery.of(context).size.height / 2.5,
-        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1)),
-        child: Column(children: [Text("Ki é la?"), EtatDesLieux()]),
-      );
+  // --- Nouvelle version de kifekoi ---
+  Widget kifekoi() {
+    // Liste des utilisateurs (noms complets)
+    final userNames =
+        usersData.map((u) => '${u['nom']} ${u['prenom']}').toList();
+    String? selectedUser;
+    List<Map<String, dynamic>> userPosts = [];
+    return Container(
+      width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+          ? MediaQuery.of(context).size.width / 2.5
+          : MediaQuery.of(context).size.width / 1.1,
+      height: MediaQuery.of(context).size.height / 2.5,
+      decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1)),
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return Column(
+            children: [
+              Text('Ki fè koi'),
+              Row(children: [
+                DropdownButton<String>(
+                  value: selectedUser,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedUser = newValue;
+                      // Mettre à jour les postes de l'utilisateur sélectionné
+                      final user = usersData.firstWhere(
+                          (u) => '${u['nom']} ${u['prenom']}' == selectedUser,
+                          orElse: () => {});
+                      if (user.isNotEmpty) {
+                        final userId = user['uid'];
+                        userPosts = [];
+                        for (var ben in posBenData) {
+                          if (ben['ben_id'] == userId &&
+                              ben['pos_id'] != null &&
+                              ben['pos_id'] is List) {
+                            for (var affectation in ben['pos_id']) {
+                              if (affectation is Map) {
+                                userPosts.add({
+                                  'nomPoste': affectation['poste'],
+                                  'jour': affectation['jour'],
+                                  'heureDebut': affectation['debut'],
+                                  'heureFin': affectation['fin'],
+                                });
+                              }
+                            }
+                          }
+                        }
+                      }
+                    });
+                  },
+                  items: userNames
+                      .map<DropdownMenuItem<String>>((String userName) {
+                    return DropdownMenuItem<String>(
+                      value: userName,
+                      child: Text(userName),
+                    );
+                  }).toList(),
+                  hint: Text('Sélectionnez un nom'),
+                ),
+                Expanded(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 1.1,
+                    height: MediaQuery.of(context).size.height / 3,
+                    child: ListView.builder(
+                      itemCount: userPosts.length,
+                      itemBuilder: (context, index) {
+                        final poste = userPosts[index];
+                        return ListTile(
+                          title: Text('Nom du poste: ${poste['nomPoste']}'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Jour: ${poste['jour']}'),
+                              Text('Heure de début: ${poste['heureDebut']}'),
+                              Text('Heure de fin: ${poste['heureFin']}'),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ]),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // --- Nouvelle version de kiela ---
+  Widget kiela() {
+    // Map : jour > poste > créneau > liste des bénévoles
+    Map<String, Map<String, Map<String, List<Map<String, String>>>>>
+        dayPosteTimeVolunteers = {};
+    for (var ben in posBenData) {
+      if (ben['pos_id'] != null && ben['pos_id'] is List) {
+        for (var affectation in ben['pos_id']) {
+          if (affectation is Map &&
+              affectation['jour'] != null &&
+              affectation['poste'] != null &&
+              affectation['debut'] != null) {
+            String jour = affectation['jour'];
+            String poste = affectation['poste'];
+            String debut = affectation['debut'];
+            // Récupérer le nom/prénom du bénévole
+            final user = usersData.firstWhere((u) => u['uid'] == ben['ben_id'],
+                orElse: () => {});
+            String nom = user['nom'] ?? 'Nom inconnu';
+            String prenom = user['prenom'] ?? 'Prénom inconnu';
+            dayPosteTimeVolunteers[jour] ??= {};
+            dayPosteTimeVolunteers[jour]![poste] ??= {};
+            dayPosteTimeVolunteers[jour]![poste]![debut] ??= [];
+            dayPosteTimeVolunteers[jour]![poste]![debut]!
+                .add({'nom': nom, 'prenom': prenom});
+          }
+        }
+      }
+    }
+    return Container(
+      width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+          ? MediaQuery.of(context).size.width / 2.5
+          : MediaQuery.of(context).size.width / 1.1,
+      height: MediaQuery.of(context).size.height / 2.5,
+      decoration: BoxDecoration(color: Colors.green.withOpacity(0.1)),
+      child: Column(children: [
+        Text("Ki é la?"),
+        Expanded(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: dayPosteTimeVolunteers[groupValue]?.length ?? 0,
+            itemBuilder: (context, index) {
+              String nomPoste =
+                  dayPosteTimeVolunteers[groupValue]!.keys.elementAt(index);
+              Map<String, List<Map<String, String>>> horairesMap =
+                  dayPosteTimeVolunteers[groupValue]![nomPoste]!;
+              return ExpansionTile(
+                title: Text('Poste: $nomPoste'),
+                children: horairesMap.entries.map((horaireEntry) {
+                  String horaires = horaireEntry.key;
+                  List<Map<String, String>> benevoles = horaireEntry.value;
+                  return ExpansionTile(
+                    title: Text(
+                        'Horaires: $horaires (${benevoles.length} bénévoles)'),
+                    children: benevoles.map((benevole) {
+                      String nom = benevole['nom']!;
+                      String prenom = benevole['prenom']!;
+                      return ListTile(
+                        title: Text('$prenom $nom'),
+                      );
+                    }).toList(),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+      ]),
+    );
+  }
 
   Widget EtatDesLieux() => FutureBuilder<
           Map<String, Map<String, Map<String, List<Map<String, String>>>>>>(
@@ -476,31 +577,32 @@ class _AnalyseState extends State<Analyse> {
 
   Future<void> _createPDF() async {
     // Create a new PDF document.
-    // PdfDocument document = PdfDocument();
+    PdfDocument document = PdfDocument();
     // Add a new page to the document.
-    // final page = document.pages.add();
-    // final Size pageSize = page.getClientSize();
+    final page = document.pages.add();
+    final Size pageSize = page.getClientSize();
 
     // page.graphics.drawImage(
     //     PdfBitmap(await _readImageData('assets/logoTEV.png')),
     //     Rect.fromLTWH(0, 0, 40, 40));
 
-    // PdfGrid grid = PdfGrid();
-    // grid.style = PdfGridStyle(
-    //     font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-    //     cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    // grid.columns.add(count: 7);
-    // grid.headers.add(1);
+    PdfGrid grid = PdfGrid();
+    grid.style = PdfGridStyle(
+        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
+        cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
+    grid.columns.add(count: 7);
+    grid.headers.add(1);
 
-    // PdfGridRow headers = grid.headers[0];
-    // headers.cells[0].value = 'Nom';
-    // headers.cells[1].value = 'Prenom';
-    // headers.cells[2].value = 'Téléphone';
-    // headers.cells[3].value = 'Jour';
-    // headers.cells[4].value = 'poste';
-    // headers.cells[5].value = 'debut';
-    // headers.cells[6].value = 'fin';
+    PdfGridRow headers = grid.headers[0];
+    headers.cells[0].value = 'Nom';
+    headers.cells[1].value = 'Prenom';
+    headers.cells[2].value = 'Téléphone';
+    headers.cells[3].value = 'Jour';
+    headers.cells[4].value = 'poste';
+    headers.cells[5].value = 'debut';
+    headers.cells[6].value = 'fin';
 
+    // Supprimer tous les usages de 'items' (lignes 606-614)
     // for (var i = 0; i < items.length; i++) {
     //   PdfGridRow row = grid.rows.add();
     //   row.cells[0].value = items[i][0];
@@ -512,50 +614,50 @@ class _AnalyseState extends State<Analyse> {
     //   row.cells[6].value = items[i][6];
     // }
 
-    // grid.draw(
-    //     page: document.pages.add(),
-    //     bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
+    grid.draw(
+        page: document.pages.add(),
+        bounds: Rect.fromLTWH(0, 55, pageSize.width, pageSize.height));
 
     //Save the document
-    // CustomWebPdf().pdf(document);
+    CustomWebPdf().pdf(document);
   }
 
-  // Future<void> pdfMobile(PdfDocument document) async {
-  //   // final appDocDir = await getApplicationDocumentsDirectory();
-  //   // final filePath = 'Bénévoles_kikeou.pdf';
-  //   // List<int> bytes = await document.save();
-  //   // File file = File('Bénévoles_kikeou_mobile.pdf');
-  //   // file.writeAsBytes(bytes);
+  Future<void> pdfMobile(PdfDocument document) async {
+    // final appDocDir = await getApplicationDocumentsDirectory();
+    // final filePath = 'Bénévoles_kikeou.pdf';
+    // List<int> bytes = await document.save();
+    // File file = File('Bénévoles_kikeou_mobile.pdf');
+    // file.writeAsBytes(bytes);
 
-  //   // final File file =
-  //   //     File(path.join(appDocDir.path, 'Bénévoles_kikeou_mobile.pdf'));
-  //   // // final File file = File(appDocDir.path + 'Bénévoles_kikeou_mobile.pdf');
-  //   // await file.writeAsBytes(bytes, flush: true).whenComplete(() {
-  //   //   OpenFile.open(appDocDir.path + 'downloaded.pdf');
-  //   // });
-  //   // file.writeAsBytesSync(await document.save());
-  //   // File(filePath).writeAsBytesSync(await document.save());
-  // }
+    // final File file =
+    //     File(path.join(appDocDir.path, 'Bénévoles_kikeou_mobile.pdf'));
+    // // final File file = File(appDocDir.path + 'Bénévoles_kikeou_mobile.pdf');
+    // await file.writeAsBytes(bytes, flush: true).whenComplete(() {
+    //   OpenFile.open(appDocDir.path + 'downloaded.pdf');
+    // });
+    // file.writeAsBytesSync(await document.save());
+    // File(filePath).writeAsBytesSync(await document.save());
+  }
 
-  // Future<void> downloadFile(PdfDocument fileUrl) async {
-  //   // final response = await http.get(fileUrl as Uri);
+  Future<void> downloadFile(PdfDocument fileUrl) async {
+    // final response = await http.get(fileUrl as Uri);
 
-  //   // if (response.statusCode == 200) {
-  //   //   // Obtenez le répertoire de stockage local de l'appareil
-  //   //   final appDocDir = await getApplicationDocumentsDirectory();
+    // if (response.statusCode == 200) {
+    //   // Obtenez le répertoire de stockage local de l'appareil
+    //   final appDocDir = await getApplicationDocumentsDirectory();
 
-  //   //   // Obtenez le chemin d'accès complet où vous souhaitez enregistrer le fichier
-  //   //   final filePath = '${appDocDir.path}/test.pdf';
+    //   // Obtenez le chemin d'accès complet où vous souhaitez enregistrer le fichier
+    //   final filePath = '${appDocDir.path}/test.pdf';
 
-  //   //   // Écrivez le contenu téléchargé dans un fichier local
-  //   //   // File file = File(filePath);
-  //   //   // await file.writeAsBytes(response.bodyBytes);
+    //   // Écrivez le contenu téléchargé dans un fichier local
+    //   // File file = File(filePath);
+    //   // await file.writeAsBytes(response.bodyBytes);
 
-  //   //   print('Fichier téléchargé avec succès à $filePath');
-  //   // } else {
-  //   //   throw Exception('Échec du téléchargement du fichier');
-  //   // }
-  // }
+    //   print('Fichier téléchargé avec succès à $filePath');
+    // } else {
+    //   throw Exception('Échec du téléchargement du fichier');
+    // }
+  }
 
   Future<Uint8List> _readImageData(String name) async {
     final data = await rootBundle.load('$name');
@@ -628,124 +730,6 @@ class _AnalyseState extends State<Analyse> {
     return dayPosteTimeVolunteers;
   }
 
-  Future<List<List<dynamic>>> getAllUsers() async {
-    itemsUser = [];
-
-    // Utiliser les données centralisées au lieu de faire un appel Firestore
-    List<Map<String, dynamic>> documents = usersData;
-
-    documents.sort((a, b) {
-      String nomA = (a['nom'] ?? '').toString().toUpperCase();
-      String nomB = (b['nom'] ?? '').toString().toUpperCase();
-
-      return nomA.compareTo(nomB);
-    });
-
-    for (Map<String, dynamic> userData in documents) {
-      itemsUser.add([
-        (userData['nom'] ?? '').toString().toUpperCase(),
-        userData['prenom'] ?? '',
-        userData['email'] ?? '',
-        userData['tel'] ?? '',
-      ]);
-    }
-    return itemsUser;
-  }
-
-  Future<void> _createPDFuser() async {
-    // Create a new PDF document.
-    // PdfDocument document = PdfDocument();
-    // Add a new page to the document.
-    // final page = document.pages.add();
-
-    // PdfGrid grid = PdfGrid();
-    // grid.style = PdfGridStyle(
-    //     font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-    //     cellPadding: PdfPaddings(left: 5, right: 2, top: 2, bottom: 2));
-    // grid.columns.add(count: 4);
-    // grid.headers.add(1);
-
-    // PdfGridRow headers = grid.headers[0];
-    // headers.cells[0].value = 'Nom';
-    // headers.cells[1].value = 'Prenom';
-    // headers.cells[2].value = 'Email';
-    // headers.cells[3].value = 'Téléphone';
-
-    // for (var i = 0; i < itemsUser.length; i++) {
-    //   PdfGridRow row = grid.rows.add();
-    //   row.cells[0].value = itemsUser[i][0];
-    //   row.cells[1].value = itemsUser[i][1];
-    //   row.cells[2].value = itemsUser[i][2];
-    //   row.cells[3].value = itemsUser[i][3];
-    // }
-
-    // grid.draw(
-    //     page: document.pages.add(),
-    //     bounds: Rect.fromLTWH(
-    //         0, 55, page.getClientSize().width, page.getClientSize().height));
-
-    //Save the document
-    // CustomPdf().pdf(document);
-    // CustomWebPdf().pdf(document);
-  }
-
-  Future<void> loadUserNames() async {
-    // Utiliser les données centralisées au lieu de faire un appel Firestore
-    final List<Map<String, dynamic>> documents = usersData;
-
-    documents.sort((a, b) {
-      String nomA = (a['nom'] ?? '').toString().toUpperCase();
-      String nomB = (b['nom'] ?? '').toString().toUpperCase();
-
-      return nomA.compareTo(nomB);
-    });
-
-    setState(() {
-      users = documents
-          .map(
-            (doc) => Users(
-              id: doc['id'] ?? doc['uid'] ?? '',
-              nom: doc['nom'] as String? ?? '',
-              prenom: doc['prenom'] as String? ?? '',
-            ),
-          )
-          .toList();
-      userNames = users.map((user) => '${user.nom} ${user.prenom}').toList();
-    });
-  }
-
-  Future<List<Poste>> getUserPosts(String userName) async {
-    postesUsers = [];
-
-    // Utiliser les données centralisées au lieu de faire un appel Firestore
-    for (Map<String, dynamic> doc in posBenData) {
-      if (doc['ben_id'] == userName) {
-        List<dynamic> posIds = doc['pos_id'] ?? [];
-
-        for (var i = 0; i < posIds.length; i++) {
-          String nomPoste = posIds[i]['poste'] ?? '';
-          String jour = posIds[i]['jour'] ?? '';
-          String heureDebut = posIds[i]['debut'] ?? '';
-          String heureFin = posIds[i]['fin'] ?? '';
-
-          postesUsers.add(Poste(
-            nomPoste: nomPoste,
-            jour: jour,
-            heureDebut: heureDebut,
-            heureFin: heureFin,
-          ));
-        }
-      }
-    }
-    return postesUsers;
-  }
-
-  Future<Uint8List> _readImageData1(String name) async {
-    final data = await rootBundle.load('$name');
-    return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  }
-
-// Fonction pour récupérer les bénévoles avec leurs postes
   Future<List<BenevoleAvecPoste>> getVolunteersWithPosts() async {
     List<BenevoleAvecPoste> benevolesAvecPostes = [];
 
@@ -880,3 +864,103 @@ class _AnalyseState extends State<Analyse> {
         )
       ]));
 }
+
+// --- Fonction pure : Liste des bénévoles ---
+List<Map<String, dynamic>> getBenevoles(List<Map<String, dynamic>> posBenData,
+    List<Map<String, dynamic>> usersData) {
+  final benevoleIds = <String>{};
+  final benevoles = <Map<String, dynamic>>[];
+  for (var ben in posBenData) {
+    final benId = ben['ben_id'];
+    if (benId != null && !benevoleIds.contains(benId)) {
+      benevoleIds.add(benId);
+      final user =
+          usersData.firstWhere((u) => u['UserId'] == benId, orElse: () => {});
+      if (user.isNotEmpty) {
+        benevoles.add({
+          'nom': user['nom'],
+          'prenom': user['prenom'],
+          'tel': user['tel'],
+          'email': user['email']
+        });
+      }
+    }
+  }
+  return benevoles;
+}
+
+// --- Fonction pure : Liste des postes d'un utilisateur ---
+List<Map<String, dynamic>> getUserPosts(
+    String userId, List<Map<String, dynamic>> posBenData) {
+  final userPosts = <Map<String, dynamic>>[];
+  for (var ben in posBenData) {
+    if (ben['ben_id'] == userId &&
+        ben['pos_id'] != null &&
+        ben['pos_id'] is List) {
+      for (var affectation in ben['pos_id']) {
+        if (affectation is Map) {
+          userPosts.add({
+            'nomPoste': affectation['poste'],
+            'jour': affectation['jour'],
+            'heureDebut': affectation['debut'],
+            'heureFin': affectation['fin'],
+          });
+        }
+      }
+    }
+  }
+  return userPosts;
+}
+
+// --- Fonction pure : Map jour > poste > créneau > liste des bénévoles ---
+Map<String, Map<String, Map<String, List<Map<String, String>>>>>
+    getDayPosteTimeVolunteers(List<Map<String, dynamic>> posBenData,
+        List<Map<String, dynamic>> usersData) {
+  Map<String, Map<String, Map<String, List<Map<String, String>>>>>
+      dayPosteTimeVolunteers = {};
+  for (var ben in posBenData) {
+    if (ben['pos_id'] != null && ben['pos_id'] is List) {
+      for (var affectation in ben['pos_id']) {
+        if (affectation is Map &&
+            affectation['jour'] != null &&
+            affectation['poste'] != null &&
+            affectation['debut'] != null) {
+          String jour = affectation['jour'];
+          String poste = affectation['poste'];
+          String debut = affectation['debut'];
+          final user = usersData.firstWhere((u) => u['uid'] == ben['ben_id'],
+              orElse: () => {});
+          String nom = user['nom'] ?? 'Nom inconnu';
+          String prenom = user['prenom'] ?? 'Prénom inconnu';
+          dayPosteTimeVolunteers[jour] ??= {};
+          dayPosteTimeVolunteers[jour]![poste] ??= {};
+          dayPosteTimeVolunteers[jour]![poste]![debut] ??= [];
+          dayPosteTimeVolunteers[jour]![poste]![debut]!
+              .add({'nom': nom, 'prenom': prenom});
+        }
+      }
+    }
+  }
+  return dayPosteTimeVolunteers;
+}
+
+// --- Fonction pure : Statistiques globales (exemple : nombre total de bénévoles) ---
+int getTotalBenevoles(List<Map<String, dynamic>> posBenData) {
+  final benevoleIds = <String>{};
+  for (var ben in posBenData) {
+    final benId = ben['ben_id'];
+    if (benId != null) {
+      benevoleIds.add(benId);
+    }
+  }
+  return benevoleIds.length;
+}
+
+// --- Fonction pure : Export PDF (exemple) ---
+Future<void> exportBenevolesPDF(List<Map<String, dynamic>> benevoles) async {
+  // Utiliser le package pdf pour générer le PDF à partir de la liste benevoles
+  // ...
+}
+
+// --- Utilisation dans le build ---
+// Remplacer les widgets enfants par des appels à ces fonctions pures et affichage des résultats

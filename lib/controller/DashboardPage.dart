@@ -107,11 +107,12 @@ class _DashboardPageState extends State<DashboardPage> {
       shrinkWrap: true,
       itemCount: poste.length,
       itemBuilder: (context, j) {
-        var hord = snapshot.data?.docs[i]['pos_id'][j]["debut"];
-        var horf = snapshot.data?.docs[i]['pos_id'][j]["fin"];
-        var jour = snapshot.data?.docs[i]['pos_id'][j]['jour'];
-        var postes = snapshot.data?.docs[i]['pos_id'][j]['poste'];
-        var idPoste = snapshot.data?.docs[i]['pos_id'][j]['posteId'];
+        var affectation = snapshot.data?.docs[i]['pos_id'][j];
+        var hord = affectation["debut"];
+        var horf = affectation["fin"];
+        var jour = affectation['jour'];
+        var postes = affectation['poste'];
+        var idPoste = affectation['posteId'];
 
         return Card(
           child: ListTile(
@@ -134,20 +135,12 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               icon: Icon(Icons.delete),
               onPressed: () async {
-                // 1. Supprimer l'affectation spécifique dans pos_ben
+                // 1. Supprimer l'affectation dans pos_ben
                 await FirebaseFirestore.instance
                     .collection("pos_ben")
                     .doc(posteId.toString())
                     .update({
-                  'pos_id': FieldValue.arrayRemove([
-                    {
-                      "debut": hord,
-                      "fin": horf,
-                      "poste": postes,
-                      "jour": jour,
-                      "posteId": idPoste
-                    }
-                  ])
+                  'pos_id': FieldValue.arrayRemove([affectation])
                 });
 
                 // 2. Incrémenter nbBen dans pos_hor
@@ -192,5 +185,53 @@ class _DashboardPageState extends State<DashboardPage> {
         );
       });
 
-  // Les fonctions updatePosHor et UpdateBen ont été remplacées par la logique intégrée dans onPressed
+  void updatePosHor(String posteId, String debut, String fin) {
+    FirebaseFirestore.instance
+        .collection('pos_hor')
+        .doc(posteId)
+        .get()
+        .then((snapshot) {
+      var horList = snapshot.data()!['hor'] as List<dynamic>;
+      for (var hor in horList) {
+        if (hor['debut'] == debut && hor['fin'] == fin) {
+          hor['nbBen'] = hor['nbBen'] + 1;
+          break;
+        }
+      }
+      FirebaseFirestore.instance
+          .collection('pos_hor')
+          .doc(posteId)
+          .update({'hor': horList});
+    });
+  }
+
+  Widget UpdateBen(String idPoste, String posteId, String debut, String fin) =>
+      StreamBuilder(
+        //  On récupère les informations de posteId
+
+        stream: FirebaseFirestore.instance.collection("pos_ben").where("pos_id",
+            arrayContains: {"posteId": idPoste, "debut": debut}).snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          print(FieldPath.documentId);
+
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CupertinoActivityIndicator());
+          }
+          if (snapshot.data!.docs.isEmpty) {
+            return Center(child: Text("No data found"));
+          }
+          if (snapshot != null && snapshot.data != null) {
+            // var doc = snapshot.data.docs.first;
+            // var documentId = doc.id;
+            // print("hello");
+            List<String> postesIds =
+                snapshot.data!.docs.map((doc) => doc.id).toList();
+            // On met à jour les informations dans pos_hor
+          }
+          return Container();
+        },
+      );
 }

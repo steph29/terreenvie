@@ -22,6 +22,7 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
   int _selectedHoraireIndex = 0;
   List<Map<String, dynamic>> posHorData = [];
   List<Map<String, dynamic>> posBenData = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -41,52 +42,80 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
   }
 
   Future<void> _loadAllData() async {
-    // Charger tous les pos_hor et pos_ben du jour sélectionné
-    final posHorSnapshot =
-        await _posHorRef.where('jour', isEqualTo: groupValue).get();
-    posHorData = posHorSnapshot.docs
-        .map((d) => d.data() as Map<String, dynamic>)
-        .toList();
+    setState(() {
+      _isLoading = true;
+    });
 
-    final posBenSnapshot = await _posBenRef.get();
-    posBenData = posBenSnapshot.docs
-        .map((d) => d.data() as Map<String, dynamic>)
-        .toList();
+    try {
+      // Charger tous les pos_hor et pos_ben du jour sélectionné
+      final posHorSnapshot =
+          await _posHorRef.where('jour', isEqualTo: groupValue).get();
+      posHorData = posHorSnapshot.docs
+          .map((d) => d.data() as Map<String, dynamic>)
+          .toList();
 
-    // Construire la liste des postes et horaires
-    _postes = posHorData.map((d) => d['poste'] as String).toList();
-    while (_postes.length < 3) {
-      _postes.add('—');
-    }
-    Set<String> horairesSet = {};
-    for (var d in posHorData) {
-      if (d['hor'] != null) {
-        for (var h in d['hor']) {
-          if (h is Map && h['debut'] != null) {
-            horairesSet.add(h['debut'].toString());
+      final posBenSnapshot = await _posBenRef.get();
+      posBenData = posBenSnapshot.docs
+          .map((d) => d.data() as Map<String, dynamic>)
+          .toList();
+
+      // Construire la liste des postes
+      _postes = posHorData.map((d) => d['poste'] as String).toList();
+
+      // S'assurer qu'il y a au moins 3 postes pour éviter les erreurs fl_chart
+      while (_postes.length < 3) {
+        _postes.add('—');
+      }
+
+      // Construire la liste des horaires
+      Set<String> horairesSet = {};
+      for (var d in posHorData) {
+        if (d['hor'] != null) {
+          for (var h in d['hor']) {
+            if (h is Map && h['debut'] != null) {
+              horairesSet.add(h['debut'].toString());
+            }
           }
         }
       }
-    }
-    List<String> horairesList = horairesSet.toList();
-    horairesList.sort((a, b) {
-      int getHour(String s) {
-        final match = RegExp(r'^(\d{1,2})').firstMatch(s);
-        return match != null ? int.parse(match.group(1)!) : 0;
-      }
 
-      return getHour(a).compareTo(getHour(b));
-    });
-    _horaires = horairesList;
-    _selectedHoraireIndex = 0;
-    _computeRadarData();
+      List<String> horairesList = horairesSet.toList();
+      horairesList.sort((a, b) {
+        int getHour(String s) {
+          final match = RegExp(r'^(\d{1,2})').firstMatch(s);
+          return match != null ? int.parse(match.group(1)!) : 0;
+        }
+
+        return getHour(a).compareTo(getHour(b));
+      });
+
+      _horaires = horairesList;
+      _selectedHoraireIndex = 0;
+
+      if (_horaires.isNotEmpty) {
+        _computeRadarData();
+      }
+    } catch (e) {
+      print('Erreur lors du chargement des données: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _computeRadarData() {
-    if (_horaires.isEmpty) return;
+    if (_horaires.isEmpty) {
+      setState(() {
+        _dataValues = List.filled(_postes.length, 0.0);
+      });
+      return;
+    }
+
     String selectedHoraire = _horaires[_selectedHoraireIndex];
+
     // Map du nombre de places par poste/créneau
-    Map<String, int> placesByPoste = {for (var p in _postes) p: 1};
+    Map<String, int> placesByPoste = {};
     for (var d in posHorData) {
       String poste = d['poste'];
       if (d['hor'] != null) {
@@ -97,8 +126,9 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
         }
       }
     }
+
     // Map du nombre d'inscrits par poste/créneau
-    Map<String, int> countByPoste = {for (var p in _postes) p: 0};
+    Map<String, int> countByPoste = {};
     for (var ben in posBenData) {
       if (ben['pos_id'] != null && ben['pos_id'] is List) {
         for (var affectation in ben['pos_id']) {
@@ -106,96 +136,119 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
               affectation['jour'] == groupValue &&
               affectation['debut'] == selectedHoraire) {
             String poste = affectation['poste'];
-            if (countByPoste.containsKey(poste)) {
-              countByPoste[poste] = countByPoste[poste]! + 1;
-            }
+            countByPoste[poste] = (countByPoste[poste] ?? 0) + 1;
           }
         }
       }
     }
+
     // Calcul des pourcentages
     _dataValues = [];
     for (var poste in _postes) {
       int inscrits = countByPoste[poste] ?? 0;
-      int places = placesByPoste[poste] ?? 1;
-      double percentage = (inscrits / places) * 100;
+      int places = placesByPoste[poste] ?? 0;
+      double percentage = places > 0 ? (inscrits / places) * 100 : 0.0;
       // Normaliser à 100% maximum
       _dataValues.add(percentage > 100 ? 100.0 : percentage);
     }
+
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (_horaires.isNotEmpty)
-          Column(
-            children: [
-              Text('Sélectionnez un créneau horaire'),
-              Slider(
-                value: _selectedHoraireIndex.toDouble(),
-                min: 0,
-                max: (_horaires.length - 1).toDouble(),
-                divisions: _horaires.length - 1,
-                label: _horaires[_selectedHoraireIndex],
-                onChanged: (double value) {
-                  setState(() {
-                    _selectedHoraireIndex = value.round();
-                    _computeRadarData();
-                  });
-                },
-              ),
-              Text('Heure : ${_horaires[_selectedHoraireIndex]}'),
-            ],
+    return Container(
+      height: 400,
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3),
           ),
-        Text('Radar chart'),
-        buildSegmentControl(),
-        Expanded(
-          child: _dataValues.isEmpty
-              ? Center(child: CircularProgressIndicator())
-              : RadarChartWidget(
-                  data: _dataValues,
-                  labels: _postes,
-                ),
-        ),
-      ],
+        ],
+      ),
+      child: Column(
+        children: [
+          // Sélecteur de jour
+          CupertinoSegmentedControl<String>(
+            groupValue: groupValue,
+            onValueChanged: (String value) {
+              setState(() {
+                groupValue = value;
+              });
+              _loadAllData();
+            },
+            children: {
+              'Lundi': Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Lundi'),
+              ),
+              'Mardi': Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Mardi'),
+              ),
+              'Mercredi': Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Mercredi'),
+              ),
+              'Jeudi': Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Jeudi'),
+              ),
+              'Vendredi': Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Vendredi'),
+              ),
+              'Samedi': Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Samedi'),
+              ),
+              'Dimanche': Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('Dimanche'),
+              ),
+            },
+          ),
+
+          SizedBox(height: 20),
+
+          // Slider pour l'heure
+          if (_horaires.isNotEmpty) ...[
+            Text('Créneau horaire: ${_horaires[_selectedHoraireIndex]}'),
+            Slider(
+              value: _selectedHoraireIndex.toDouble(),
+              min: 0,
+              max: (_horaires.length - 1).toDouble(),
+              divisions: _horaires.length - 1,
+              onChanged: (double value) {
+                setState(() {
+                  _selectedHoraireIndex = value.round();
+                });
+                _computeRadarData();
+              },
+            ),
+          ] else ...[
+            Text('Aucun créneau disponible pour ce jour'),
+          ],
+
+          SizedBox(height: 20),
+
+          // Graphique radar
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : RadarChartWidget(
+                    data: _dataValues,
+                    labels: _postes,
+                  ),
+          ),
+        ],
+      ),
     );
   }
-
-  Widget buildSegmentControl() => CupertinoSegmentedControl<String>(
-        padding: EdgeInsets.all(5),
-        groupValue: groupValue,
-        selectedColor: Color(0xFF2b5a72),
-        unselectedColor: Colors.white,
-        borderColor: Color(0xFF2b5a72),
-        pressedColor: Color(0xFF2b5a72).withOpacity(0.2),
-        children: {
-          "Mardi": (kIsWeb) ? buildSegment("Mardi") : buildSegment("Mar"),
-          "Mercredi": (kIsWeb) ? buildSegment("Mercredi") : buildSegment("Mer"),
-          "Jeudi": (kIsWeb) ? buildSegment("Jeudi") : buildSegment("Jeu"),
-          "Vendredi": (kIsWeb) ? buildSegment("Vendredi") : buildSegment("Ven"),
-          "Samedi": (kIsWeb) ? buildSegment("Samedi") : buildSegment("Sam"),
-          "Dimanche": (kIsWeb) ? buildSegment("Dimanche") : buildSegment("Dim"),
-          "Lundi": (kIsWeb) ? buildSegment("Lundi") : buildSegment("Lun"),
-        },
-        onValueChanged: (newValue) async {
-          setState(() {
-            groupValue = newValue;
-          });
-          await _loadAllData();
-        },
-      );
-
-  Widget buildSegment(String text) => Padding(
-        padding: (kIsWeb || MediaQuery.of(context).size.width > 920)
-            ? EdgeInsets.all(7)
-            : EdgeInsets.all(3),
-        child: Text(
-          text,
-          style: (kIsWeb || MediaQuery.of(context).size.width > 920)
-              ? TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
-              : TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-        ),
-      );
 }

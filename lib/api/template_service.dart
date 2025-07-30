@@ -1,49 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TemplateService {
+  static final TemplateService _instance = TemplateService._internal();
+  factory TemplateService() => _instance;
+  TemplateService._internal();
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Variables disponibles dans les templates
-  final Map<String, String> availableVariables = {
-    'nom': 'Nom de l\'utilisateur',
-    'prenom': 'Prénom de l\'utilisateur',
-    'email': 'Email de l\'utilisateur',
-    'role': 'Rôle de l\'utilisateur',
-    'poste': 'Nom du poste de bénévolat',
-    'debut': 'Heure de début du créneau',
-    'fin': 'Heure de fin du créneau',
-    'jour': 'Jour de la semaine',
-    'desc': 'Description du poste',
-    'date': 'Date actuelle',
-    'heure': 'Heure actuelle',
-  };
-
-  // Templates prédéfinis
-  final Map<String, Map<String, String>> predefinedTemplates = {
-    'rappel_creneau': {
-      'title': 'Rappel: Votre créneau {poste} {jour}',
-      'body':
-          'Bonjour {prenom}, rappel pour votre créneau {poste} de {debut} à {fin} le {jour}.',
-    },
-    'nouveau_poste': {
-      'title': 'Nouveau poste disponible: {poste}',
-      'body':
-          'Un nouveau poste "{poste}" est disponible le {jour} de {debut} à {fin}.',
-    },
-    'annulation_creneau': {
-      'title': 'Annulation: Créneau {poste} {jour}',
-      'body': 'Le créneau {poste} du {jour} de {debut} à {fin} a été annulé.',
-    },
-    'bienvenue': {
-      'title': 'Bienvenue {prenom} !',
-      'body':
-          'Merci de vous être inscrit sur Terre en Vie. Votre compte a été créé avec succès.',
-    },
-    'modification_poste': {
-      'title': 'Modification: Poste {poste}',
-      'body':
-          'Le poste "{poste}" a été modifié. Consultez les détails dans l\'application.',
-    },
+  static const Map<String, String> availableVariables = {
+    '{nom}': 'Nom de l\'utilisateur',
+    '{prenom}': 'Prénom de l\'utilisateur',
+    '{poste}': 'Poste assigné',
+    '{jour}': 'Jour du créneau',
+    '{debut}': 'Heure de début',
+    '{fin}': 'Heure de fin',
+    '{email}': 'Email de l\'utilisateur',
+    '{role}': 'Rôle de l\'utilisateur',
+    '{date}': 'Date actuelle',
+    '{heure}': 'Heure actuelle',
   };
 
   // Remplacer les variables dans un template
@@ -56,23 +31,21 @@ class TemplateService {
     result =
         result.replaceAll('{prenom}', userData['prenom']?.toString() ?? '');
     result = result.replaceAll('{email}', userData['email']?.toString() ?? '');
-    result = result.replaceAll('{role}', userData['role']?.toString() ?? '');
+    result = result.replaceAll('{role}', userData['profil']?.toString() ?? '');
 
-    // Variables de créneau
+    // Variables de créneau (si disponibles)
     if (creneauData != null) {
       result =
           result.replaceAll('{poste}', creneauData['poste']?.toString() ?? '');
       result =
-          result.replaceAll('{debut}', creneauData['debut']?.toString() ?? '');
-      result = result.replaceAll('{fin}', creneauData['fin']?.toString() ?? '');
-      result =
           result.replaceAll('{jour}', creneauData['jour']?.toString() ?? '');
       result =
-          result.replaceAll('{desc}', creneauData['desc']?.toString() ?? '');
+          result.replaceAll('{debut}', creneauData['debut']?.toString() ?? '');
+      result = result.replaceAll('{fin}', creneauData['fin']?.toString() ?? '');
     }
 
     // Variables de date/heure
-    final now = DateTime.now();
+    DateTime now = DateTime.now();
     result = result.replaceAll('{date}', '${now.day}/${now.month}/${now.year}');
     result = result.replaceAll('{heure}',
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}');
@@ -80,19 +53,30 @@ class TemplateService {
     return result;
   }
 
-  // Récupérer les créneaux d'un utilisateur
+  // Récupérer les données de créneaux d'un utilisateur
   Future<List<Map<String, dynamic>>> getUserCreneaux(String userId) async {
     try {
-      final querySnapshot = await _firestore
+      final QuerySnapshot snapshot = await _firestore
           .collection('pos_ben')
           .where('ben_id', isEqualTo: userId)
           .get();
 
       List<Map<String, dynamic>> creneaux = [];
-      for (var doc in querySnapshot.docs) {
-        List<dynamic> posIds = doc.data()['pos_id'] ?? [];
-        for (var pos in posIds) {
-          creneaux.add(Map<String, dynamic>.from(pos));
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['pos_id'] != null && data['pos_id'] is List) {
+          for (var pos in data['pos_id']) {
+            if (pos is Map<String, dynamic>) {
+              creneaux.add({
+                'poste': pos['poste'] ?? '',
+                'jour': pos['jour'] ?? '',
+                'debut': pos['debut'] ?? '',
+                'fin': pos['fin'] ?? '',
+                'desc': pos['desc'] ?? '',
+              });
+            }
+          }
         }
       }
 
@@ -103,94 +87,114 @@ class TemplateService {
     }
   }
 
-  // Récupérer les données d'un utilisateur
-  Future<Map<String, dynamic>?> getUserData(String userId) async {
+  // Récupérer les données complètes d'un utilisateur
+  Future<Map<String, dynamic>> getUserData(String userId) async {
     try {
-      final doc = await _firestore.collection('users').doc(userId).get();
-      if (doc.exists) {
-        return doc.data();
+      final QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .where('UserId', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first.data() as Map<String, dynamic>;
       }
-      return null;
+      return {};
     } catch (e) {
       print('Erreur lors de la récupération des données utilisateur: $e');
-      return null;
+      return {};
     }
   }
 
-  // Générer des notifications personnalisées
-  Future<List<Map<String, String>>> generatePersonalizedNotifications(
-    String titleTemplate,
-    String bodyTemplate, {
-    List<String>? userIds,
-  }) async {
-    try {
-      List<Map<String, String>> notifications = [];
+  // Générer des notifications personnalisées pour tous les utilisateurs
+  Future<List<Map<String, dynamic>>> generatePersonalizedNotifications(
+      String titleTemplate, String bodyTemplate,
+      {List<String>? selectedUserIds}) async {
+    List<Map<String, dynamic>> notifications = [];
 
-      // Récupérer tous les utilisateurs ou les utilisateurs spécifiés
-      QuerySnapshot querySnapshot;
-      if (userIds != null && userIds.isNotEmpty) {
-        querySnapshot = await _firestore
+    try {
+      // Récupérer tous les utilisateurs ou les utilisateurs sélectionnés
+      QuerySnapshot userSnapshot;
+      if (selectedUserIds != null && selectedUserIds.isNotEmpty) {
+        // Utilisateurs spécifiques
+        userSnapshot = await _firestore
             .collection('users')
-            .where(FieldPath.documentId, whereIn: userIds)
+            .where(FieldPath.documentId, whereIn: selectedUserIds)
             .get();
       } else {
-        querySnapshot = await _firestore.collection('users').get();
+        // Tous les utilisateurs
+        userSnapshot = await _firestore.collection('users').get();
       }
 
-      for (var doc in querySnapshot.docs) {
-        final userData = doc.data() as Map<String, dynamic>;
-        final userId = doc.id;
-        final fcmToken = userData['fcmToken'] as String?;
-
-        if (fcmToken == null || fcmToken.isEmpty) {
-          continue;
-        }
+      for (var userDoc in userSnapshot.docs) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final userId = userDoc.id;
 
         // Récupérer les créneaux de l'utilisateur
         final creneaux = await getUserCreneaux(userId);
 
-        // Si l'utilisateur a des créneaux, créer une notification pour chaque créneau
         if (creneaux.isNotEmpty) {
+          // Créer une notification pour chaque créneau
           for (var creneau in creneaux) {
-            final title = replaceVariables(titleTemplate, userData, creneau);
-            final body = replaceVariables(bodyTemplate, userData, creneau);
+            final personalizedTitle =
+                replaceVariables(titleTemplate, userData, creneau);
+            final personalizedBody =
+                replaceVariables(bodyTemplate, userData, creneau);
 
             notifications.add({
-              'title': title,
-              'body': body,
-              'token': fcmToken,
               'userId': userId,
+              'userData': userData,
+              'creneau': creneau,
+              'title': personalizedTitle,
+              'body': personalizedBody,
+              'fcmToken': userData['fcmToken'],
             });
           }
         } else {
-          // Si l'utilisateur n'a pas de créneaux, créer une notification sans données de créneau
-          final title = replaceVariables(titleTemplate, userData, null);
-          final body = replaceVariables(bodyTemplate, userData, null);
+          // Utilisateur sans créneaux - notification générique
+          final personalizedTitle =
+              replaceVariables(titleTemplate, userData, null);
+          final personalizedBody =
+              replaceVariables(bodyTemplate, userData, null);
 
           notifications.add({
-            'title': title,
-            'body': body,
-            'token': fcmToken,
             'userId': userId,
+            'userData': userData,
+            'creneau': null,
+            'title': personalizedTitle,
+            'body': personalizedBody,
+            'fcmToken': userData['fcmToken'],
           });
         }
       }
-
-      return notifications;
     } catch (e) {
       print(
           'Erreur lors de la génération des notifications personnalisées: $e');
-      return [];
     }
+
+    return notifications;
   }
 
-  // Récupérer un template prédéfini
-  Map<String, String>? getPredefinedTemplate(String templateName) {
-    return predefinedTemplates[templateName];
-  }
-
-  // Récupérer la liste des templates prédéfinis
-  List<String> getPredefinedTemplateNames() {
-    return predefinedTemplates.keys.toList();
-  }
+  // Templates prédéfinis
+  static const Map<String, Map<String, String>> predefinedTemplates = {
+    'rappel_benevolat': {
+      'title': 'Rappel bénévolat - {jour}',
+      'body':
+          'Bonjour {prenom} {nom}, tu as un créneau {poste} de {debut} à {fin} le {jour}. Merci !',
+    },
+    'rappel_general': {
+      'title': 'Rappel - {jour}',
+      'body':
+          'Salut {prenom}, n\'oublie pas ton créneau {poste} le {jour} de {debut} à {fin}.',
+    },
+    'message_personnalise': {
+      'title': 'Message pour {prenom}',
+      'body':
+          'Bonjour {prenom} {nom}, nous avons un message important pour toi.',
+    },
+    'rappel_urgent': {
+      'title': 'URGENT - {poste} {jour}',
+      'body':
+          '{prenom}, nous avons besoin de toi pour {poste} le {jour} de {debut} à {fin}. Merci !',
+    },
+  };
 }
