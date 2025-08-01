@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'dart:convert';
+import 'dart:html' as html;
 import 'Analyse.dart';
 
 class Kikeou extends StatefulWidget {
@@ -290,9 +292,28 @@ class _KikeouState extends State<Kikeou> {
         bounds: Rect.fromLTWH(0, pageSize.height - 50, pageSize.width, 20),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
-    // Afficher l'aperçu avant impression
-    // await Printing.layoutPdf(
-    //     onLayout: (format) async => Uint8List.fromList(await document.save()));
+    // Sauvegarder le document
+    List<int> bytes = await document.save();
+    document.dispose();
+
+    // Afficher le PDF
+    if (kIsWeb) {
+      print('📄 PDF Ki ké où généré avec succès (mode Web)');
+      print('📄 Nombre de bénévoles: ${items.length}');
+      print('📄 Taille du PDF: ${bytes.length} bytes');
+
+      // Créer une URL de données pour afficher le PDF dans le navigateur
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute(
+            'download', 'kikeou_${selectedPoste}_${groupValue ?? "tous"}.pdf')
+        ..click();
+      html.Url.revokeObjectUrl(url);
+    } else {
+      // Pour mobile, on pourrait sauvegarder le fichier
+      print('📄 PDF Ki ké où généré avec succès (mode Mobile)');
+    }
   }
 
   Future<List<List>> fetchData(String? groupValue) async {

@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert';
+import 'dart:html' as html;
 
 class BenevoleListWidget extends StatefulWidget {
   const BenevoleListWidget({Key? key}) : super(key: key);
@@ -131,11 +133,19 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     List<int> bytes = await document.save();
     document.dispose();
 
-    // Afficher le PDF (simulation pour le web)
+    // Afficher le PDF
     if (kIsWeb) {
       print('📄 PDF généré avec succès (mode Web)');
       print('📄 Nombre de bénévoles: ${benevoles.length}');
       print('📄 Taille du PDF: ${bytes.length} bytes');
+
+      // Créer une URL de données pour afficher le PDF dans le navigateur
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', 'liste_benevoles.pdf')
+        ..click();
+      html.Url.revokeObjectUrl(url);
     } else {
       // Pour mobile, on pourrait sauvegarder le fichier
       print('📄 PDF généré avec succès (mode Mobile)');
