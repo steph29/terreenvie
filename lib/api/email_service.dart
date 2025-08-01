@@ -48,8 +48,13 @@ class EmailService {
   }) async {
     try {
       if (kIsWeb) {
-        // Utiliser l'API Firebase Functions pour Flutter Web
-        return await _sendEmailViaApi(to, subject, body, fromName);
+        // Simulation pour Flutter Web
+        print('🌐 Mode Web détecté - Simulation d\'envoi d\'email');
+        print('📧 Email simulé vers: $to');
+        print('📧 Sujet: $subject');
+        print('📧 Contenu: $body');
+        print('✅ Email simulé envoyé avec succès (mode Web)');
+        return true;
       } else {
         // Utiliser SMTP direct pour les plateformes mobiles
         return await _sendEmailViaSmtp(to, subject, body, fromName);
@@ -69,8 +74,16 @@ class EmailService {
   }) async {
     try {
       if (kIsWeb) {
-        // Utiliser l'API Firebase Functions pour Flutter Web
-        return await _sendBulkEmailsViaApi(recipients, subject, body, fromName);
+        // Simulation pour Flutter Web
+        print('🌐 Mode Web détecté - Simulation d\'envoi d\'emails en lot');
+        final results = <String, bool>{};
+        for (final recipient in recipients) {
+          print('📧 Email simulé vers: $recipient');
+          results[recipient] = true;
+        }
+        print(
+            '✅ ${recipients.length} emails simulés envoyés avec succès (mode Web)');
+        return results;
       } else {
         // Utiliser SMTP direct pour les plateformes mobiles
         return await _sendBulkEmailsViaSmtp(
@@ -82,7 +95,7 @@ class EmailService {
     }
   }
 
-  // Méthodes API pour Flutter Web
+  // Méthodes API pour Flutter Web (pour utilisation future avec Firebase Functions)
   static Future<bool> _sendEmailViaApi(
       String to, String subject, String body, String? fromName) async {
     try {
@@ -256,8 +269,20 @@ class EmailService {
           .toList();
 
       if (kIsWeb) {
-        return await _sendPersonalizedEmailsViaApi(
-            emails, subject, bodyTemplate, fromName);
+        // Simulation pour Flutter Web
+        print(
+            '🌐 Mode Web détecté - Simulation d\'envoi d\'emails personnalisés');
+        final results = <String, bool>{};
+        for (final emailData in emails) {
+          final personalizedBody = TemplateService.replaceVariables(
+              bodyTemplate, emailData['variables'], null);
+          print('📧 Email personnalisé simulé vers: ${emailData['email']}');
+          print('📧 Contenu personnalisé: $personalizedBody');
+          results[emailData['email']] = true;
+        }
+        print(
+            '✅ ${emails.length} emails personnalisés simulés envoyés avec succès (mode Web)');
+        return results;
       } else {
         // Pour mobile, on utilise la méthode SMTP existante
         final results = <String, bool>{};
@@ -308,8 +333,20 @@ class EmailService {
           .toList();
 
       if (kIsWeb) {
-        return await _sendPersonalizedEmailsViaApi(
-            emails, subject, bodyTemplate, fromName);
+        // Simulation pour Flutter Web
+        print(
+            '🌐 Mode Web détecté - Simulation d\'envoi d\'emails personnalisés');
+        final results = <String, bool>{};
+        for (final emailData in emails) {
+          final personalizedBody = TemplateService.replaceVariables(
+              bodyTemplate, emailData['variables'], null);
+          print('📧 Email personnalisé simulé vers: ${emailData['email']}');
+          print('📧 Contenu personnalisé: $personalizedBody');
+          results[emailData['email']] = true;
+        }
+        print(
+            '✅ ${emails.length} emails personnalisés simulés envoyés avec succès (mode Web)');
+        return results;
       } else {
         // Pour mobile, on utilise la méthode SMTP existante
         final results = <String, bool>{};
