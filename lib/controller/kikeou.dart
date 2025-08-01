@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:printing/printing.dart';
 import 'Analyse.dart';
 
 class Kikeou extends StatefulWidget {
@@ -292,8 +291,8 @@ class _KikeouState extends State<Kikeou> {
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
     // Afficher l'aperçu avant impression
-    await Printing.layoutPdf(
-        onLayout: (format) async => Uint8List.fromList(await document.save()));
+    // await Printing.layoutPdf(
+    //     onLayout: (format) async => Uint8List.fromList(await document.save()));
   }
 
   Future<List<List>> fetchData(String? groupValue) async {

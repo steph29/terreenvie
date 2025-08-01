@@ -161,21 +161,34 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
       if (_useTemplatesEmails) {
         // Utiliser les emails personnalisés avec templates
         if (_sendToAll) {
-          await _emailService.sendPersonalizedToAllUsers(subject, body);
+          await _emailService.sendPersonalizedToAllUsers(
+            subject: subject,
+            bodyTemplate: body,
+          );
         } else {
-          final userIds =
-              _selectedUserObjects.map((u) => u['id'] as String).toList();
+          final selectedEmails =
+              _selectedUserObjects.map((u) => u['email'] as String).toList();
           await _emailService.sendPersonalizedToSpecificUsers(
-              userIds, subject, body);
+            selectedEmails: selectedEmails,
+            subject: subject,
+            bodyTemplate: body,
+          );
         }
       } else {
         // Utiliser les emails simples
         if (_sendToAll) {
-          await _emailService.sendToAllUsers(subject, body);
+          await _emailService.sendToAllUsers(
+            subject: subject,
+            body: body,
+          );
         } else {
-          final userIds =
-              _selectedUserObjects.map((u) => u['id'] as String).toList();
-          await _emailService.sendToSpecificUsers(userIds, subject, body);
+          final selectedEmails =
+              _selectedUserObjects.map((u) => u['email'] as String).toList();
+          await _emailService.sendToSpecificUsers(
+            selectedEmails: selectedEmails,
+            subject: subject,
+            body: body,
+          );
         }
       }
 
