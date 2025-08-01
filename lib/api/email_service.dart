@@ -1,23 +1,35 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:http/http.dart' as http;
 import 'template_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EmailService {
-  // Service d'email simplifié compatible avec l'existant
+  static final EmailService _instance = EmailService._internal();
+  factory EmailService() => _instance;
+  EmailService._internal();
+
   final TemplateService _templateService = TemplateService();
 
-  // Envoi d'un email simple
-  static Future<bool> sendEmail({
+  // Configuration SMTP
+  SmtpServer get _smtpServer {
+    final password = dotenv.env['EMAIL_PASSWORD'] ?? '';
+    return gmail('communication.terreenvie@gmail.com', password);
+  }
+
+  // Envoyer un email simple
+  Future<bool> sendEmail({
     required String to,
     required String subject,
     required String body,
-    String? fromName,
   }) async {
     try {
       if (kIsWeb) {
-        // Simulation pour Flutter Web
+        // Mode Web - Utiliser une API externe ou simulation
         print('🌐 Mode Web détecté - Simulation d\'envoi d\'email');
         print('📧 Email simulé vers: $to');
         print('📧 Sujet: $subject');
@@ -25,12 +37,15 @@ class EmailService {
         print('✅ Email simulé envoyé avec succès (mode Web)');
         return true;
       } else {
-        // Pour mobile, on utilise une approche simplifiée
-        print('📱 Mode Mobile - Simulation d\'envoi d\'email');
-        print('📧 Email simulé vers: $to');
-        print('📧 Sujet: $subject');
-        print('📧 Contenu: $body');
-        print('✅ Email simulé envoyé avec succès (mode Mobile)');
+        // Mode Mobile - SMTP réel
+        final message = Message()
+          ..from = Address('communication.terreenvie@gmail.com', 'Terre en Vie')
+          ..recipients.add(to)
+          ..subject = subject
+          ..text = body;
+
+        final sendReport = await send(message, _smtpServer);
+        print('✅ Email envoyé avec succès: ${sendReport.toString()}');
         return true;
       }
     } catch (e) {
@@ -39,168 +54,142 @@ class EmailService {
     }
   }
 
-  // Envoi d'emails en lot
-  static Future<Map<String, bool>> sendBulkEmails({
-    required List<String> recipients,
+  // Envoyer des emails en masse
+  Future<bool> sendBulkEmails({
+    required List<String> emails,
     required String subject,
     required String body,
-    String? fromName,
   }) async {
     try {
-      print(
-          '📧 Envoi d\'emails en lot vers ${recipients.length} destinataires');
-      final results = <String, bool>{};
+      if (kIsWeb) {
+        // Mode Web - Simulation
+        print('🌐 Mode Web détecté - Simulation d\'envoi d\'emails en masse');
+        for (String email in emails) {
+          print('📧 Email simulé vers: $email');
+        }
+        print(
+            '✅ ${emails.length} emails simulés envoyés avec succès (mode Web)');
+        return true;
+      } else {
+        // Mode Mobile - SMTP réel
+        final message = Message()
+          ..from = Address('communication.terreenvie@gmail.com', 'Terre en Vie')
+          ..recipients.addAll(emails)
+          ..subject = subject
+          ..text = body;
 
-      for (final recipient in recipients) {
-        final success = await sendEmail(
-          to: recipient,
-          subject: subject,
-          body: body,
-          fromName: fromName,
-        );
-        results[recipient] = success;
+        final sendReport = await send(message, _smtpServer);
+        print(
+            '✅ Emails en masse envoyés avec succès: ${sendReport.toString()}');
+        return true;
       }
-
-      print('✅ ${recipients.length} emails simulés envoyés avec succès');
-      return results;
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi des emails en lot: $e');
-      return {};
+      print('❌ Erreur lors de l\'envoi d\'emails en masse: $e');
+      return false;
     }
   }
 
-  // Méthodes d'instance pour l'interface utilisateur
-  Future<Map<String, bool>> sendPersonalizedToAllUsers({
+  // Envoyer des emails personnalisés à tous les utilisateurs
+  Future<bool> sendPersonalizedToAllUsers({
     required String subject,
     required String bodyTemplate,
-    String? fromName,
+    Map<String, dynamic>? creneauData,
   }) async {
     try {
-      final usersSnapshot =
-          await FirebaseFirestore.instance.collection('users').get();
-      final users = usersSnapshot.docs.map((doc) => doc.data()).toList();
-
-      final results = <String, bool>{};
-
-      for (final user in users) {
-        final email = user['email'] as String?;
-        if (email != null && email.isNotEmpty) {
-          final variables = {
-            'nom': user['nom'] ?? '',
-            'prenom': user['prenom'] ?? '',
-            'email': email,
-          };
-
-          final personalizedBody =
-              _templateService.replaceVariables(bodyTemplate, variables, null);
-          final success = await sendEmail(
-            to: email,
-            subject: subject,
-            body: personalizedBody,
-            fromName: fromName,
-          );
-          results[email] = success;
-        }
-      }
-
-      print(
-          '✅ ${results.length} emails personnalisés simulés envoyés avec succès');
-      return results;
-    } catch (e) {
-      print(
-          '❌ Erreur lors de l\'envoi personnalisé à tous les utilisateurs: $e');
-      return {};
-    }
-  }
-
-  Future<Map<String, bool>> sendPersonalizedToSpecificUsers({
-    required List<String> selectedEmails,
-    required String subject,
-    required String bodyTemplate,
-    String? fromName,
-  }) async {
-    try {
-      final usersSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('email', whereIn: selectedEmails)
-          .get();
-
-      final users = usersSnapshot.docs.map((doc) => doc.data()).toList();
-      final results = <String, bool>{};
-
-      for (final user in users) {
-        final email = user['email'] as String?;
-        if (email != null && email.isNotEmpty) {
-          final variables = {
-            'nom': user['nom'] ?? '',
-            'prenom': user['prenom'] ?? '',
-            'email': email,
-          };
-
-          final personalizedBody =
-              _templateService.replaceVariables(bodyTemplate, variables, null);
-          final success = await sendEmail(
-            to: email,
-            subject: subject,
-            body: personalizedBody,
-            fromName: fromName,
-          );
-          results[email] = success;
-        }
-      }
-
-      print(
-          '✅ ${results.length} emails personnalisés simulés envoyés avec succès');
-      return results;
-    } catch (e) {
-      print(
-          '❌ Erreur lors de l\'envoi personnalisé aux utilisateurs spécifiques: $e');
-      return {};
-    }
-  }
-
-  Future<Map<String, bool>> sendToAllUsers({
-    required String subject,
-    required String body,
-    String? fromName,
-  }) async {
-    try {
+      // Récupérer tous les utilisateurs depuis Firestore
       final usersSnapshot =
           await FirebaseFirestore.instance.collection('users').get();
       final emails = usersSnapshot.docs
-          .map((doc) => doc.data()['email'] as String?)
-          .where((email) => email != null && email!.isNotEmpty)
-          .cast<String>()
+          .map((doc) => doc.data()['email'] as String)
           .toList();
 
-      return await sendBulkEmails(
-        recipients: emails,
-        subject: subject,
-        body: body,
-        fromName: fromName,
-      );
+      if (kIsWeb) {
+        // Mode Web - Simulation
+        print('🌐 Mode Web détecté - Simulation d\'emails personnalisés');
+        for (String email in emails) {
+          final personalizedBody =
+              _templateService.replaceVariables(bodyTemplate, creneauData);
+          print('📧 Email personnalisé simulé vers: $email');
+          print('📧 Contenu: $personalizedBody');
+        }
+        print(
+            '✅ ${emails.length} emails personnalisés simulés envoyés avec succès (mode Web)');
+        return true;
+      } else {
+        // Mode Mobile - SMTP réel
+        for (String email in emails) {
+          final personalizedBody =
+              _templateService.replaceVariables(bodyTemplate, creneauData);
+          await sendEmail(
+            to: email,
+            subject: subject,
+            body: personalizedBody,
+          );
+        }
+        print('✅ ${emails.length} emails personnalisés envoyés avec succès');
+        return true;
+      }
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi à tous les utilisateurs: $e');
-      return {};
+      print('❌ Erreur lors de l\'envoi d\'emails personnalisés: $e');
+      return false;
     }
   }
 
-  Future<Map<String, bool>> sendToSpecificUsers({
+  // Envoyer des emails personnalisés à des utilisateurs spécifiques
+  Future<bool> sendPersonalizedToSpecificUsers({
     required List<String> selectedEmails,
     required String subject,
-    required String body,
-    String? fromName,
+    required String bodyTemplate,
+    Map<String, dynamic>? creneauData,
   }) async {
     try {
-      return await sendBulkEmails(
-        recipients: selectedEmails,
-        subject: subject,
-        body: body,
-        fromName: fromName,
-      );
+      if (kIsWeb) {
+        // Mode Web - Simulation
+        print('🌐 Mode Web détecté - Simulation d\'emails personnalisés');
+        for (String email in selectedEmails) {
+          final personalizedBody =
+              _templateService.replaceVariables(bodyTemplate, creneauData);
+          print('📧 Email personnalisé simulé vers: $email');
+          print('📧 Contenu: $personalizedBody');
+        }
+        print(
+            '✅ ${selectedEmails.length} emails personnalisés simulés envoyés avec succès (mode Web)');
+        return true;
+      } else {
+        // Mode Mobile - SMTP réel
+        for (String email in selectedEmails) {
+          final personalizedBody =
+              _templateService.replaceVariables(bodyTemplate, creneauData);
+          await sendEmail(
+            to: email,
+            subject: subject,
+            body: personalizedBody,
+          );
+        }
+        print(
+            '✅ ${selectedEmails.length} emails personnalisés envoyés avec succès');
+        return true;
+      }
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi aux utilisateurs spécifiques: $e');
-      return {};
+      print('❌ Erreur lors de l\'envoi d\'emails personnalisés: $e');
+      return false;
     }
+  }
+
+  // Méthodes de compatibilité pour l'interface existante
+  Future<bool> sendToAllUsers(String subject, String body) async {
+    return await sendPersonalizedToAllUsers(
+      subject: subject,
+      bodyTemplate: body,
+    );
+  }
+
+  Future<bool> sendToSpecificUsers(
+      List<String> userIds, String subject, String body) async {
+    return await sendPersonalizedToSpecificUsers(
+      selectedEmails: userIds,
+      subject: subject,
+      bodyTemplate: body,
+    );
   }
 }
