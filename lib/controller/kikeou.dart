@@ -303,13 +303,20 @@ class _KikeouState extends State<Kikeou> {
       print('📄 Taille du PDF: ${bytes.length} bytes');
 
       // Créer une URL de données pour afficher le PDF dans le navigateur
-      final blob = html.Blob([bytes]);
+      final blob = html.Blob([Uint8List.fromList(bytes)], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
+
+      // Créer un lien de téléchargement
       final anchor = html.AnchorElement(href: url)
         ..setAttribute(
             'download', 'kikeou_${selectedPoste}_${groupValue ?? "tous"}.pdf')
+        ..setAttribute('target', '_blank')
         ..click();
-      html.Url.revokeObjectUrl(url);
+
+      // Nettoyer l'URL après un délai
+      Future.delayed(Duration(seconds: 1), () {
+        html.Url.revokeObjectUrl(url);
+      });
     } else {
       // Pour mobile, on pourrait sauvegarder le fichier
       print('📄 PDF Ki ké où généré avec succès (mode Mobile)');

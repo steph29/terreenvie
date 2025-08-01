@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show rootBundle, Uint8List;
 import 'dart:convert';
 import 'dart:html' as html;
 
@@ -140,12 +140,19 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
       print('📄 Taille du PDF: ${bytes.length} bytes');
 
       // Créer une URL de données pour afficher le PDF dans le navigateur
-      final blob = html.Blob([bytes]);
+      final blob = html.Blob([Uint8List.fromList(bytes)], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
+
+      // Créer un lien de téléchargement
       final anchor = html.AnchorElement(href: url)
         ..setAttribute('download', 'liste_benevoles.pdf')
+        ..setAttribute('target', '_blank')
         ..click();
-      html.Url.revokeObjectUrl(url);
+
+      // Nettoyer l'URL après un délai
+      Future.delayed(Duration(seconds: 1), () {
+        html.Url.revokeObjectUrl(url);
+      });
     } else {
       // Pour mobile, on pourrait sauvegarder le fichier
       print('📄 PDF généré avec succès (mode Mobile)');
