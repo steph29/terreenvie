@@ -57,18 +57,34 @@ class Analyse extends StatefulWidget {
   State<Analyse> createState() => _AnalyseState();
 }
 
-class _AnalyseState extends State<Analyse> {
+class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   String groupValue = "Samedi";
+
   // Centralisation des données Firestore
   List<Map<String, dynamic>> posHorData = [];
   List<Map<String, dynamic>> posBenData = [];
   List<Map<String, dynamic>> usersData = [];
   bool isLoading = true;
 
+  // Couleurs du thème
+  static const Color primaryColor = Color(0xFF4CAF50);
+  static const Color backgroundColor = Color(0xFFf2f0e7);
+  static const Color cardColor = Colors.white;
+  static const Color textColor = Color(0xFF333333);
+  static const Color accentColor = Color(0xFF666666);
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _loadAllData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAllData() async {
@@ -103,17 +119,335 @@ class _AnalyseState extends State<Analyse> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Ki ké où?"),
-          backgroundColor: Color(0xFFf2f0e7),
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        title: Text(
+          "Tableau de bord",
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
-        body: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: EdgeInsets.all(20),
-                child: (kIsWeb || MediaQuery.of(context).size.width > 920)
-                    ? isWeb()
-                    : isMobile()));
+        backgroundColor: Color(0xFFf2f0e7),
+        foregroundColor: Colors.black87,
+        elevation: 2,
+        shadowColor: Colors.black12,
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: primaryColor,
+          labelColor: primaryColor,
+          unselectedLabelColor: Colors.black54,
+          indicatorWeight: 3,
+          labelStyle: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontWeight: FontWeight.normal,
+            fontSize: 14,
+          ),
+          tabs: [
+            Tab(
+              icon: Icon(Icons.dashboard, size: 20),
+              text: 'KPI',
+            ),
+            Tab(
+              icon: Icon(Icons.radar, size: 20),
+              text: 'Graphique',
+            ),
+            Tab(
+              icon: Icon(Icons.people, size: 20),
+              text: 'Bénévoles',
+            ),
+          ],
+        ),
+      ),
+      body: isLoading
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Chargement des données...',
+                    style: TextStyle(color: accentColor),
+                  ),
+                ],
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildKPITab(),
+                _buildChartTab(),
+                _buildVolunteersTab(),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildKPITab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Indicateurs clés',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          SizedBox(height: 20),
+
+          // KPI Cards
+          GridView.count(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.2,
+            children: [
+              _buildKPICard(
+                'Total Bénévoles',
+                _getTotalVolunteers().toString(),
+                Icons.people,
+                primaryColor,
+              ),
+              _buildKPICard(
+                'Créneaux Occupés',
+                _getOccupiedSlots().toString(),
+                Icons.schedule,
+                Colors.blue,
+              ),
+              _buildKPICard(
+                'Taux de Remplissage',
+                '${_getFillRate().toStringAsFixed(1)}%',
+                Icons.pie_chart,
+                Colors.orange,
+              ),
+              _buildKPICard(
+                'Postes Actifs',
+                _getActivePosts().toString(),
+                Icons.work,
+                Colors.purple,
+              ),
+              _buildKPICard(
+                'Jours Actifs',
+                _getActiveDays().toString(),
+                Icons.calendar_today,
+                Colors.teal,
+              ),
+              _buildKPICard(
+                'Nouveaux Cette Semaine',
+                _getNewVolunteersThisWeek().toString(),
+                Icons.person_add,
+                Colors.green,
+              ),
+            ],
+          ),
+
+          SizedBox(height: 30),
+
+          // Sélecteur de jour
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filtrer par jour',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  CupertinoSegmentedControl<String>(
+                    children: {
+                      'Lundi': Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text('Lun'),
+                      ),
+                      'Mardi': Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text('Mar'),
+                      ),
+                      'Mercredi': Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text('Mer'),
+                      ),
+                      'Jeudi': Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text('Jeu'),
+                      ),
+                      'Vendredi': Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text('Ven'),
+                      ),
+                      'Samedi': Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text('Sam'),
+                      ),
+                      'Dimanche': Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text('Dim'),
+                      ),
+                    },
+                    groupValue: groupValue,
+                    onValueChanged: (String value) {
+                      setState(() {
+                        groupValue = value;
+                      });
+                      _loadAllData();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChartTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Graphique de remplissage',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          SizedBox(height: 20),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: RadarChartScreen(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVolunteersTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Gestion des bénévoles',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          SizedBox(height: 20),
+          Column(
+            children: [
+              Kikeou(),
+              SizedBox(height: 20),
+              kifekoi(),
+              SizedBox(height: 20),
+              Listedeski(),
+              SizedBox(height: 20),
+              kiela(),
+              SizedBox(height: 20),
+              ListTotal(),
+              SizedBox(height: 20),
+              BenevoleListWidget(),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKPICard(String title, String value, IconData icon, Color color) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.withOpacity(0.1),
+              color.withOpacity(0.05),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 40,
+                color: color,
+              ),
+              SizedBox(height: 12),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: accentColor,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget isMobile() => Column(
@@ -626,7 +960,7 @@ class _AnalyseState extends State<Analyse> {
     // final appDocDir = await getApplicationDocumentsDirectory();
     // final filePath = 'Bénévoles_kikeou.pdf';
     // List<int> bytes = await document.save();
-    // File file = File('Bénévoles_kikeou_mobile.pdf');
+    // File file = File(filePath);
     // file.writeAsBytes(bytes);
 
     // final File file =
@@ -863,104 +1197,212 @@ class _AnalyseState extends State<Analyse> {
           },
         )
       ]));
-}
 
-// --- Fonction pure : Liste des bénévoles ---
-List<Map<String, dynamic>> getBenevoles(List<Map<String, dynamic>> posBenData,
-    List<Map<String, dynamic>> usersData) {
-  final benevoleIds = <String>{};
-  final benevoles = <Map<String, dynamic>>[];
-  for (var ben in posBenData) {
-    final benId = ben['ben_id'];
-    if (benId != null && !benevoleIds.contains(benId)) {
-      benevoleIds.add(benId);
-      final user =
-          usersData.firstWhere((u) => u['UserId'] == benId, orElse: () => {});
-      if (user.isNotEmpty) {
-        benevoles.add({
-          'nom': user['nom'],
-          'prenom': user['prenom'],
-          'tel': user['tel'],
-          'email': user['email']
-        });
-      }
-    }
-  }
-  return benevoles;
-}
-
-// --- Fonction pure : Liste des postes d'un utilisateur ---
-List<Map<String, dynamic>> getUserPosts(
-    String userId, List<Map<String, dynamic>> posBenData) {
-  final userPosts = <Map<String, dynamic>>[];
-  for (var ben in posBenData) {
-    if (ben['ben_id'] == userId &&
-        ben['pos_id'] != null &&
-        ben['pos_id'] is List) {
-      for (var affectation in ben['pos_id']) {
-        if (affectation is Map) {
-          userPosts.add({
-            'nomPoste': affectation['poste'],
-            'jour': affectation['jour'],
-            'heureDebut': affectation['debut'],
-            'heureFin': affectation['fin'],
+  // --- Fonction pure : Liste des bénévoles ---
+  List<Map<String, dynamic>> getBenevoles(List<Map<String, dynamic>> posBenData,
+      List<Map<String, dynamic>> usersData) {
+    final benevoleIds = <String>{};
+    final benevoles = <Map<String, dynamic>>[];
+    for (var ben in posBenData) {
+      final benId = ben['ben_id'];
+      if (benId != null && !benevoleIds.contains(benId)) {
+        benevoleIds.add(benId);
+        final user =
+            usersData.firstWhere((u) => u['UserId'] == benId, orElse: () => {});
+        if (user.isNotEmpty) {
+          benevoles.add({
+            'nom': user['nom'],
+            'prenom': user['prenom'],
+            'tel': user['tel'],
+            'email': user['email']
           });
         }
       }
     }
+    return benevoles;
   }
-  return userPosts;
-}
 
-// --- Fonction pure : Map jour > poste > créneau > liste des bénévoles ---
-Map<String, Map<String, Map<String, List<Map<String, String>>>>>
-    getDayPosteTimeVolunteers(List<Map<String, dynamic>> posBenData,
-        List<Map<String, dynamic>> usersData) {
-  Map<String, Map<String, Map<String, List<Map<String, String>>>>>
-      dayPosteTimeVolunteers = {};
-  for (var ben in posBenData) {
-    if (ben['pos_id'] != null && ben['pos_id'] is List) {
-      for (var affectation in ben['pos_id']) {
-        if (affectation is Map &&
-            affectation['jour'] != null &&
-            affectation['poste'] != null &&
-            affectation['debut'] != null) {
-          String jour = affectation['jour'];
-          String poste = affectation['poste'];
-          String debut = affectation['debut'];
-          final user = usersData.firstWhere((u) => u['uid'] == ben['ben_id'],
-              orElse: () => {});
-          String nom = user['nom'] ?? 'Nom inconnu';
-          String prenom = user['prenom'] ?? 'Prénom inconnu';
-          dayPosteTimeVolunteers[jour] ??= {};
-          dayPosteTimeVolunteers[jour]![poste] ??= {};
-          dayPosteTimeVolunteers[jour]![poste]![debut] ??= [];
-          dayPosteTimeVolunteers[jour]![poste]![debut]!
-              .add({'nom': nom, 'prenom': prenom});
+// --- Fonction pure : Liste des postes d'un utilisateur ---
+  List<Map<String, dynamic>> getUserPosts(
+      String userId, List<Map<String, dynamic>> posBenData) {
+    final userPosts = <Map<String, dynamic>>[];
+    for (var ben in posBenData) {
+      if (ben['ben_id'] == userId &&
+          ben['pos_id'] != null &&
+          ben['pos_id'] is List) {
+        for (var affectation in ben['pos_id']) {
+          if (affectation is Map) {
+            userPosts.add({
+              'nomPoste': affectation['poste'],
+              'jour': affectation['jour'],
+              'heureDebut': affectation['debut'],
+              'heureFin': affectation['fin'],
+            });
+          }
         }
       }
     }
+    return userPosts;
   }
-  return dayPosteTimeVolunteers;
-}
+
+// --- Fonction pure : Map jour > poste > créneau > liste des bénévoles ---
+  Map<String, Map<String, Map<String, List<Map<String, String>>>>>
+      getDayPosteTimeVolunteers(List<Map<String, dynamic>> posBenData,
+          List<Map<String, dynamic>> usersData) {
+    Map<String, Map<String, Map<String, List<Map<String, String>>>>>
+        dayPosteTimeVolunteers = {};
+    for (var ben in posBenData) {
+      if (ben['pos_id'] != null && ben['pos_id'] is List) {
+        for (var affectation in ben['pos_id']) {
+          if (affectation is Map &&
+              affectation['jour'] != null &&
+              affectation['poste'] != null &&
+              affectation['debut'] != null) {
+            String jour = affectation['jour'];
+            String poste = affectation['poste'];
+            String debut = affectation['debut'];
+            final user = usersData.firstWhere((u) => u['uid'] == ben['ben_id'],
+                orElse: () => {});
+            String nom = user['nom'] ?? 'Nom inconnu';
+            String prenom = user['prenom'] ?? 'Prénom inconnu';
+            dayPosteTimeVolunteers[jour] ??= {};
+            dayPosteTimeVolunteers[jour]![poste] ??= {};
+            dayPosteTimeVolunteers[jour]![poste]![debut] ??= [];
+            dayPosteTimeVolunteers[jour]![poste]![debut]!
+                .add({'nom': nom, 'prenom': prenom});
+          }
+        }
+      }
+    }
+    return dayPosteTimeVolunteers;
+  }
 
 // --- Fonction pure : Statistiques globales (exemple : nombre total de bénévoles) ---
-int getTotalBenevoles(List<Map<String, dynamic>> posBenData) {
-  final benevoleIds = <String>{};
-  for (var ben in posBenData) {
-    final benId = ben['ben_id'];
-    if (benId != null) {
-      benevoleIds.add(benId);
+  int getTotalBenevoles(List<Map<String, dynamic>> posBenData) {
+    final benevoleIds = <String>{};
+    for (var ben in posBenData) {
+      final benId = ben['ben_id'];
+      if (benId != null) {
+        benevoleIds.add(benId);
+      }
     }
+    return benevoleIds.length;
   }
-  return benevoleIds.length;
-}
 
 // --- Fonction pure : Export PDF (exemple) ---
-Future<void> exportBenevolesPDF(List<Map<String, dynamic>> benevoles) async {
-  // Utiliser le package pdf pour générer le PDF à partir de la liste benevoles
-  // ...
-}
+  Future<void> exportBenevolesPDF(List<Map<String, dynamic>> benevoles) async {
+    // Utiliser le package pdf pour générer le PDF à partir de la liste benevoles
+    // ...
+  }
 
 // --- Utilisation dans le build ---
 // Remplacer les widgets enfants par des appels à ces fonctions pures et affichage des résultats
+
+  // Méthodes pour calculer les KPI
+  int _getTotalVolunteers() {
+    return usersData.length;
+  }
+
+  int _getOccupiedSlots() {
+    int total = 0;
+    for (var posBen in posBenData) {
+      if (posBen['pos_id'] != null && posBen['pos_id'] is List) {
+        final posIdList = posBen['pos_id'] as List;
+        // Compter seulement les créneaux pour le jour sélectionné
+        for (var pos in posIdList) {
+          if (pos is Map<String, dynamic> && pos['jour'] == groupValue) {
+            total++;
+          }
+        }
+      }
+    }
+    print('=== DEBUG _getOccupiedSlots ===');
+    print('Créneaux occupés pour $groupValue: $total');
+    return total;
+  }
+
+  double _getFillRate() {
+    num totalSlots = 0;
+    num occupiedSlots = 0;
+
+    print('=== DEBUG _getFillRate ===');
+    print('Jour sélectionné: $groupValue');
+    print('Nombre de posHorData: ${posHorData.length}');
+
+    // Calculer le total des places disponibles
+    for (var posHor in posHorData) {
+      if (posHor['hor'] != null && posHor['hor'] is List) {
+        print('Trouvé posHor pour le jour: ${posHor['jour']}');
+        for (var hor in posHor['hor']) {
+          if (hor is Map<String, dynamic>) {
+            final tot = hor['tot'] ?? 0;
+            print('Créneau - tot: $tot');
+
+            // Vérifier que les valeurs sont valides
+            if (tot > 0) {
+              totalSlots += tot;
+            }
+          }
+        }
+      }
+    }
+
+    // Compter les vrais inscrits dans pos_ben
+    for (var posBen in posBenData) {
+      if (posBen['pos_id'] != null && posBen['pos_id'] is List) {
+        final posIdList = posBen['pos_id'] as List;
+        for (var pos in posIdList) {
+          if (pos is Map<String, dynamic> && pos['jour'] == groupValue) {
+            occupiedSlots++;
+            print('Inscription trouvée pour ${pos['poste']} - ${pos['debut']}');
+          }
+        }
+      }
+    }
+
+    print('Total slots: $totalSlots, Occupied slots: $occupiedSlots');
+
+    // Éviter les valeurs aberrantes
+    if (totalSlots <= 0) return 0;
+
+    final result = (occupiedSlots / totalSlots) * 100;
+    print('Taux de remplissage calculé: $result%');
+    return result;
+  }
+
+  int _getActivePosts() {
+    Set<String> posts = {};
+    for (var posHor in posHorData) {
+      if (posHor['poste'] != null) {
+        posts.add(posHor['poste']);
+      }
+    }
+    return posts.length;
+  }
+
+  int _getActiveDays() {
+    Set<String> days = {};
+    for (var posHor in posHorData) {
+      if (posHor['jour'] != null) {
+        days.add(posHor['jour']);
+      }
+    }
+    return days.length;
+  }
+
+  int _getNewVolunteersThisWeek() {
+    DateTime now = DateTime.now();
+    DateTime weekAgo = now.subtract(Duration(days: 7));
+
+    int newVolunteers = 0;
+    for (var user in usersData) {
+      if (user['createdAt'] != null) {
+        DateTime createdAt = (user['createdAt'] as Timestamp).toDate();
+        if (createdAt.isAfter(weekAgo)) {
+          newVolunteers++;
+        }
+      }
+    }
+    return newVolunteers;
+  }
+}

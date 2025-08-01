@@ -20,6 +20,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
   bool isLoading = false;
   String? fcmToken;
 
+  // Couleurs du thème
+  static const Color primaryColor = Color(0xFF4CAF50);
+  static const Color backgroundColor = Color(0xFFf2f0e7);
+  static const Color cardColor = Colors.white;
+  static const Color textColor = Color(0xFF333333);
+  static const Color accentColor = Color(0xFF666666);
+
   @override
   void initState() {
     super.initState();
@@ -134,191 +141,221 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text('Notifications'),
-        backgroundColor: Colors.green[700],
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.clear_all),
-            onPressed: _clearNotifications,
-            tooltip: 'Effacer toutes les notifications',
+            icon: const Icon(Icons.refresh),
+            onPressed: _initializeNotifications,
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Section d'information
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: Colors.grey[100],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
               children: [
-                Text(
-                  'État des notifications',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                if (isLoading)
-                  const Row(
+                // Statut des notifications
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  color: backgroundColor,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.notifications_active,
+                            color: primaryColor,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Statut des notifications',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 8),
-                      Text('Initialisation...'),
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      Icon(
-                        fcmToken != null ? Icons.check_circle : Icons.error,
-                        color: fcmToken != null ? Colors.green : Colors.red,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        fcmToken != null
-                            ? 'Notifications activées'
-                            : 'Notifications non disponibles',
-                      ),
-                    ],
-                  ),
-                if (fcmToken != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    kIsWeb
-                        ? 'Mode Web (simulation) - Token: ${fcmToken!.substring(0, 20)}...'
-                        : 'Token FCM: ${fcmToken!.substring(0, 20)}...',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          // Boutons d'action
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: kIsWeb ? _simulateNotification : null,
-                    icon: const Icon(Icons.send),
-                    label: const Text('Tester (Web)'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _clearNotifications,
-                    icon: const Icon(Icons.clear),
-                    label: const Text('Effacer'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Liste des notifications
-          Expanded(
-            child: notifications.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.notifications_none,
-                          size: 64,
-                          color: Colors.grey[400],
+                      const SizedBox(height: 8),
+                      if (isLoading)
+                        Row(
+                          children: [
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const SizedBox(width: 8),
+                            Text('Initialisation...',
+                                style: TextStyle(color: accentColor)),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Icon(
+                              fcmToken != null
+                                  ? Icons.check_circle
+                                  : Icons.error,
+                              color:
+                                  fcmToken != null ? primaryColor : Colors.red,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              fcmToken != null
+                                  ? 'Notifications activées'
+                                  : 'Notifications non disponibles',
+                              style: TextStyle(color: accentColor),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Aucune notification',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
+                      if (fcmToken != null) ...[
                         const SizedBox(height: 8),
                         Text(
-                          'Les notifications reçues apparaîtront ici',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey[500],
-                                  ),
+                          kIsWeb
+                              ? 'Mode Web (simulation) - Token: ${fcmToken!.substring(0, 20)}...'
+                              : 'Token FCM: ${fcmToken!.substring(0, 20)}...',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: accentColor),
                         ),
                       ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: notifications.length,
-                    itemBuilder: (context, index) {
-                      final notification = notifications[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
+                    ],
+                  ),
+                ),
+
+                // Boutons d'action
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: kIsWeb ? _simulateNotification : null,
+                          icon: const Icon(Icons.send),
+                          label: const Text('Tester (Web)'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.green[100],
-                            child: Icon(
-                              Icons.notifications,
-                              color: Colors.green[700],
-                            ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _clearNotifications,
+                          icon: const Icon(Icons.clear),
+                          label: const Text('Effacer'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
                           ),
-                          title: Text(
-                            notification['title'],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Liste des notifications
+                Expanded(
+                  child: notifications.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(notification['body']),
-                              const SizedBox(height: 4),
+                              Icon(
+                                Icons.notifications_none,
+                                size: 64,
+                                color: accentColor,
+                              ),
+                              const SizedBox(height: 16),
                               Text(
-                                _formatTimestamp(notification['timestamp']),
+                                'Aucune notification',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodySmall
+                                    .titleMedium
                                     ?.copyWith(
-                                      color: Colors.grey[600],
+                                      color: accentColor,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Les notifications reçues apparaîtront ici',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: accentColor,
                                     ),
                               ),
                             ],
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () {
-                              setState(() {
-                                notifications.removeAt(index);
-                              });
-                            },
-                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: notifications.length,
+                          itemBuilder: (context, index) {
+                            final notification = notifications[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                      primaryColor.withOpacity(0.1),
+                                  child: Icon(
+                                    Icons.notifications,
+                                    color: primaryColor,
+                                  ),
+                                ),
+                                title: Text(
+                                  notification['title'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: textColor),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(notification['body'],
+                                        style: TextStyle(color: accentColor)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      notification['timestamp'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: accentColor,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                ),
+              ],
+            ),
     );
   }
 

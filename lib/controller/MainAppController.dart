@@ -15,18 +15,73 @@ import 'Logcontroller.dart';
 import 'SignUpPage.dart';
 import 'comptePage.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:async'; // Added for Timer
 
 class MainAppController extends StatefulWidget {
   @override
   State<MainAppController> createState() => _MainAppControllerState();
 }
 
-class _MainAppControllerState extends State<MainAppController> {
+class _MainAppControllerState extends State<MainAppController>
+    with TickerProviderStateMixin {
   User? userId; //= FirebaseAuth.instance.currentUser;
+  bool _isLoading = true;
+  late AnimationController _logoController;
+  late AnimationController _pulseController;
+  late AnimationController _fadeController;
+  late Animation<double> _logoAnimation;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialiser les animations
+    _logoController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _logoAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _logoController,
+      curve: Curves.elasticOut,
+    ));
+
+    _pulseAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    ));
+
+    // Démarrer les animations
+    _logoController.forward();
+    _fadeController.forward();
+    _pulseController.repeat(reverse: true);
+
     userId = FirebaseAuth.instance.currentUser;
     if (userId != null) {
       _checkUserAdminStatus();
@@ -36,6 +91,23 @@ class _MainAppControllerState extends State<MainAppController> {
         isAdminVisible = false;
       });
     }
+
+    // Simuler un temps de chargement pour l'animation
+    Timer(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _logoController.dispose();
+    _pulseController.dispose();
+    _fadeController.dispose();
+    super.dispose();
   }
 
   // Méthode pour sauvegarder automatiquement le token FCM
@@ -191,6 +263,123 @@ class _MainAppControllerState extends State<MainAppController> {
 
   @override
   Widget build(BuildContext context) {
+    // Afficher l'animation de chargement si _isLoading est true
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor:
+            const Color(0xFFf2f0e7), // Couleur de fond beige/ivoire
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo animé
+              AnimatedBuilder(
+                animation: _logoAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _logoAnimation.value,
+                    child: AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _pulseAnimation.value,
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color:
+                                  const Color(0xFF4CAF50), // Vert pour le logo
+                              borderRadius: BorderRadius.circular(60),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.eco,
+                              size: 60,
+                              color:
+                                  Colors.white, // Icône blanche sur fond vert
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 40),
+
+              // Titre animé
+              AnimatedBuilder(
+                animation: _fadeAnimation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _fadeAnimation.value,
+                    child: const Text(
+                      'Chargement...',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4CAF50), // Vert pour le titre
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // Sous-titre animé
+              AnimatedBuilder(
+                animation: _fadeAnimation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _fadeAnimation.value,
+                    child: const Text(
+                      'Préparation de votre espace',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color:
+                            Color(0xFF666666), // Gris foncé pour le sous-titre
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 60),
+
+              // Indicateur de chargement moderne
+              AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Container(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        const Color(0xFF4CAF50)
+                            .withOpacity(_pulseAnimation.value * 0.8),
+                      ),
+                      strokeWidth: 3,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Retourner l'interface normale une fois le chargement terminé
     return Scaffold(
         bottomNavigationBar: MediaQuery.of(context).size.width < 640
             ? (userId != null
