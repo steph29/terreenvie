@@ -86,7 +86,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     // Ajouter une page
     PdfPage page = document.pages.add();
     PdfGraphics graphics = page.graphics;
-    PdfPageSize pageSize = page.size;
+    Size pageSize = page.getClientSize();
 
     // Définir les polices
     PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 12);
@@ -108,7 +108,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     // En-tête avec logo (simulé par un rectangle coloré)
     PdfSolidBrush headerBrush = PdfSolidBrush(primaryColor);
     graphics.drawRectangle(
-        headerBrush, Rect.fromLTWH(0, 0, pageSize.width, 80));
+        bounds: Rect.fromLTWH(0, 0, pageSize.width, 80), brush: headerBrush);
 
     // Titre principal
     graphics.drawString('TERRE EN VIE', titleFont,
@@ -162,15 +162,15 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     );
 
     // Ajouter les données des bénévoles
-    for (var benevole in benevoles) {
+    for (int i = 0; i < benevoles.length; i++) {
       PdfGridRow row = grid.rows.add();
-      row.cells[0].value = benevole['nom'] ?? '';
-      row.cells[1].value = benevole['prenom'] ?? '';
-      row.cells[2].value = benevole['email'] ?? '';
-      row.cells[3].value = benevole['tel'] ?? '';
+      row.cells[0].value = benevoles[i]['nom'] ?? '';
+      row.cells[1].value = benevoles[i]['prenom'] ?? '';
+      row.cells[2].value = benevoles[i]['email'] ?? '';
+      row.cells[3].value = benevoles[i]['tel'] ?? '';
 
       // Alterner les couleurs des lignes
-      if (grid.rows.indexOf(row) % 2 == 0) {
+      if (i % 2 == 0) {
         row.style = PdfGridRowStyle(
           backgroundBrush: PdfSolidBrush(PdfColor(248, 248, 248)),
         );

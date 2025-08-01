@@ -239,7 +239,7 @@ class _KikeouState extends State<Kikeou> {
     // En-tête avec logo (simulé par un rectangle coloré)
     PdfSolidBrush headerBrush = PdfSolidBrush(primaryColor);
     graphics.drawRectangle(
-        headerBrush, Rect.fromLTWH(0, 0, pageSize.width, 80));
+        bounds: Rect.fromLTWH(0, 0, pageSize.width, 80), brush: headerBrush);
 
     // Titre principal
     graphics.drawString('TERRE EN VIE', titleFont,
