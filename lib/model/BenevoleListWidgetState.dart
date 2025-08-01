@@ -105,10 +105,15 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     // Position initiale
     double yPosition = 50;
 
-    // En-tête avec logo (simulé par un rectangle coloré)
-    PdfSolidBrush headerBrush = PdfSolidBrush(primaryColor);
-    graphics.drawRectangle(
-        bounds: Rect.fromLTWH(0, 0, pageSize.width, 80), brush: headerBrush);
+    // Ajouter le logo Terre en Vie
+    try {
+      final logoData = await rootBundle.load('assets/logoTEV.png');
+      final logoImage = PdfBitmap(logoData.buffer.asUint8List());
+      graphics.drawImage(logoImage, Rect.fromLTWH(20, 20, 60, 60));
+    } catch (e) {
+      print('Erreur lors du chargement du logo: $e');
+      // Continuer sans logo si erreur
+    }
 
     // Titre principal
     graphics.drawString('TERRE EN VIE', titleFont,
