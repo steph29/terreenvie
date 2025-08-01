@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'template_service.dart';
 
 class EmailService {
   // Service d'email simplifié compatible avec l'existant
+  final TemplateService _templateService = TemplateService();
 
   // Envoi d'un email simple
   static Future<bool> sendEmail({
@@ -92,7 +92,7 @@ class EmailService {
           };
 
           final personalizedBody =
-              TemplateService.replaceVariables(bodyTemplate, variables, null);
+              _templateService.replaceVariables(bodyTemplate, variables, null);
           final success = await sendEmail(
             to: email,
             subject: subject,
@@ -138,7 +138,7 @@ class EmailService {
           };
 
           final personalizedBody =
-              TemplateService.replaceVariables(bodyTemplate, variables, null);
+              _templateService.replaceVariables(bodyTemplate, variables, null);
           final success = await sendEmail(
             to: email,
             subject: subject,
