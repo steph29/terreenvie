@@ -94,8 +94,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     double yPosition = 50;
 
     // Titre
-    graphics.drawString('Liste des bénévoles', titleFont,
-        Rect.fromLTWH(50, yPosition, 500, 30));
+    graphics.drawString('Liste des bénévoles', titleFont);
     yPosition += 40;
 
     // Créer un tableau
