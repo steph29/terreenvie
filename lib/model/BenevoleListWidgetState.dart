@@ -86,22 +86,66 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     // Ajouter une page
     PdfPage page = document.pages.add();
     PdfGraphics graphics = page.graphics;
+    PdfPageSize pageSize = page.size;
 
-    // Définir la police
+    // Définir les polices
     PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 12);
     PdfFont titleFont =
-        PdfStandardFont(PdfFontFamily.helvetica, 16, style: PdfFontStyle.bold);
+        PdfStandardFont(PdfFontFamily.helvetica, 20, style: PdfFontStyle.bold);
+    PdfFont subtitleFont =
+        PdfStandardFont(PdfFontFamily.helvetica, 14, style: PdfFontStyle.bold);
+    PdfFont headerFont =
+        PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
+
+    // Couleurs du thème
+    PdfColor primaryColor = PdfColor(76, 175, 80); // Vert Terre en Vie
+    PdfColor backgroundColor = PdfColor(242, 240, 231); // Beige/ivoire
+    PdfColor headerColor = PdfColor(200, 200, 200);
 
     // Position initiale
     double yPosition = 50;
 
-    // Titre
-    graphics.drawString('Liste des bénévoles', titleFont);
+    // En-tête avec logo (simulé par un rectangle coloré)
+    PdfSolidBrush headerBrush = PdfSolidBrush(primaryColor);
+    graphics.drawRectangle(
+        headerBrush, Rect.fromLTWH(0, 0, pageSize.width, 80));
+
+    // Titre principal
+    graphics.drawString('TERRE EN VIE', titleFont,
+        bounds: Rect.fromLTWH(0, 20, pageSize.width, 30),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    // Sous-titre
+    graphics.drawString('Liste des bénévoles', subtitleFont,
+        bounds: Rect.fromLTWH(0, 50, pageSize.width, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    yPosition = 100;
+
+    // Informations de génération
+    String dateGeneration =
+        'Généré le ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year} à ${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')}';
+    graphics.drawString(dateGeneration, font,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    yPosition += 30;
+
+    // Statistiques
+    String stats = 'Total des bénévoles : ${benevoles.length}';
+    graphics.drawString(stats, headerFont,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
     yPosition += 40;
 
-    // Créer un tableau
+    // Créer un tableau avec design amélioré
     PdfGrid grid = PdfGrid();
     grid.columns.add(count: 4);
+    grid.style = PdfGridStyle(
+      cellPadding: PdfPaddings(left: 10, right: 10, top: 5, bottom: 5),
+      font: font,
+    );
 
     // En-têtes du tableau
     PdfGridRow header = grid.headers.add(1)[0];
@@ -112,9 +156,9 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
     // Style de l'en-tête
     header.style = PdfGridRowStyle(
-      font: PdfStandardFont(PdfFontFamily.helvetica, 12,
-          style: PdfFontStyle.bold),
-      backgroundBrush: PdfSolidBrush(PdfColor(200, 200, 200)),
+      font: headerFont,
+      backgroundBrush: PdfSolidBrush(headerColor),
+      textBrush: PdfSolidBrush(PdfColor(0, 0, 0)),
     );
 
     // Ajouter les données des bénévoles
@@ -124,10 +168,32 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
       row.cells[1].value = benevole['prenom'] ?? '';
       row.cells[2].value = benevole['email'] ?? '';
       row.cells[3].value = benevole['tel'] ?? '';
+
+      // Alterner les couleurs des lignes
+      if (grid.rows.indexOf(row) % 2 == 0) {
+        row.style = PdfGridRowStyle(
+          backgroundBrush: PdfSolidBrush(PdfColor(248, 248, 248)),
+        );
+      }
     }
 
     // Dessiner le tableau
-    grid.draw(page: page, bounds: Rect.fromLTWH(50, yPosition, 500, 0));
+    grid.draw(
+        page: page,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 0));
+
+    // Pied de page
+    yPosition = pageSize.height - 80;
+    graphics.drawString(
+        'Document généré automatiquement par l\'application Terre en Vie', font,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    yPosition += 20;
+    graphics.drawString(
+        '© ${DateTime.now().year} Terre en Vie - Tous droits réservés', font,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
     // Sauvegarder le document
     List<int> bytes = await document.save();

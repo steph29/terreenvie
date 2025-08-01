@@ -221,54 +221,77 @@ class _KikeouState extends State<Kikeou> {
     // En-tête du document
     PdfGraphics graphics = page.graphics;
     PdfStandardFont titleFont =
-        PdfStandardFont(PdfFontFamily.timesRoman, 20, style: PdfFontStyle.bold);
+        PdfStandardFont(PdfFontFamily.helvetica, 20, style: PdfFontStyle.bold);
     PdfStandardFont subtitleFont =
-        PdfStandardFont(PdfFontFamily.timesRoman, 14);
-    PdfStandardFont normalFont = PdfStandardFont(PdfFontFamily.timesRoman, 12);
+        PdfStandardFont(PdfFontFamily.helvetica, 14, style: PdfFontStyle.bold);
+    PdfStandardFont normalFont = PdfStandardFont(PdfFontFamily.helvetica, 12);
+    PdfStandardFont headerFont =
+        PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
 
-    // Ajouter le logo Terre en Vie
-    try {
-      final logoData = await rootBundle.load('assets/logoTEV.png');
-      final logoImage = PdfBitmap(logoData.buffer.asUint8List());
-      graphics.drawImage(logoImage, Rect.fromLTWH(20, 20, 40, 40));
-    } catch (e) {
-      print('Erreur lors du chargement du logo: $e');
-      // Continuer sans logo si erreur
-    }
+    // Couleurs du thème
+    PdfColor primaryColor = PdfColor(76, 175, 80); // Vert Terre en Vie
+    PdfColor backgroundColor = PdfColor(242, 240, 231); // Beige/ivoire
+    PdfColor headerColor = PdfColor(200, 200, 200);
+
+    // Position initiale
+    double yPosition = 50;
+
+    // En-tête avec logo (simulé par un rectangle coloré)
+    PdfSolidBrush headerBrush = PdfSolidBrush(primaryColor);
+    graphics.drawRectangle(
+        headerBrush, Rect.fromLTWH(0, 0, pageSize.width, 80));
 
     // Titre principal
-    graphics.drawString('Terre en Vie', titleFont,
+    graphics.drawString('TERRE EN VIE', titleFont,
         bounds: Rect.fromLTWH(0, 20, pageSize.width, 30),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
     // Sous-titre avec informations du poste et jour
-    String subtitle = 'Liste des bénévoles - $selectedPoste - $groupValue';
+    String subtitle = 'Ki ké où ? - $selectedPoste - $groupValue';
     graphics.drawString(subtitle, subtitleFont,
         bounds: Rect.fromLTWH(0, 50, pageSize.width, 20),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
+    yPosition = 100;
+
     // Date de génération
     String dateGeneree =
-        'Généré le ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
+        'Généré le ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year} à ${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')}';
     graphics.drawString(dateGeneree, normalFont,
-        bounds: Rect.fromLTWH(0, 70, pageSize.width, 15),
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
-    // Tableau des bénévoles
+    yPosition += 30;
+
+    // Statistiques
+    String stats = 'Total des bénévoles : ${items.length}';
+    graphics.drawString(stats, headerFont,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    yPosition += 40;
+
+    // Tableau des bénévoles avec design amélioré
     PdfGrid grid = PdfGrid();
     grid.style = PdfGridStyle(
-      font: PdfStandardFont(PdfFontFamily.timesRoman, 11),
-      cellPadding: PdfPaddings(left: 5, right: 5, top: 5, bottom: 5),
+      font: normalFont,
+      cellPadding: PdfPaddings(left: 10, right: 10, top: 5, bottom: 5),
     );
     grid.columns.add(count: 4);
-    grid.headers.add(1);
 
     // En-têtes du tableau
-    PdfGridRow headers = grid.headers[0];
-    headers.cells[0].value = 'Nom';
-    headers.cells[1].value = 'Prénom';
-    headers.cells[2].value = 'Téléphone';
-    headers.cells[3].value = 'Créneau';
+    PdfGridRow header = grid.headers.add(1)[0];
+    header.cells[0].value = 'Nom';
+    header.cells[1].value = 'Prénom';
+    header.cells[2].value = 'Téléphone';
+    header.cells[3].value = 'Créneau';
+
+    // Style de l'en-tête
+    header.style = PdfGridRowStyle(
+      font: headerFont,
+      backgroundBrush: PdfSolidBrush(headerColor),
+      textBrush: PdfSolidBrush(PdfColor(0, 0, 0)),
+    );
 
     // Données des bénévoles
     for (var i = 0; i < items.length; i++) {
@@ -278,18 +301,33 @@ class _KikeouState extends State<Kikeou> {
       row.cells[2].value = items[i][2]; // Téléphone
       row.cells[3].value =
           '${items[i][5]} - ${items[i][6]}'; // Créneau (début - fin)
+
+      // Alterner les couleurs des lignes
+      if (i % 2 == 0) {
+        row.style = PdfGridRowStyle(
+          backgroundBrush: PdfSolidBrush(PdfColor(248, 248, 248)),
+        );
+      }
     }
 
     // Dessiner le tableau
     grid.draw(
         page: page,
-        bounds:
-            Rect.fromLTWH(0, 100, pageSize.width - 40, pageSize.height - 120));
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 0));
 
-    // Pied de page avec statistiques
-    String totalBenevoles = 'Total des bénévoles: ${items.length}';
-    graphics.drawString(totalBenevoles, normalFont,
-        bounds: Rect.fromLTWH(0, pageSize.height - 50, pageSize.width, 20),
+    // Pied de page
+    yPosition = pageSize.height - 80;
+    graphics.drawString(
+        'Document généré automatiquement par l\'application Terre en Vie',
+        normalFont,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
+        format: PdfStringFormat(alignment: PdfTextAlignment.center));
+
+    yPosition += 20;
+    graphics.drawString(
+        '© ${DateTime.now().year} Terre en Vie - Tous droits réservés',
+        normalFont,
+        bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
     // Sauvegarder le document
