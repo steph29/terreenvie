@@ -39,11 +39,11 @@ dependencies:
   get: ^4.6.6
   provider: ^6.1.1
   url_launcher: ^6.2.2
-  easy_sidemenu: ^3.0.1
+  # easy_sidemenu: ^2.0.0  # Temporairement commenté pour résoudre le problème de version
   rxdart: ^0.27.7
   fl_chart: ^1.0.0
   lottie: ^2.7.0
-  scroll_date_picker: ^1.0.0
+  scroll_date_picker: ^3.8.0
   webview_flutter: ^4.4.2
   flutter_widget_from_html_core: ^0.14.7
   google_fonts: ^6.1.0
