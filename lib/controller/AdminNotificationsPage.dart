@@ -177,17 +177,14 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
       } else {
         // Utiliser les emails simples
         if (_sendToAll) {
-          await _emailService.sendToAllUsers(
-            subject: subject,
-            body: body,
-          );
+          await _emailService.sendToAllUsers(subject, body);
         } else {
           final selectedEmails =
               _selectedUserObjects.map((u) => u['email'] as String).toList();
           await _emailService.sendToSpecificUsers(
-            selectedEmails: selectedEmails,
-            subject: subject,
-            body: body,
+            selectedEmails,
+            subject,
+            body,
           );
         }
       }

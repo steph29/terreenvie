@@ -99,34 +99,34 @@ class EmailService {
       // Récupérer tous les utilisateurs depuis Firestore
       final usersSnapshot =
           await FirebaseFirestore.instance.collection('users').get();
-      final emails = usersSnapshot.docs
-          .map((doc) => doc.data()['email'] as String)
+      final users = usersSnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
 
       if (kIsWeb) {
         // Mode Web - Simulation
         print('🌐 Mode Web détecté - Simulation d\'emails personnalisés');
-        for (String email in emails) {
-          final personalizedBody =
-              _templateService.replaceVariables(bodyTemplate, creneauData);
-          print('📧 Email personnalisé simulé vers: $email');
+        for (Map<String, dynamic> user in users) {
+          final personalizedBody = _templateService.replaceVariables(
+              bodyTemplate, user, creneauData);
+          print('📧 Email personnalisé simulé vers: ${user['email']}');
           print('📧 Contenu: $personalizedBody');
         }
         print(
-            '✅ ${emails.length} emails personnalisés simulés envoyés avec succès (mode Web)');
+            '✅ ${users.length} emails personnalisés simulés envoyés avec succès (mode Web)');
         return true;
       } else {
         // Mode Mobile - SMTP réel
-        for (String email in emails) {
-          final personalizedBody =
-              _templateService.replaceVariables(bodyTemplate, creneauData);
+        for (Map<String, dynamic> user in users) {
+          final personalizedBody = _templateService.replaceVariables(
+              bodyTemplate, user, creneauData);
           await sendEmail(
-            to: email,
+            to: user['email'] as String,
             subject: subject,
             body: personalizedBody,
           );
         }
-        print('✅ ${emails.length} emails personnalisés envoyés avec succès');
+        print('✅ ${users.length} emails personnalisés envoyés avec succès');
         return true;
       }
     } catch (e) {
@@ -147,8 +147,15 @@ class EmailService {
         // Mode Web - Simulation
         print('🌐 Mode Web détecté - Simulation d\'emails personnalisés');
         for (String email in selectedEmails) {
-          final personalizedBody =
-              _templateService.replaceVariables(bodyTemplate, creneauData);
+          // Créer un objet userData minimal pour la simulation
+          final userData = {
+            'email': email,
+            'nom': '',
+            'prenom': '',
+            'profil': ''
+          };
+          final personalizedBody = _templateService.replaceVariables(
+              bodyTemplate, userData, creneauData);
           print('📧 Email personnalisé simulé vers: $email');
           print('📧 Contenu: $personalizedBody');
         }
@@ -158,8 +165,24 @@ class EmailService {
       } else {
         // Mode Mobile - SMTP réel
         for (String email in selectedEmails) {
-          final personalizedBody =
-              _templateService.replaceVariables(bodyTemplate, creneauData);
+          // Récupérer les données utilisateur depuis Firestore
+          final userSnapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .where('email', isEqualTo: email)
+              .get();
+
+          Map<String, dynamic> userData = {
+            'email': email,
+            'nom': '',
+            'prenom': '',
+            'profil': ''
+          };
+          if (userSnapshot.docs.isNotEmpty) {
+            userData = userSnapshot.docs.first.data();
+          }
+
+          final personalizedBody = _templateService.replaceVariables(
+              bodyTemplate, userData, creneauData);
           await sendEmail(
             to: email,
             subject: subject,
