@@ -484,33 +484,87 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
                           style: TextStyle(color: accentColor),
                         ),
                         SizedBox(height: 8),
-                        Container(
-                          height: 200,
-                          child: ListView.builder(
-                            itemCount: _users.length,
-                            itemBuilder: (context, index) {
-                              final user = _users[index];
-                              final isSelected = _selectedUserObjects
-                                  .any((u) => u['id'] == user['id']);
-                              return CheckboxListTile(
-                                title: Text(user['name']),
-                                subtitle: Text(user['email']),
-                                value: isSelected,
-                                activeColor: primaryColor,
-                                onChanged: (value) {
+
+                        // Autocomplete pour la sélection d'utilisateurs
+                        Autocomplete<Map<String, dynamic>>(
+                          optionsBuilder: (TextEditingValue textEditingValue) {
+                            if (textEditingValue.text.isEmpty) {
+                              return _users;
+                            }
+                            return _users.where((user) {
+                              final name =
+                                  user['name'].toString().toLowerCase();
+                              final email =
+                                  user['email'].toString().toLowerCase();
+                              final query = textEditingValue.text.toLowerCase();
+                              return name.contains(query) ||
+                                  email.contains(query);
+                            });
+                          },
+                          displayStringForOption: (option) =>
+                              '${option['name']} (${option['email']})',
+                          onSelected: (Map<String, dynamic> selection) {
+                            if (!_selectedUserObjects
+                                .any((u) => u['id'] == selection['id'])) {
+                              setState(() {
+                                _selectedUserObjects.add(selection);
+                              });
+                            }
+                          },
+                          fieldViewBuilder: (context, textEditingController,
+                              focusNode, onFieldSubmitted) {
+                            return TextFormField(
+                              controller: textEditingController,
+                              focusNode: focusNode,
+                              decoration: InputDecoration(
+                                labelText: 'Rechercher un utilisateur...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide:
+                                      BorderSide(color: primaryColor, width: 2),
+                                ),
+                                suffixIcon:
+                                    Icon(Icons.search, color: primaryColor),
+                              ),
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: 12),
+
+                        // Liste des utilisateurs sélectionnés avec puces
+                        if (_selectedUserObjects.isNotEmpty) ...[
+                          Text(
+                            'Utilisateurs sélectionnés:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: _selectedUserObjects.map((user) {
+                              return Chip(
+                                label: Text(user['name']),
+                                deleteIcon: Icon(Icons.close, size: 18),
+                                onDeleted: () {
                                   setState(() {
-                                    if (value!) {
-                                      _selectedUserObjects.add(user);
-                                    } else {
-                                      _selectedUserObjects.removeWhere(
-                                          (u) => u['id'] == user['id']);
-                                    }
+                                    _selectedUserObjects.removeWhere(
+                                        (u) => u['id'] == user['id']);
                                   });
                                 },
+                                backgroundColor: primaryColor.withOpacity(0.1),
+                                labelStyle: TextStyle(color: primaryColor),
+                                deleteIconColor: primaryColor,
                               );
-                            },
+                            }).toList(),
                           ),
-                        ),
+                        ],
                       ],
                     ],
                   ),
