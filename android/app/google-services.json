@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1078182509252",
+    "firebase_url": "https://terreenvie-6723d-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "terreenvie-6723d",
+    "storage_bucket": "terreenvie-6723d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1078182509252:android:d393db692712a4432b2791",
+        "android_client_info": {
+          "package_name": "com.terreenvie.terreenvie"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1078182509252-e1js9f0qm2dguhq1p1lf2ikdj5d972bm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9x1lmshf7tBBDVVTBieLUjHNDf7HpLOo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1078182509252-e1js9f0qm2dguhq1p1lf2ikdj5d972bm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1078182509252-fqmdvh05p88rjs6bjrc1mkl0kvde8i12.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.terreenvie"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
