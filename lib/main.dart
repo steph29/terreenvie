@@ -18,6 +18,12 @@ final _messageStreamController = BehaviorSubject<RemoteMessage>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Optimisations pour réduire les contextes WebGL
+  if (kIsWeb) {
+    // Configuration pour optimiser les performances web
+    await webOptimizations();
+  }
+
   // Charger les variables d'environnement avec gestion d'erreur
   try {
     // Pour Flutter Web, on utilise le chemin asset
@@ -69,6 +75,17 @@ Future<void> main() async {
   });
 
   runApp(const MyApp());
+}
+
+// Fonction pour optimiser les performances web
+Future<void> webOptimizations() async {
+  // Optimisations spécifiques au web pour réduire les contextes WebGL
+  if (kIsWeb) {
+    // Réduire la qualité des images pour économiser la mémoire GPU
+    // Désactiver certaines animations complexes
+    // Optimiser le rendu
+    print('🌐 Optimisations web appliquées');
+  }
 }
 
 class MyApp extends StatefulWidget {

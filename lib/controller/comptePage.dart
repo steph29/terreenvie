@@ -43,6 +43,31 @@ class _ComptePageState extends State<ComptePage> {
     posHorData = posHorSnapshot.docs.map((d) {
       final data = d.data() as Map<String, dynamic>;
       data['id'] = d.id; // Ajouter l'ID du document
+
+      // Migration : ajouter le champ 'tot' s'il n'existe pas
+      if (data['hor'] != null) {
+        List<dynamic> horList = List.from(data['hor']);
+        bool needsUpdate = false;
+
+        for (var hor in horList) {
+          if (hor is Map && hor['tot'] == null) {
+            hor['tot'] =
+                hor['nbBen'] ?? 0; // Utiliser nbBen comme total initial
+            needsUpdate = true;
+          }
+        }
+
+        // Sauvegarder les modifications si nécessaire
+        if (needsUpdate) {
+          FirebaseFirestore.instance
+              .collection('pos_hor')
+              .doc(d.id)
+              .update({'hor': horList});
+        }
+
+        data['hor'] = horList;
+      }
+
       return data;
     }).toList();
 
@@ -259,12 +284,7 @@ class _ComptePageState extends State<ComptePage> {
             child: ListTile(
               title: (nben != 0)
                   ? Text(
-                      hord +
-                          ' - ' +
-                          horf +
-                          ' avec ' +
-                          nben.toString() +
-                          ' benevoles',
+                      hord + ' - ' + horf,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -275,7 +295,19 @@ class _ComptePageState extends State<ComptePage> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
-                          color: Color(0xFF2b5a72)),
+                          color: Colors.red),
+                    ),
+              subtitle: (nben != 0)
+                  ? Text(
+                      'Places restantes: ${nben.toString()}${horId['tot'] != null ? '/${horId['tot']}' : ''}',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF2b5a72)),
+                    )
+                  : Text(
+                      'COMPLET',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red),
                     ),
               trailing: (nben != 0)
                   ? Container(
@@ -285,7 +317,8 @@ class _ComptePageState extends State<ComptePage> {
                           Expanded(
                               child: IconButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFf2f0e7),
+                              backgroundColor: Color(0xFF2b5a72),
+                              foregroundColor: Colors.white,
                             ),
                             icon: Icon(Icons.check_circle),
                             onPressed: () {
@@ -304,7 +337,11 @@ class _ComptePageState extends State<ComptePage> {
                                     actions: [
                                       TextButton(
                                         child: Text("Poursuivre"),
-                                        onPressed: () => Navigator.pop(context),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          // Rafraîchir les données après fermeture de la popup
+                                          _loadAllData();
+                                        },
                                       ),
                                     ],
                                   ),
@@ -320,7 +357,19 @@ class _ComptePageState extends State<ComptePage> {
                       ),
                     )
                   : Container(
-                      child: Text("Complet"),
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "COMPLET",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
             ),
           );

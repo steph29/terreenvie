@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:terreenvie/controller/PDF/web.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'dart:convert';
 import 'dart:html' as html;
-import 'Analyse.dart';
 
 class Kikeou extends StatefulWidget {
   @override
@@ -88,6 +85,8 @@ class _KikeouState extends State<Kikeou> {
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedPoste = newValue;
+                    // Rafraîchir les données quand le poste change
+                    fetchData(groupValue);
                   });
                 },
               ),
@@ -209,8 +208,26 @@ class _KikeouState extends State<Kikeou> {
       return;
     }
 
-    // Récupérer les données à jour
-    await fetchData(groupValue);
+    // Récupérer les données à jour avec les mêmes paramètres que l'affichage
+    print(
+        '📄 Génération PDF pour le poste: $selectedPoste et le jour: $groupValue');
+
+    // S'assurer que les données sont bien récupérées avec les bons filtres
+    List<List<dynamic>> pdfItems =
+        await _fetchDataForPDF(selectedPoste!, groupValue!);
+
+    // Vérifier que les données sont bien récupérées
+    if (pdfItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Aucune donnée trouvée pour ce poste et ce jour'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    print('📄 Nombre d\'éléments pour le PDF: ${pdfItems.length}');
 
     // Create a new PDF document.
     PdfDocument document = PdfDocument();
@@ -229,8 +246,6 @@ class _KikeouState extends State<Kikeou> {
         PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
 
     // Couleurs du thème
-    PdfColor primaryColor = PdfColor(76, 175, 80); // Vert Terre en Vie
-    PdfColor backgroundColor = PdfColor(242, 240, 231); // Beige/ivoire
     PdfColor headerColor = PdfColor(200, 200, 200);
 
     // Position initiale
@@ -269,7 +284,7 @@ class _KikeouState extends State<Kikeou> {
     yPosition += 30;
 
     // Statistiques
-    String stats = 'Total des bénévoles : ${items.length}';
+    String stats = 'Total des bénévoles : ${pdfItems.length}';
     graphics.drawString(stats, headerFont,
         bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
@@ -298,14 +313,14 @@ class _KikeouState extends State<Kikeou> {
       textBrush: PdfSolidBrush(PdfColor(0, 0, 0)),
     );
 
-    // Données des bénévoles
-    for (var i = 0; i < items.length; i++) {
+    // Données des bénévoles - utiliser pdfItems au lieu de items
+    for (var i = 0; i < pdfItems.length; i++) {
       PdfGridRow row = grid.rows.add();
-      row.cells[0].value = items[i][0]; // Nom
-      row.cells[1].value = items[i][1]; // Prénom
-      row.cells[2].value = items[i][2]; // Téléphone
+      row.cells[0].value = pdfItems[i][0]; // Nom
+      row.cells[1].value = pdfItems[i][1]; // Prénom
+      row.cells[2].value = pdfItems[i][2]; // Téléphone
       row.cells[3].value =
-          '${items[i][5]} - ${items[i][6]}'; // Créneau (début - fin)
+          '${pdfItems[i][5]} - ${pdfItems[i][6]}'; // Créneau (début - fin)
 
       // Alterner les couleurs des lignes
       if (i % 2 == 0) {
@@ -342,7 +357,7 @@ class _KikeouState extends State<Kikeou> {
     // Afficher le PDF
     if (kIsWeb) {
       print('📄 PDF Ki ké où généré avec succès (mode Web)');
-      print('📄 Nombre de bénévoles: ${items.length}');
+      print('📄 Nombre de bénévoles: ${pdfItems.length}');
       print('📄 Taille du PDF: ${bytes.length} bytes');
 
       // Créer une URL de données pour afficher le PDF dans le navigateur
@@ -350,7 +365,7 @@ class _KikeouState extends State<Kikeou> {
       final url = html.Url.createObjectUrlFromBlob(blob);
 
       // Créer un lien de téléchargement
-      final anchor = html.AnchorElement(href: url)
+      html.AnchorElement(href: url)
         ..setAttribute(
             'download', 'kikeou_${selectedPoste}_${groupValue ?? "tous"}.pdf')
         ..setAttribute('target', '_blank')
@@ -368,7 +383,6 @@ class _KikeouState extends State<Kikeou> {
 
   Future<List<List>> fetchData(String? groupValue) async {
     items = [];
-    Widget? itemWidget = null;
     totalCount = 0;
 
     // Si selectedPoste est null, ne pas récupérer les données
@@ -405,7 +419,7 @@ class _KikeouState extends State<Kikeou> {
 
     // Filtrer les documents par le poste sélectionné
     for (var document in documents) {
-      Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+      Map<String, dynamic> data = document.data();
       List<dynamic>? posIdList = data['pos_id'];
 
       if (posIdList != null && posIdList.isNotEmpty) {
@@ -415,7 +429,7 @@ class _KikeouState extends State<Kikeou> {
 
         if (poste != null && poste == selectedPoste) {
           if (groupValue == null || jour == groupValue) {
-            String? benevoleId = data['ben_id'] as String?;
+            String? benevoleId = data['ben_id'];
 
             if (benevoleId != null) {
               DocumentSnapshot<Map<String, dynamic>> userSnapshot =
@@ -428,16 +442,24 @@ class _KikeouState extends State<Kikeou> {
                 Map<String, dynamic> userData =
                     userSnapshot.data() as Map<String, dynamic>;
 
+                // Debug: Afficher les données utilisateur
+                print('🔍 Données utilisateur pour $benevoleId:');
+                print('   - nom: ${userData['nom']}');
+                print('   - prenom: ${userData['prenom']}');
+                print('   - tel: ${userData['tel']}');
+
                 items.add([
-                  userData['nom'].toUpperCase(),
-                  userData['prenom'],
-                  userData['tel'],
+                  (userData['nom'] ?? 'Inconnu').toString().toUpperCase(),
+                  userData['prenom'] ?? 'Inconnu',
+                  userData['tel'] ?? 'Non renseigné',
                   data['pos_id'][0]['jour'],
                   data['pos_id'][0]['poste'],
                   data['pos_id'][0]['debut'],
                   data['pos_id'][0]['fin']
                 ]);
                 totalCount++;
+              } else {
+                print('⚠️ Utilisateur non trouvé pour l\'ID: $benevoleId');
               }
             }
           }
@@ -445,5 +467,90 @@ class _KikeouState extends State<Kikeou> {
       }
     }
     return items;
+  }
+
+  // Fonction spécialisée pour récupérer les données du PDF
+  Future<List<List<dynamic>>> _fetchDataForPDF(
+      String poste, String jour) async {
+    List<List<dynamic>> pdfItems = [];
+
+    print('🔍 Récupération des données PDF pour: $poste - $jour');
+
+    // Requête Firestore pour récupérer les données des bénévoles
+    QuerySnapshot<Map<String, dynamic>> posBenSnapshot =
+        await FirebaseFirestore.instance.collection('pos_ben').get();
+
+    // Convertir les documents en une liste pour les trier
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+        posBenSnapshot.docs;
+
+    // Trier les documents par poste, jour et heure
+    documents.sort((a, b) {
+      String posteA = a.get('pos_id')[0]['poste'] ?? '';
+      String posteB = b.get('pos_id')[0]['poste'] ?? '';
+      String jourA = a.get('pos_id')[0]['jour'] ?? '';
+      String jourB = b.get('pos_id')[0]['jour'] ?? '';
+      String heureA = a.get('pos_id')[0]['debut'] ?? '';
+      String heureB = b.get('pos_id')[0]['debut'] ?? '';
+
+      int posteComparison = posteA.compareTo(posteB);
+      int jourComparison = jourA.compareTo(jourB);
+
+      if (posteComparison == 0) {
+        return jourComparison == 0 ? heureA.compareTo(heureB) : jourComparison;
+      } else {
+        return posteComparison;
+      }
+    });
+
+    // Filtrer les documents par le poste et jour spécifiés
+    for (var document in documents) {
+      Map<String, dynamic> data = document.data();
+      List<dynamic>? posIdList = data['pos_id'];
+
+      if (posIdList != null && posIdList.isNotEmpty) {
+        Map<String, dynamic>? firstPosId = posIdList[0];
+        String? posteDoc = firstPosId?['poste'];
+        String? jourDoc = firstPosId?['jour'];
+
+        // Filtrer par le poste et jour spécifiés
+        if (posteDoc == poste && jourDoc == jour) {
+          String? benevoleId = data['ben_id'];
+
+          if (benevoleId != null) {
+            DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(benevoleId)
+                    .get();
+
+            if (userSnapshot.exists) {
+              Map<String, dynamic> userData =
+                  userSnapshot.data() as Map<String, dynamic>;
+
+              pdfItems.add([
+                (userData['nom'] ?? 'Inconnu').toString().toUpperCase(),
+                userData['prenom'] ?? 'Inconnu',
+                userData['tel'] ?? 'Non renseigné',
+                data['pos_id'][0]['jour'],
+                data['pos_id'][0]['poste'],
+                data['pos_id'][0]['debut'],
+                data['pos_id'][0]['fin']
+              ]);
+            }
+          }
+        }
+      }
+    }
+
+    // Trier les éléments par ordre alphabétique des noms
+    pdfItems.sort((a, b) {
+      String nomA = a[0].toString(); // nom (index 0)
+      String nomB = b[0].toString(); // nom (index 0)
+      return nomA.compareTo(nomB);
+    });
+
+    print('📄 Données PDF récupérées et triées: ${pdfItems.length} éléments');
+    return pdfItems;
   }
 }

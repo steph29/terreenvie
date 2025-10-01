@@ -95,21 +95,28 @@ class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
         .collection('pos_hor')
         .where('jour', isEqualTo: groupValue)
         .get();
-    posHorData = posHorSnapshot.docs
-        .map((d) => d.data() as Map<String, dynamic>)
-        .toList();
+    posHorData = posHorSnapshot.docs.map((d) => d.data()).toList();
 
     final posBenSnapshot =
         await FirebaseFirestore.instance.collection('pos_ben').get();
-    posBenData = posBenSnapshot.docs
-        .map((d) => d.data() as Map<String, dynamic>)
-        .toList();
+    posBenData = posBenSnapshot.docs.map((d) => d.data()).toList();
 
     final usersSnapshot =
         await FirebaseFirestore.instance.collection('users').get();
-    usersData = usersSnapshot.docs
-        .map((d) => d.data() as Map<String, dynamic>)
-        .toList();
+    usersData = usersSnapshot.docs.map((d) => d.data()).toList();
+
+    // Debug: Afficher la structure des données
+    print('📊 Données chargées:');
+    print('  - posBenData: ${posBenData.length} éléments');
+    print('  - usersData: ${usersData.length} éléments');
+    if (usersData.isNotEmpty) {
+      print('  - Clés dans usersData[0]: ${usersData.first.keys.toList()}');
+      print('  - Exemple user: ${usersData.first}');
+    }
+    if (posBenData.isNotEmpty) {
+      print('  - Clés dans posBenData[0]: ${posBenData.first.keys.toList()}');
+      print('  - Exemple posBen: ${posBenData.first}');
+    }
 
     setState(() {
       isLoading = false;
@@ -613,91 +620,9 @@ class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
 
   // --- Nouvelle version de kifekoi ---
   Widget kifekoi() {
-    // Liste des utilisateurs (noms complets)
-    final userNames =
-        usersData.map((u) => '${u['nom']} ${u['prenom']}').toList();
-    String? selectedUser;
-    List<Map<String, dynamic>> userPosts = [];
-    return Container(
-      width: (kIsWeb || MediaQuery.of(context).size.width > 920)
-          ? MediaQuery.of(context).size.width / 2.5
-          : MediaQuery.of(context).size.width / 1.1,
-      height: MediaQuery.of(context).size.height / 2.5,
-      decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1)),
-      child: StatefulBuilder(
-        builder: (context, setState) {
-          return Column(
-            children: [
-              Text('Ki fè koi'),
-              Row(children: [
-                DropdownButton<String>(
-                  value: selectedUser,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedUser = newValue;
-                      // Mettre à jour les postes de l'utilisateur sélectionné
-                      final user = usersData.firstWhere(
-                          (u) => '${u['nom']} ${u['prenom']}' == selectedUser,
-                          orElse: () => {});
-                      if (user.isNotEmpty) {
-                        final userId = user['uid'];
-                        userPosts = [];
-                        for (var ben in posBenData) {
-                          if (ben['ben_id'] == userId &&
-                              ben['pos_id'] != null &&
-                              ben['pos_id'] is List) {
-                            for (var affectation in ben['pos_id']) {
-                              if (affectation is Map) {
-                                userPosts.add({
-                                  'nomPoste': affectation['poste'],
-                                  'jour': affectation['jour'],
-                                  'heureDebut': affectation['debut'],
-                                  'heureFin': affectation['fin'],
-                                });
-                              }
-                            }
-                          }
-                        }
-                      }
-                    });
-                  },
-                  items: userNames
-                      .map<DropdownMenuItem<String>>((String userName) {
-                    return DropdownMenuItem<String>(
-                      value: userName,
-                      child: Text(userName),
-                    );
-                  }).toList(),
-                  hint: Text('Sélectionnez un nom'),
-                ),
-                Expanded(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width / 1.1,
-                    height: MediaQuery.of(context).size.height / 3,
-                    child: ListView.builder(
-                      itemCount: userPosts.length,
-                      itemBuilder: (context, index) {
-                        final poste = userPosts[index];
-                        return ListTile(
-                          title: Text('Nom du poste: ${poste['nomPoste']}'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Jour: ${poste['jour']}'),
-                              Text('Heure de début: ${poste['heureDebut']}'),
-                              Text('Heure de fin: ${poste['heureFin']}'),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ]),
-            ],
-          );
-        },
-      ),
+    return _KifekoiWidget(
+      usersData: usersData,
+      posBenData: posBenData,
     );
   }
 
@@ -706,6 +631,21 @@ class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
     // Map : jour > poste > créneau > liste des bénévoles
     Map<String, Map<String, Map<String, List<Map<String, String>>>>>
         dayPosteTimeVolunteers = {};
+
+    // Créer un map pour un accès rapide aux utilisateurs
+    final userMap = <String, Map<String, dynamic>>{};
+    for (var user in usersData) {
+      // Essayer les deux clés possibles
+      if (user['uid'] != null) {
+        userMap[user['uid']] = user;
+      }
+      if (user['UserId'] != null) {
+        userMap[user['UserId']] = user;
+      }
+    }
+
+    print('🗺️ Map des utilisateurs créé avec ${userMap.length} entrées');
+
     for (var ben in posBenData) {
       if (ben['pos_id'] != null && ben['pos_id'] is List) {
         for (var affectation in ben['pos_id']) {
@@ -716,11 +656,22 @@ class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
             String jour = affectation['jour'];
             String poste = affectation['poste'];
             String debut = affectation['debut'];
+
             // Récupérer le nom/prénom du bénévole
-            final user = usersData.firstWhere((u) => u['uid'] == ben['ben_id'],
-                orElse: () => {});
-            String nom = user['nom'] ?? 'Nom inconnu';
-            String prenom = user['prenom'] ?? 'Prénom inconnu';
+            final benId = ben['ben_id'];
+            final user = userMap[benId];
+
+            String nom = 'Nom inconnu';
+            String prenom = 'Prénom inconnu';
+
+            if (user != null) {
+              nom = user['nom'] ?? 'Nom inconnu';
+              prenom = user['prenom'] ?? 'Prénom inconnu';
+              print('✅ Utilisateur trouvé: $prenom $nom (ID: $benId)');
+            } else {
+              print('❌ Utilisateur non trouvé pour ben_id: $benId');
+            }
+
             dayPosteTimeVolunteers[jour] ??= {};
             dayPosteTimeVolunteers[jour]![poste] ??= {};
             dayPosteTimeVolunteers[jour]![poste]![debut] ??= [];
@@ -741,25 +692,34 @@ class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
         Expanded(
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: dayPosteTimeVolunteers[groupValue]?.length ?? 0,
+            itemCount: dayPosteTimeVolunteers.length,
             itemBuilder: (context, index) {
-              String nomPoste =
-                  dayPosteTimeVolunteers[groupValue]!.keys.elementAt(index);
-              Map<String, List<Map<String, String>>> horairesMap =
-                  dayPosteTimeVolunteers[groupValue]![nomPoste]!;
+              String jour = dayPosteTimeVolunteers.keys.elementAt(index);
+              Map<String, Map<String, List<Map<String, String>>>> postesMap =
+                  dayPosteTimeVolunteers[jour]!;
+
               return ExpansionTile(
-                title: Text('Poste: $nomPoste'),
-                children: horairesMap.entries.map((horaireEntry) {
-                  String horaires = horaireEntry.key;
-                  List<Map<String, String>> benevoles = horaireEntry.value;
+                title: Text('Jour: $jour'),
+                children: postesMap.entries.map((posteEntry) {
+                  String nomPoste = posteEntry.key;
+                  Map<String, List<Map<String, String>>> horairesMap =
+                      posteEntry.value;
+
                   return ExpansionTile(
-                    title: Text(
-                        'Horaires: $horaires (${benevoles.length} bénévoles)'),
-                    children: benevoles.map((benevole) {
-                      String nom = benevole['nom']!;
-                      String prenom = benevole['prenom']!;
-                      return ListTile(
-                        title: Text('$prenom $nom'),
+                    title: Text('Poste: $nomPoste'),
+                    children: horairesMap.entries.map((horaireEntry) {
+                      String horaires = horaireEntry.key;
+                      List<Map<String, String>> benevoles = horaireEntry.value;
+                      return ExpansionTile(
+                        title: Text(
+                            'Horaires: $horaires (${benevoles.length} bénévoles)'),
+                        children: benevoles.map((benevole) {
+                          String nom = benevole['nom']!;
+                          String prenom = benevole['prenom']!;
+                          return ListTile(
+                            title: Text('$prenom $nom'),
+                          );
+                        }).toList(),
                       );
                     }).toList(),
                   );
@@ -1404,5 +1364,223 @@ class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
       }
     }
     return newVolunteers;
+  }
+}
+
+// Widget séparé pour Kifekoi avec son propre état
+class _KifekoiWidget extends StatefulWidget {
+  final List<Map<String, dynamic>> usersData;
+  final List<Map<String, dynamic>> posBenData;
+
+  const _KifekoiWidget({
+    required this.usersData,
+    required this.posBenData,
+  });
+
+  @override
+  _KifekoiWidgetState createState() => _KifekoiWidgetState();
+}
+
+class _KifekoiWidgetState extends State<_KifekoiWidget> {
+  String? selectedUser;
+  List<Map<String, dynamic>> userPosts = [];
+
+  @override
+  Widget build(BuildContext context) {
+    // Liste des utilisateurs (noms complets) triée par ordre alphabétique
+    final userNames = widget.usersData
+        .map((u) => '${u['nom'] ?? 'Inconnu'} ${u['prenom'] ?? 'Inconnu'}')
+        .toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    return Container(
+      width: (kIsWeb || MediaQuery.of(context).size.width > 920)
+          ? MediaQuery.of(context).size.width / 2.5
+          : MediaQuery.of(context).size.width / 1.1,
+      height: MediaQuery.of(context).size.height / 2.5,
+      decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1)),
+      child: Column(
+        children: [
+          Text('Ki fè koi'),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              // Autocomplete pour sélectionner un utilisateur avec recherche
+              Expanded(
+                flex: 2,
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: 200),
+                  child: Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return userNames;
+                      }
+                      return userNames.where((String option) {
+                        return option.toLowerCase().contains(
+                              textEditingValue.text.toLowerCase(),
+                            );
+                      });
+                    },
+                    onSelected: (String selection) {
+                      setState(() {
+                        selectedUser = selection;
+                        _updateUserPosts();
+                      });
+                    },
+                    fieldViewBuilder: (BuildContext context,
+                        TextEditingController textEditingController,
+                        FocusNode focusNode,
+                        VoidCallback onFieldSubmitted) {
+                      return TextField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          hintText: 'Rechercher un nom...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        onSubmitted: (String value) {
+                          onFieldSubmitted();
+                        },
+                      );
+                    },
+                    optionsViewBuilder: (BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxHeight: 200),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final String option = options.elementAt(index);
+                                return InkWell(
+                                  onTap: () => onSelected(option),
+                                  child: Container(
+                                    padding: EdgeInsets.all(12),
+                                    child: Text(
+                                      option,
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              // Liste des postes de l'utilisateur sélectionné
+              Expanded(
+                flex: 3,
+                child: Container(
+                  height: MediaQuery.of(context).size.height / 3,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: userPosts.isEmpty
+                      ? Center(
+                          child: Text(
+                            selectedUser == null
+                                ? 'Sélectionnez un nom pour voir ses postes'
+                                : 'Aucun poste trouvé pour cet utilisateur',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: userPosts.length,
+                          itemBuilder: (context, index) {
+                            final poste = userPosts[index];
+                            return Card(
+                              margin: EdgeInsets.all(4),
+                              child: ListTile(
+                                title: Text(
+                                  '${poste['nomPoste']}',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Jour: ${poste['jour']}'),
+                                    Text(
+                                        'Heure: ${poste['heureDebut']} - ${poste['heureFin']}'),
+                                  ],
+                                ),
+                                leading: Icon(
+                                  Icons.work,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _updateUserPosts() {
+    userPosts.clear();
+
+    if (selectedUser == null) return;
+
+    // Trouver l'utilisateur sélectionné
+    final user = widget.usersData.firstWhere(
+      (u) =>
+          '${u['nom'] ?? 'Inconnu'} ${u['prenom'] ?? 'Inconnu'}' ==
+          selectedUser,
+      orElse: () => {},
+    );
+
+    if (user.isEmpty) return;
+
+    final userId = user['uid'] ?? user['UserId'];
+    if (userId == null) return;
+
+    print(
+        '🔍 Recherche des postes pour l\'utilisateur: $selectedUser (ID: $userId)');
+
+    // Parcourir les données des bénévoles pour trouver les postes de cet utilisateur
+    for (var ben in widget.posBenData) {
+      if (ben['ben_id'] == userId &&
+          ben['pos_id'] != null &&
+          ben['pos_id'] is List) {
+        print('📋 Postes trouvés pour $selectedUser');
+        for (var affectation in ben['pos_id']) {
+          if (affectation is Map) {
+            userPosts.add({
+              'nomPoste': affectation['poste'] ?? 'Poste inconnu',
+              'jour': affectation['jour'] ?? 'Jour inconnu',
+              'heureDebut': affectation['debut'] ?? 'Heure inconnue',
+              'heureFin': affectation['fin'] ?? 'Heure inconnue',
+            });
+          }
+        }
+      }
+    }
+
+    print('📊 Total des postes trouvés: ${userPosts.length}');
   }
 }

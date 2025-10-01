@@ -22,6 +22,7 @@ class _AddPosteState extends State<AddPoste> {
   int? editingIndex;
   bool isEdition = false;
   String? posteId;
+  String selectedJour = "Samedi";
 
   @override
   void initState() {
@@ -32,7 +33,11 @@ class _AddPosteState extends State<AddPoste> {
       posteId = Get.arguments['posteId'];
       posteContoller.text = Get.arguments['poste'] ?? '';
       descContoller.text = Get.arguments['desc'] ?? '';
+      selectedJour = Get.arguments['jour'] ?? "Samedi";
       _loadHoraires();
+    } else if (Get.arguments != null && Get.arguments['jour'] != null) {
+      // Mode création avec jour spécifique
+      selectedJour = Get.arguments['jour'];
     }
   }
 
@@ -43,8 +48,29 @@ class _AddPosteState extends State<AddPoste> {
           .doc(posteId)
           .get();
       if (doc.exists) {
+        List<Map<String, dynamic>> horaires =
+            List<Map<String, dynamic>>.from(doc.data()!['hor'] ?? []);
+
+        // Migration : ajouter le champ 'tot' s'il n'existe pas
+        bool needsUpdate = false;
+        for (var hor in horaires) {
+          if (hor['tot'] == null) {
+            hor['tot'] =
+                hor['nbBen'] ?? 0; // Utiliser nbBen comme total initial
+            needsUpdate = true;
+          }
+        }
+
+        // Sauvegarder les modifications si nécessaire
+        if (needsUpdate) {
+          await FirebaseFirestore.instance
+              .collection('pos_hor')
+              .doc(posteId)
+              .update({'hor': horaires});
+        }
+
         setState(() {
-          horList = List<Map<String, dynamic>>.from(doc.data()!['hor'] ?? []);
+          horList = horaires;
         });
       }
     }
@@ -105,6 +131,48 @@ class _AddPosteState extends State<AddPoste> {
                       ),
                       maxLines: 3,
                     ),
+                    SizedBox(height: 15),
+                    // Sélecteur de jour (seulement en mode création)
+                    if (!isEdition) ...[
+                      Text(
+                        "Jour de la semaine",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2b5a72),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        value: selectedJour,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        items: [
+                          "Lundi",
+                          "Mardi",
+                          "Mercredi",
+                          "Jeudi",
+                          "Vendredi",
+                          "Samedi",
+                          "Dimanche"
+                        ].map((String jour) {
+                          return DropdownMenuItem<String>(
+                            value: jour,
+                            child: Text(jour),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              selectedJour = newValue;
+                            });
+                          }
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -184,25 +252,29 @@ class _AddPosteState extends State<AddPoste> {
                               setState(() {
                                 if (editingIndex != null) {
                                   // Modifier un créneau existant
+                                  int totalPlaces =
+                                      int.parse(nbBenContoller.text.trim());
                                   horList[editingIndex!] = {
                                     'debut': debutContoller.text.trim(),
                                     'fin': finContoller.text.trim(),
                                     'nbBen':
-                                        int.parse(nbBenContoller.text.trim()),
+                                        totalPlaces, // Places restantes (commence au total)
                                     'tot':
-                                        int.parse(nbBenContoller.text.trim()),
+                                        totalPlaces, // Total des places (ne change jamais)
                                     'check': false,
                                   };
                                   editingIndex = null;
                                 } else {
                                   // Ajouter un nouveau créneau
+                                  int totalPlaces =
+                                      int.parse(nbBenContoller.text.trim());
                                   horList.add({
                                     'debut': debutContoller.text.trim(),
                                     'fin': finContoller.text.trim(),
                                     'nbBen':
-                                        int.parse(nbBenContoller.text.trim()),
+                                        totalPlaces, // Places restantes (commence au total)
                                     'tot':
-                                        int.parse(nbBenContoller.text.trim()),
+                                        totalPlaces, // Total des places (ne change jamais)
                                     'check': false,
                                   });
                                 }
@@ -268,7 +340,8 @@ class _AddPosteState extends State<AddPoste> {
                           return Card(
                             child: ListTile(
                               title: Text("${hor['debut']} - ${hor['fin']}"),
-                              subtitle: Text("Places: ${hor['nbBen']}"),
+                              subtitle: Text(
+                                  "Places restantes: ${hor['nbBen']}/${hor['tot']}"),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -316,15 +389,43 @@ class _AddPosteState extends State<AddPoste> {
                         if (posteContoller.text.isNotEmpty &&
                             descContoller.text.isNotEmpty &&
                             horList.isNotEmpty) {
-                          await FirebaseFirestore.instance
-                              .collection("pos_hor")
-                              .add({
-                            "poste": posteContoller.text.trim(),
-                            "desc": descContoller.text.trim(),
-                            "hor": horList,
-                            "jour": Get.arguments['jour'] ?? "Samedi",
-                          });
-                          Get.back();
+                          try {
+                            await FirebaseFirestore.instance
+                                .collection("pos_hor")
+                                .add({
+                              "poste": posteContoller.text.trim(),
+                              "desc": descContoller.text.trim(),
+                              "hor": horList,
+                              "jour": selectedJour,
+                            });
+
+                            // Afficher un message de succès
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Poste créé avec succès !"),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+
+                            Get.back();
+                          } catch (e) {
+                            // Afficher un message d'erreur
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Erreur lors de la création: $e"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } else {
+                          // Afficher un message si les champs sont vides
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Veuillez remplir tous les champs et ajouter au moins un créneau horaire"),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
                         }
                       },
                       child: Text(

@@ -192,11 +192,19 @@ class _AdminPageState extends State<AdminPage> {
                       return Card(
                         child: ListTile(
                           title: Text(
-                            '${h['debut']} - ${h['fin']} (${h['nbBen'] ?? '-'} places restantes / ${h['tot'] ?? '-'} total)',
+                            '${h['debut']} - ${h['fin']}',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
                                 color: Color(0xFF2b5a72)),
+                          ),
+                          subtitle: Text(
+                            'Places: ${h['nbBen'] ?? 0}/${h['tot'] ?? h['nbBen'] ?? 0} ${(h['nbBen'] == 0) ? '(COMPLET)' : ''}',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: (h['nbBen'] == 0)
+                                    ? Colors.red
+                                    : Color(0xFF2b5a72)),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -253,6 +261,22 @@ class _AdminPageState extends State<AdminPage> {
                 ],
               ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          // Ouvrir la page de création d'un nouveau poste avec le jour sélectionné
+          await Get.to(() => AddPoste(), arguments: {
+            'jour': groupValue,
+          });
+          // Rafraîchir les données après retour de la page de création
+          _loadAllData();
+        },
+        backgroundColor: Color(0xFF2b5a72),
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        tooltip: 'Créer un nouveau poste pour $groupValue',
+      ),
     );
   }
 }

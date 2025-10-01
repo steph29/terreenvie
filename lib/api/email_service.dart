@@ -15,6 +15,14 @@ class EmailService {
 
   final TemplateService _templateService = TemplateService();
 
+  // URLs des Firebase Functions
+  static const String _sendEmailUrl =
+      'https://sendemail-7mzwe64jha-uc.a.run.app';
+  static const String _sendBulkEmailsUrl =
+      'https://sendbulkemails-7mzwe64jha-uc.a.run.app';
+  static const String _sendPersonalizedEmailsUrl =
+      'https://sendpersonalizedemails-7mzwe64jha-uc.a.run.app';
+
   // Configuration SMTP
   SmtpServer get _smtpServer {
     final password = dotenv.env['EMAIL_PASSWORD'] ?? '';
@@ -28,16 +36,41 @@ class EmailService {
     required String body,
   }) async {
     try {
+      print('🚀 Début de sendEmail');
+      print('🌐 kIsWeb: $kIsWeb');
+
       if (kIsWeb) {
-        // Mode Web - Utiliser une API externe ou simulation
-        print('🌐 Mode Web détecté - Simulation d\'envoi d\'email');
-        print('📧 Email simulé vers: $to');
-        print('📧 Sujet: $subject');
-        print('📧 Contenu: $body');
-        print('✅ Email simulé envoyé avec succès (mode Web)');
-        return true;
+        // Mode Web - Utiliser Firebase Functions
+        print('🌐 Mode Web détecté - Utilisation des Firebase Functions');
+        print('📧 URL: $_sendEmailUrl');
+        print(
+            '📧 Données à envoyer: {"to": "$to", "subject": "$subject", "body": "$body"}');
+
+        final response = await http.post(
+          Uri.parse(_sendEmailUrl),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'to': to,
+            'subject': subject,
+            'body': body,
+          }),
+        );
+
+        print('📧 Réponse reçue: ${response.statusCode} - ${response.body}');
+
+        if (response.statusCode == 200) {
+          print('✅ Email envoyé avec succès via Firebase Functions');
+          return true;
+        } else {
+          print(
+              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
+          return false;
+        }
       } else {
         // Mode Mobile - SMTP réel
+        print('📱 Mode Mobile détecté - Utilisation SMTP');
         final message = Message()
           ..from = Address('communication.terreenvie@gmail.com', 'Terre en Vie')
           ..recipients.add(to)
@@ -62,14 +95,30 @@ class EmailService {
   }) async {
     try {
       if (kIsWeb) {
-        // Mode Web - Simulation
-        print('🌐 Mode Web détecté - Simulation d\'envoi d\'emails en masse');
-        for (String email in emails) {
-          print('📧 Email simulé vers: $email');
-        }
+        // Mode Web - Utiliser Firebase Functions
         print(
-            '✅ ${emails.length} emails simulés envoyés avec succès (mode Web)');
-        return true;
+            '🌐 Mode Web détecté - Utilisation des Firebase Functions pour emails en masse');
+
+        final response = await http.post(
+          Uri.parse(_sendBulkEmailsUrl),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'emails': emails,
+            'subject': subject,
+            'body': body,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          print('✅ Emails en masse envoyés avec succès via Firebase Functions');
+          return true;
+        } else {
+          print(
+              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
+          return false;
+        }
       } else {
         // Mode Mobile - SMTP réel
         final message = Message()
@@ -104,17 +153,42 @@ class EmailService {
           .toList();
 
       if (kIsWeb) {
-        // Mode Web - Simulation
-        print('🌐 Mode Web détecté - Simulation d\'emails personnalisés');
-        for (Map<String, dynamic> user in users) {
-          final personalizedBody = _templateService.replaceVariables(
-              bodyTemplate, user, creneauData);
-          print('📧 Email personnalisé simulé vers: ${user['email']}');
-          print('📧 Contenu: $personalizedBody');
-        }
+        // Mode Web - Utiliser Firebase Functions
         print(
-            '✅ ${users.length} emails personnalisés simulés envoyés avec succès (mode Web)');
-        return true;
+            '🌐 Mode Web détecté - Utilisation des Firebase Functions pour emails personnalisés');
+
+        // Convertir les données en objets JSON simples
+        final usersJson = users
+            .map((user) => {
+                  'email': user['email']?.toString() ?? '',
+                  'prenom': user['prenom']?.toString() ?? '',
+                  'nom': user['nom']?.toString() ?? '',
+                  'profil': user['profil']?.toString() ?? '',
+                })
+            .toList();
+
+        final response = await http.post(
+          Uri.parse(_sendPersonalizedEmailsUrl),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'users': usersJson,
+            'subject': subject,
+            'bodyTemplate': bodyTemplate,
+            'creneauData': creneauData,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          print(
+              '✅ Emails personnalisés envoyés avec succès via Firebase Functions');
+          return true;
+        } else {
+          print(
+              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
+          return false;
+        }
       } else {
         // Mode Mobile - SMTP réel
         for (Map<String, dynamic> user in users) {
@@ -144,24 +218,52 @@ class EmailService {
   }) async {
     try {
       if (kIsWeb) {
-        // Mode Web - Simulation
-        print('🌐 Mode Web détecté - Simulation d\'emails personnalisés');
-        for (String email in selectedEmails) {
-          // Créer un objet userData minimal pour la simulation
-          final userData = {
-            'email': email,
-            'nom': '',
-            'prenom': '',
-            'profil': ''
-          };
-          final personalizedBody = _templateService.replaceVariables(
-              bodyTemplate, userData, creneauData);
-          print('📧 Email personnalisé simulé vers: $email');
-          print('📧 Contenu: $personalizedBody');
-        }
+        // Mode Web - Utiliser Firebase Functions
         print(
-            '✅ ${selectedEmails.length} emails personnalisés simulés envoyés avec succès (mode Web)');
-        return true;
+            '🌐 Mode Web détecté - Utilisation des Firebase Functions pour emails personnalisés spécifiques');
+
+        // Récupérer les données utilisateur depuis Firestore
+        final usersSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', whereIn: selectedEmails)
+            .get();
+
+        final users = usersSnapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+
+        // Convertir les données en objets JSON simples
+        final usersJson = users
+            .map((user) => {
+                  'email': user['email']?.toString() ?? '',
+                  'prenom': user['prenom']?.toString() ?? '',
+                  'nom': user['nom']?.toString() ?? '',
+                  'profil': user['profil']?.toString() ?? '',
+                })
+            .toList();
+
+        final response = await http.post(
+          Uri.parse(_sendPersonalizedEmailsUrl),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'users': usersJson,
+            'subject': subject,
+            'bodyTemplate': bodyTemplate,
+            'creneauData': creneauData,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          print(
+              '✅ Emails personnalisés spécifiques envoyés avec succès via Firebase Functions');
+          return true;
+        } else {
+          print(
+              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
+          return false;
+        }
       } else {
         // Mode Mobile - SMTP réel
         for (String email in selectedEmails) {
@@ -214,5 +316,50 @@ class EmailService {
       subject: subject,
       bodyTemplate: body,
     );
+  }
+
+  // Envoyer un email de bienvenue à un nouveau bénévole
+  Future<bool> sendWelcomeEmail({
+    required String email,
+    required String prenom,
+    required String nom,
+  }) async {
+    try {
+      print('🎉 Envoi de l\'email de bienvenue à $email');
+
+      // Récupérer le template de bienvenue
+      final template = TemplateService.predefinedTemplates['bienvenue'];
+      if (template == null) {
+        print('❌ Template de bienvenue non trouvé');
+        return false;
+      }
+
+      // Préparer les données utilisateur
+      final userData = {
+        'email': email,
+        'prenom': prenom,
+        'nom': nom,
+        'profil': 'ben',
+      };
+
+      // Remplacer les variables dans le template
+      final subject =
+          _templateService.replaceVariables(template['title']!, userData, null);
+      final body =
+          _templateService.replaceVariables(template['body']!, userData, null);
+
+      print('📧 Sujet: $subject');
+      print('📧 Corps: $body');
+
+      // Envoyer l'email
+      return await sendEmail(
+        to: email,
+        subject: subject,
+        body: body,
+      );
+    } catch (e) {
+      print('❌ Erreur lors de l\'envoi de l\'email de bienvenue: $e');
+      return false;
+    }
   }
 }

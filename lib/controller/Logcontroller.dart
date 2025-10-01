@@ -29,8 +29,7 @@ class _LogControllerState extends State<LogController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text("Bienvenue sur le site des bénévoles de la  Bio en fête 2024"),
+        title: Text("Bienvenue sur le site des bénévoles de la  Bio en fête"),
         backgroundColor: Color(0xFFf2f0e7),
       ),
       body: AuthLog(),

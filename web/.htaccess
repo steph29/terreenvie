@@ -1,0 +1,59 @@
+# Configuration pour éviter les problèmes de cache Flutter Web
+
+# Désactiver le cache pour les fichiers Flutter
+
+<FilesMatch "\.(js|dart\.js|wasm|json)$">
+Header set Cache-Control "no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "0"
+</FilesMatch>
+
+# Désactiver le cache pour index.html
+
+<Files "index.html">
+Header set Cache-Control "no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "0"
+</Files>
+
+# Désactiver le cache pour flutter.js
+
+<Files "flutter.js">
+Header set Cache-Control "no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "0"
+</Files>
+
+# Désactiver le cache pour les assets Flutter
+
+<FilesMatch "flutter_assets/.\*">
+Header set Cache-Control "no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "0"
+</FilesMatch>
+
+# Configuration générale pour éviter les problèmes de cache
+
+Header always set Cache-Control "no-cache, no-store, must-revalidate"
+Header always set Pragma "no-cache"
+Header always set Expires "0"
+
+# Désactiver ETags
+
+FileETag None
+
+# Configuration pour les erreurs
+
+ErrorDocument 404 /index.html
+ErrorDocument 500 /index.html
+
+# Redirection pour SPA (Single Page Application)
+
+RewriteEngine On
+RewriteBase /
+
+# Rediriger toutes les requêtes vers index.html sauf pour les fichiers existants
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]

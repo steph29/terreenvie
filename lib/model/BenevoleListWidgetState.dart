@@ -144,9 +144,9 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
     yPosition += 40;
 
-    // Créer un tableau avec design amélioré
+    // Créer un tableau avec design amélioré (seulement nom et prénom)
     PdfGrid grid = PdfGrid();
-    grid.columns.add(count: 4);
+    grid.columns.add(count: 2);
     grid.style = PdfGridStyle(
       cellPadding: PdfPaddings(left: 10, right: 10, top: 5, bottom: 5),
       font: font,
@@ -156,8 +156,6 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     PdfGridRow header = grid.headers.add(1)[0];
     header.cells[0].value = 'Nom';
     header.cells[1].value = 'Prénom';
-    header.cells[2].value = 'Email';
-    header.cells[3].value = 'Téléphone';
 
     // Style de l'en-tête
     header.style = PdfGridRowStyle(
@@ -166,13 +164,19 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
       textBrush: PdfSolidBrush(PdfColor(0, 0, 0)),
     );
 
-    // Ajouter les données des bénévoles
-    for (int i = 0; i < benevoles.length; i++) {
+    // Trier les bénévoles par ordre alphabétique des noms
+    List<Map<String, dynamic>> benevolesTries = List.from(benevoles);
+    benevolesTries.sort((a, b) {
+      String nomA = (a['nom'] ?? '').toString().toUpperCase();
+      String nomB = (b['nom'] ?? '').toString().toUpperCase();
+      return nomA.compareTo(nomB);
+    });
+
+    // Ajouter les données des bénévoles triés (seulement nom et prénom)
+    for (int i = 0; i < benevolesTries.length; i++) {
       PdfGridRow row = grid.rows.add();
-      row.cells[0].value = benevoles[i]['nom'] ?? '';
-      row.cells[1].value = benevoles[i]['prenom'] ?? '';
-      row.cells[2].value = benevoles[i]['email'] ?? '';
-      row.cells[3].value = benevoles[i]['tel'] ?? '';
+      row.cells[0].value = benevolesTries[i]['nom'] ?? '';
+      row.cells[1].value = benevolesTries[i]['prenom'] ?? '';
 
       // Alterner les couleurs des lignes
       if (i % 2 == 0) {
@@ -190,13 +194,13 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     // Pied de page
     yPosition = pageSize.height - 80;
     graphics.drawString(
-        'Document généré automatiquement par l\'application Terre en Vie', font,
+        '© ${DateTime.now().year} Terre en Vie - Tous droits réservés', font,
         bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 
     yPosition += 20;
     graphics.drawString(
-        '© ${DateTime.now().year} Terre en Vie - Tous droits réservés', font,
+        'Document généré automatiquement par l\'application Terre en Vie', font,
         bounds: Rect.fromLTWH(50, yPosition, pageSize.width - 100, 20),
         format: PdfStringFormat(alignment: PdfTextAlignment.center));
 

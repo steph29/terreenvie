@@ -176,6 +176,11 @@ class TemplateService {
 
   // Templates prédéfinis
   static const Map<String, Map<String, String>> predefinedTemplates = {
+    'bienvenue': {
+      'title': 'Bienvenue chez Terre en Vie, {prenom} !',
+      'body':
+          'Bonjour {prenom} {nom},\n\nBienvenue dans la communauté Terre en Vie ! Nous sommes ravis de vous compter parmi nos bénévoles.\n\nVotre compte a été créé avec succès avec l\'adresse email : {email}\n\nVous pouvez dès maintenant vous connecter à votre tableau de bord pour voir vos créneaux et gérer votre profil.\n\nMerci de votre engagement !\n\nL\'équipe Terre en Vie',
+    },
     'rappel_benevolat': {
       'title': 'Rappel bénévolat - {jour}',
       'body':
