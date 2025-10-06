@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -53,6 +55,12 @@ ios/Flutter/Generated*.xcconfig
 ios/Flutter/flutter_export_environment*.sh
 ios/Pods/
 ios/Podfile.lock
+
+# Swift Package Manager build directories
+.swiftpm/
+**/.build/
+**/DerivedData/
+**/xcuserdata/
 
 # Android build files
 android/build/
