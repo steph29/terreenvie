@@ -1,12 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
-import 'package:http/http.dart' as http;
-import 'template_service.dart';
+import 'dart:async';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'template_service.dart';
 
 class EmailService {
   static final EmailService _instance = EmailService._internal();
@@ -15,201 +11,120 @@ class EmailService {
 
   final TemplateService _templateService = TemplateService();
 
-  // URLs des Firebase Functions
-  static const String _sendEmailUrl =
-      'https://sendemail-7mzwe64jha-uc.a.run.app';
-  static const String _sendBulkEmailsUrl =
-      'https://sendbulkemails-7mzwe64jha-uc.a.run.app';
-  static const String _sendPersonalizedEmailsUrl =
-      'https://sendpersonalizedemails-7mzwe64jha-uc.a.run.app';
+  final FirebaseFunctions _functions = FirebaseFunctions.instance;
 
-  // Configuration SMTP
-  SmtpServer get _smtpServer {
-    final password = dotenv.env['EMAIL_PASSWORD'] ?? '';
-    return gmail('communication.terreenvie@gmail.com', password);
-  }
+  /* ----------------------------------------------------
+     1) EMAIL SIMPLE
+  ---------------------------------------------------- */
 
-  // Envoyer un email simple
   Future<bool> sendEmail({
     required String to,
     required String subject,
     required String body,
   }) async {
     try {
-      print('🚀 Début de sendEmail');
-      print('🌐 kIsWeb: $kIsWeb');
+      final callable = _functions.httpsCallable('sendEmail');
 
-      if (kIsWeb) {
-        // Mode Web - Utiliser Firebase Functions
-        print('🌐 Mode Web détecté - Utilisation des Firebase Functions');
-        print('📧 URL: $_sendEmailUrl');
-        print(
-            '📧 Données à envoyer: {"to": "$to", "subject": "$subject", "body": "$body"}');
+      final result = await callable.call({
+        'to': to,
+        'subject': subject,
+        'body': body,
+      });
 
-        final response = await http.post(
-          Uri.parse(_sendEmailUrl),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'to': to,
-            'subject': subject,
-            'body': body,
-          }),
-        );
-
-        print('📧 Réponse reçue: ${response.statusCode} - ${response.body}');
-
-        if (response.statusCode == 200) {
-          print('✅ Email envoyé avec succès via Firebase Functions');
-          return true;
-        } else {
-          print(
-              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
-          return false;
-        }
-      } else {
-        // Mode Mobile - SMTP réel
-        print('📱 Mode Mobile détecté - Utilisation SMTP');
-        final message = Message()
-          ..from = Address('communication.terreenvie@gmail.com', 'Terre en Vie')
-          ..recipients.add(to)
-          ..subject = subject
-          ..text = body;
-
-        final sendReport = await send(message, _smtpServer);
-        print('✅ Email envoyé avec succès: ${sendReport.toString()}');
-        return true;
-      }
+      return result.data['success'] == true;
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi de l\'email: $e');
+      print('❌ sendEmail error: $e');
       return false;
     }
   }
 
-  // Envoyer des emails en masse
+  /* ----------------------------------------------------
+     2) EMAILS EN MASSE
+  ---------------------------------------------------- */
+
   Future<bool> sendBulkEmails({
     required List<String> emails,
     required String subject,
     required String body,
   }) async {
     try {
-      if (kIsWeb) {
-        // Mode Web - Utiliser Firebase Functions
-        print(
-            '🌐 Mode Web détecté - Utilisation des Firebase Functions pour emails en masse');
-
-        final response = await http.post(
-          Uri.parse(_sendBulkEmailsUrl),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'emails': emails,
-            'subject': subject,
-            'body': body,
-          }),
-        );
-
-        if (response.statusCode == 200) {
-          print('✅ Emails en masse envoyés avec succès via Firebase Functions');
-          return true;
-        } else {
-          print(
-              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
-          return false;
-        }
-      } else {
-        // Mode Mobile - SMTP réel
-        final message = Message()
-          ..from = Address('communication.terreenvie@gmail.com', 'Terre en Vie')
-          ..recipients.addAll(emails)
-          ..subject = subject
-          ..text = body;
-
-        final sendReport = await send(message, _smtpServer);
-        print(
-            '✅ Emails en masse envoyés avec succès: ${sendReport.toString()}');
-        return true;
+      // Vérifier l'authentification avant l'appel
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception(
+            'Utilisateur non authentifié. Veuillez vous connecter.');
       }
+
+      print('📧 Appel de sendBulkEmails avec ${emails.length} emails');
+      print('📧 Utilisateur authentifié: ${user.uid}');
+
+      final callable = _functions.httpsCallable('sendBulkEmails');
+
+      final result = await callable.call({
+        'emails': emails,
+        'subject': subject,
+        'body': body,
+      });
+
+      print('📧 Résultat reçu: ${result.data}');
+      return result.data['success'] == true;
+    } on FirebaseFunctionsException catch (e) {
+      print('❌ Firebase Functions error:');
+      print('❌ Code: ${e.code}');
+      print('❌ Message: ${e.message}');
+      print('❌ Details: ${e.details}');
+      throw Exception('Erreur Firebase Functions (${e.code}): ${e.message}');
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi d\'emails en masse: $e');
-      return false;
+      print('❌ sendBulkEmails error: $e');
+      print('❌ Error type: ${e.runtimeType}');
+      rethrow;
     }
   }
 
-  // Envoyer des emails personnalisés à tous les utilisateurs
+  /* ----------------------------------------------------
+     3) EMAILS PERSONNALISÉS - TOUS
+  ---------------------------------------------------- */
+
   Future<bool> sendPersonalizedToAllUsers({
     required String subject,
     required String bodyTemplate,
     Map<String, dynamic>? creneauData,
   }) async {
     try {
-      // Récupérer tous les utilisateurs depuis Firestore
       final usersSnapshot =
           await FirebaseFirestore.instance.collection('users').get();
-      final users = usersSnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
+
+      final users = usersSnapshot.docs.map((doc) => doc.data()).toList();
+
+      final usersJson = users
+          .map((user) => {
+                'email': user['email'] ?? '',
+                'prenom': user['prenom'] ?? '',
+                'nom': user['nom'] ?? '',
+                'profil': user['profil'] ?? '',
+              })
           .toList();
 
-      if (kIsWeb) {
-        // Mode Web - Utiliser Firebase Functions
-        print(
-            '🌐 Mode Web détecté - Utilisation des Firebase Functions pour emails personnalisés');
+      final callable = _functions.httpsCallable('sendPersonalizedEmails');
 
-        // Convertir les données en objets JSON simples
-        final usersJson = users
-            .map((user) => {
-                  'email': user['email']?.toString() ?? '',
-                  'prenom': user['prenom']?.toString() ?? '',
-                  'nom': user['nom']?.toString() ?? '',
-                  'profil': user['profil']?.toString() ?? '',
-                })
-            .toList();
+      final result = await callable.call({
+        'users': usersJson,
+        'subject': subject,
+        'bodyTemplate': bodyTemplate,
+        'creneauData': creneauData,
+      });
 
-        final response = await http.post(
-          Uri.parse(_sendPersonalizedEmailsUrl),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'users': usersJson,
-            'subject': subject,
-            'bodyTemplate': bodyTemplate,
-            'creneauData': creneauData,
-          }),
-        );
-
-        if (response.statusCode == 200) {
-          print(
-              '✅ Emails personnalisés envoyés avec succès via Firebase Functions');
-          return true;
-        } else {
-          print(
-              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
-          return false;
-        }
-      } else {
-        // Mode Mobile - SMTP réel
-        for (Map<String, dynamic> user in users) {
-          final personalizedBody = _templateService.replaceVariables(
-              bodyTemplate, user, creneauData);
-          await sendEmail(
-            to: user['email'] as String,
-            subject: subject,
-            body: personalizedBody,
-          );
-        }
-        print('✅ ${users.length} emails personnalisés envoyés avec succès');
-        return true;
-      }
+      return result.data['success'] == true;
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi d\'emails personnalisés: $e');
+      print('❌ sendPersonalizedToAllUsers error: $e');
       return false;
     }
   }
 
-  // Envoyer des emails personnalisés à des utilisateurs spécifiques
+  /* ----------------------------------------------------
+     4) EMAILS PERSONNALISÉS - SÉLECTION
+  ---------------------------------------------------- */
+
   Future<bool> sendPersonalizedToSpecificUsers({
     required List<String> selectedEmails,
     required String subject,
@@ -217,124 +132,51 @@ class EmailService {
     Map<String, dynamic>? creneauData,
   }) async {
     try {
-      if (kIsWeb) {
-        // Mode Web - Utiliser Firebase Functions
-        print(
-            '🌐 Mode Web détecté - Utilisation des Firebase Functions pour emails personnalisés spécifiques');
+      final usersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', whereIn: selectedEmails)
+          .get();
 
-        // Récupérer les données utilisateur depuis Firestore
-        final usersSnapshot = await FirebaseFirestore.instance
-            .collection('users')
-            .where('email', whereIn: selectedEmails)
-            .get();
+      final users = usersSnapshot.docs.map((doc) => doc.data()).toList();
 
-        final users = usersSnapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList();
+      final usersJson = users
+          .map((user) => {
+                'email': user['email'] ?? '',
+                'prenom': user['prenom'] ?? '',
+                'nom': user['nom'] ?? '',
+                'profil': user['profil'] ?? '',
+              })
+          .toList();
 
-        // Convertir les données en objets JSON simples
-        final usersJson = users
-            .map((user) => {
-                  'email': user['email']?.toString() ?? '',
-                  'prenom': user['prenom']?.toString() ?? '',
-                  'nom': user['nom']?.toString() ?? '',
-                  'profil': user['profil']?.toString() ?? '',
-                })
-            .toList();
+      final callable = _functions.httpsCallable('sendPersonalizedEmails');
 
-        final response = await http.post(
-          Uri.parse(_sendPersonalizedEmailsUrl),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'users': usersJson,
-            'subject': subject,
-            'bodyTemplate': bodyTemplate,
-            'creneauData': creneauData,
-          }),
-        );
+      final result = await callable.call({
+        'users': usersJson,
+        'subject': subject,
+        'bodyTemplate': bodyTemplate,
+        'creneauData': creneauData,
+      });
 
-        if (response.statusCode == 200) {
-          print(
-              '✅ Emails personnalisés spécifiques envoyés avec succès via Firebase Functions');
-          return true;
-        } else {
-          print(
-              '❌ Erreur Firebase Functions: ${response.statusCode} - ${response.body}');
-          return false;
-        }
-      } else {
-        // Mode Mobile - SMTP réel
-        for (String email in selectedEmails) {
-          // Récupérer les données utilisateur depuis Firestore
-          final userSnapshot = await FirebaseFirestore.instance
-              .collection('users')
-              .where('email', isEqualTo: email)
-              .get();
-
-          Map<String, dynamic> userData = {
-            'email': email,
-            'nom': '',
-            'prenom': '',
-            'profil': ''
-          };
-          if (userSnapshot.docs.isNotEmpty) {
-            userData = userSnapshot.docs.first.data();
-          }
-
-          final personalizedBody = _templateService.replaceVariables(
-              bodyTemplate, userData, creneauData);
-          await sendEmail(
-            to: email,
-            subject: subject,
-            body: personalizedBody,
-          );
-        }
-        print(
-            '✅ ${selectedEmails.length} emails personnalisés envoyés avec succès');
-        return true;
-      }
+      return result.data['success'] == true;
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi d\'emails personnalisés: $e');
+      print('❌ sendPersonalizedToSpecificUsers error: $e');
       return false;
     }
   }
 
-  // Méthodes de compatibilité pour l'interface existante
-  Future<bool> sendToAllUsers(String subject, String body) async {
-    return await sendPersonalizedToAllUsers(
-      subject: subject,
-      bodyTemplate: body,
-    );
-  }
+  /* ----------------------------------------------------
+     5) EMAIL DE BIENVENUE
+  ---------------------------------------------------- */
 
-  Future<bool> sendToSpecificUsers(
-      List<String> userIds, String subject, String body) async {
-    return await sendPersonalizedToSpecificUsers(
-      selectedEmails: userIds,
-      subject: subject,
-      bodyTemplate: body,
-    );
-  }
-
-  // Envoyer un email de bienvenue à un nouveau bénévole
   Future<bool> sendWelcomeEmail({
     required String email,
     required String prenom,
     required String nom,
   }) async {
     try {
-      print('🎉 Envoi de l\'email de bienvenue à $email');
-
-      // Récupérer le template de bienvenue
       final template = TemplateService.predefinedTemplates['bienvenue'];
-      if (template == null) {
-        print('❌ Template de bienvenue non trouvé');
-        return false;
-      }
+      if (template == null) return false;
 
-      // Préparer les données utilisateur
       final userData = {
         'email': email,
         'prenom': prenom,
@@ -342,23 +184,18 @@ class EmailService {
         'profil': 'ben',
       };
 
-      // Remplacer les variables dans le template
       final subject =
           _templateService.replaceVariables(template['title']!, userData, null);
       final body =
           _templateService.replaceVariables(template['body']!, userData, null);
 
-      print('📧 Sujet: $subject');
-      print('📧 Corps: $body');
-
-      // Envoyer l'email
       return await sendEmail(
         to: email,
         subject: subject,
         body: body,
       );
     } catch (e) {
-      print('❌ Erreur lors de l\'envoi de l\'email de bienvenue: $e');
+      print('❌ sendWelcomeEmail error: $e');
       return false;
     }
   }

@@ -15,14 +15,14 @@ class EmailConfig {
   // Configuration SMTP Gmail
   static const String smtpServer = 'smtp.gmail.com';
   static const int smtpPort = 587;
-  static const String username = 'communication.terreenvie@gmail.com';
+  static const String username = 'benevole@terreenvie.com';
   static const String password =
       'votre_mot_de_passe_d_application'; // À remplacer
   static const bool ssl = false;
   static const bool allowInsecure = true;
 
   // Configuration de l'expéditeur
-  static const String senderEmail = 'communication.terreenvie@gmail.com';
+  static const String senderEmail = 'benevole@terreenvie.com';
   static const String senderName = 'Terre en Vie';
 
   // Configuration des templates d'emails

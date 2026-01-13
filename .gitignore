@@ -48,7 +48,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 node_modules
-
+/access/.env
 # iOS build files
 ios/build/
 ios/Flutter/Generated*.xcconfig

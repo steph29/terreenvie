@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:flutter/services.dart' show rootBundle, Uint8List;
-import 'dart:convert';
 import 'dart:html' as html;
 
 class BenevoleListWidget extends StatefulWidget {
@@ -29,6 +28,8 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
   // Fonction pour récupérer les bénévoles sans doublons
   Future<void> fetchUniqueBenevoles() async {
+    if (!mounted) return;
+
     Set<String> uniqueBenevoleIds = {}; // Set pour stocker les ben_id uniques
     List<Map<String, dynamic>> uniqueBenevoles =
         []; // Liste pour les bénévoles uniques
@@ -38,20 +39,28 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
       QuerySnapshot posBenSnapshot =
           await FirebaseFirestore.instance.collection('pos_ben').get();
 
+      if (!mounted) return;
+
       // Parcourir chaque document de 'pos_ben' pour extraire les ben_id
       for (var doc in posBenSnapshot.docs) {
-        String benId = doc['ben_id'];
+        String? benId = doc['ben_id'] as String?;
 
-        // Ajouter benId au set (Set évite les doublons)
-        uniqueBenevoleIds.add(benId);
+        if (benId != null && benId.isNotEmpty) {
+          // Ajouter benId au set (Set évite les doublons)
+          uniqueBenevoleIds.add(benId);
+        }
       }
 
       // Récupérer les informations de chaque bénévole à partir des ben_id uniques
       for (String benId in uniqueBenevoleIds) {
+        if (!mounted) return;
+
         DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
             .collection('users')
             .doc(benId)
             .get();
+
+        if (!mounted) return;
 
         if (userSnapshot.exists) {
           // Convertir les données en Map<String, dynamic>
@@ -60,21 +69,25 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
           if (userData != null) {
             uniqueBenevoles.add({
-              'nom': userData['nom'],
-              'prenom': userData['prenom'],
-              'tel': userData['tel'],
-              'email': userData['email']
+              'nom': userData['nom'] ?? '',
+              'prenom': userData['prenom'] ?? '',
+              'tel': userData['tel'] ?? '',
+              'email': userData['email'] ?? ''
             });
           }
         }
       }
 
       // Mettre à jour la liste des bénévoles sans doublons
-      setState(() {
-        benevoles = uniqueBenevoles;
-      });
+      if (mounted) {
+        setState(() {
+          benevoles = uniqueBenevoles;
+        });
+      }
     } catch (e) {
-      print('Erreur lors de la récupération des bénévoles: $e');
+      if (mounted) {
+        print('Erreur lors de la récupération des bénévoles: $e');
+      }
     }
   }
 
@@ -98,8 +111,6 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
         PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
 
     // Couleurs du thème
-    PdfColor primaryColor = PdfColor(76, 175, 80); // Vert Terre en Vie
-    PdfColor backgroundColor = PdfColor(242, 240, 231); // Beige/ivoire
     PdfColor headerColor = PdfColor(200, 200, 200);
 
     // Position initiale
@@ -144,18 +155,28 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
     yPosition += 40;
 
-    // Créer un tableau avec design amélioré (seulement nom et prénom)
+    // Créer un tableau avec nom, prénom, email et téléphone
     PdfGrid grid = PdfGrid();
-    grid.columns.add(count: 2);
+    grid.columns.add(count: 4); // 4 colonnes : Nom, Prénom, Email, Téléphone
     grid.style = PdfGridStyle(
-      cellPadding: PdfPaddings(left: 10, right: 10, top: 5, bottom: 5),
+      cellPadding: PdfPaddings(left: 5, right: 5, top: 5, bottom: 5),
       font: font,
     );
+
+    // Ajuster la largeur des colonnes pour une meilleure lisibilité
+    double tableWidth = pageSize.width - 100;
+    grid.columns[0].width = tableWidth * 0.22; // Nom : 22%
+    grid.columns[1].width = tableWidth * 0.22; // Prénom : 22%
+    grid.columns[2].width =
+        tableWidth * 0.38; // Email : 38% (plus large pour les adresses email)
+    grid.columns[3].width = tableWidth * 0.18; // Téléphone : 18%
 
     // En-têtes du tableau
     PdfGridRow header = grid.headers.add(1)[0];
     header.cells[0].value = 'Nom';
     header.cells[1].value = 'Prénom';
+    header.cells[2].value = 'Email';
+    header.cells[3].value = 'Téléphone';
 
     // Style de l'en-tête
     header.style = PdfGridRowStyle(
@@ -169,14 +190,29 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
     benevolesTries.sort((a, b) {
       String nomA = (a['nom'] ?? '').toString().toUpperCase();
       String nomB = (b['nom'] ?? '').toString().toUpperCase();
+      if (nomA == nomB) {
+        // Si les noms sont identiques, trier par prénom
+        String prenomA = (a['prenom'] ?? '').toString().toUpperCase();
+        String prenomB = (b['prenom'] ?? '').toString().toUpperCase();
+        return prenomA.compareTo(prenomB);
+      }
       return nomA.compareTo(nomB);
     });
 
-    // Ajouter les données des bénévoles triés (seulement nom et prénom)
+    // Vérifier qu'on a des données
+    if (benevolesTries.isEmpty) {
+      throw Exception('Aucun bénévole trouvé pour générer le PDF');
+    }
+
+    // Ajouter les données des bénévoles triés (nom, prénom, email, téléphone)
     for (int i = 0; i < benevolesTries.length; i++) {
       PdfGridRow row = grid.rows.add();
-      row.cells[0].value = benevolesTries[i]['nom'] ?? '';
-      row.cells[1].value = benevolesTries[i]['prenom'] ?? '';
+      row.cells[0].value = (benevolesTries[i]['nom'] ?? '').toString();
+      row.cells[1].value = (benevolesTries[i]['prenom'] ?? '').toString();
+      row.cells[2].value =
+          (benevolesTries[i]['email'] ?? 'Non renseigné').toString();
+      row.cells[3].value =
+          (benevolesTries[i]['tel'] ?? 'Non renseigné').toString();
 
       // Alterner les couleurs des lignes
       if (i % 2 == 0) {
@@ -219,7 +255,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
       final url = html.Url.createObjectUrlFromBlob(blob);
 
       // Créer un lien de téléchargement
-      final anchor = html.AnchorElement(href: url)
+      html.AnchorElement(href: url)
         ..setAttribute('download', 'liste_benevoles.pdf')
         ..setAttribute('target', '_blank')
         ..click();
@@ -289,13 +325,28 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
                     // Ajout du bouton dans un container aligné en bas
                     ElevatedButton(
                       onPressed: () async {
-                        // Appeler fetchData avant la génération du PDF
-                        await fetchData(); // Passer un paramètre si nécessaire
+                        try {
+                          // S'assurer que les données sont à jour avant de générer le PDF
+                          if (benevoles.isEmpty) {
+                            await fetchUniqueBenevoles();
+                          }
 
-                        // Ensuite, générer le PDF avec les données récupérées
-                        await _generatePdf();
+                          // Générer le PDF avec les données actuelles
+                          await _generatePdf();
+                        } catch (e) {
+                          print('❌ Erreur lors de la génération du PDF: $e');
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Erreur lors de la génération du PDF: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
                       },
-                      child: Text("Télécharger la liste des entrée"),
+                      child: Text("Télécharger la liste des entrées"),
                     ),
                   ],
                 ),
@@ -321,7 +372,7 @@ class _BenevoleListWidgetState extends State<BenevoleListWidget> {
 
     // Filtrer les documents et récupérer les informations des bénévoles
     for (var document in documents) {
-      Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+      Map<String, dynamic> data = document.data();
       List<dynamic>? posIdList = data['pos_id'];
 
       if (posIdList != null && posIdList.isNotEmpty) {

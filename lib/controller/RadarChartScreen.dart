@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'RadarChartWidget.dart';
@@ -41,7 +40,17 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
     _loadAllData();
   }
 
+  @override
+  void dispose() {
+    // Nettoyer les ressources avant de supprimer le widget
+    // Note: Les requêtes Firestore .get() ne peuvent pas être annulées,
+    // mais les vérifications mounted empêcheront les setState() après dispose
+    super.dispose();
+  }
+
   Future<void> _loadAllData() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
     });
@@ -50,11 +59,17 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
       // Charger tous les pos_hor et pos_ben du jour sélectionné
       final posHorSnapshot =
           await _posHorRef.where('jour', isEqualTo: groupValue).get();
+
+      if (!mounted) return;
+
       posHorData = posHorSnapshot.docs
           .map((d) => d.data() as Map<String, dynamic>)
           .toList();
 
       final posBenSnapshot = await _posBenRef.get();
+
+      if (!mounted) return;
+
       posBenData = posBenSnapshot.docs
           .map((d) => d.data() as Map<String, dynamic>)
           .toList();
@@ -89,26 +104,36 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
         return getHour(a).compareTo(getHour(b));
       });
 
+      if (!mounted) return;
+
       _horaires = horairesList;
       _selectedHoraireIndex = 0;
 
-      if (_horaires.isNotEmpty) {
+      if (_horaires.isNotEmpty && mounted) {
         _computeRadarData();
       }
     } catch (e) {
-      print('Erreur lors du chargement des données: $e');
+      if (mounted) {
+        print('Erreur lors du chargement des données: $e');
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   void _computeRadarData() {
+    if (!mounted) return;
+
     if (_horaires.isEmpty) {
-      setState(() {
-        _dataValues = List.filled(_postes.length, 0.0);
-      });
+      if (mounted) {
+        setState(() {
+          _dataValues = List.filled(_postes.length, 0.0);
+        });
+      }
       return;
     }
 
@@ -152,7 +177,9 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
       _dataValues.add(percentage > 100 ? 100.0 : percentage);
     }
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -178,10 +205,12 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
           CupertinoSegmentedControl<String>(
             groupValue: groupValue,
             onValueChanged: (String value) {
-              setState(() {
-                groupValue = value;
-              });
-              _loadAllData();
+              if (mounted) {
+                setState(() {
+                  groupValue = value;
+                });
+                _loadAllData();
+              }
             },
             children: {
               'Lundi': Padding(
@@ -226,10 +255,12 @@ class _RadarChartScreenState extends State<RadarChartScreen> {
               max: (_horaires.length - 1).toDouble(),
               divisions: _horaires.length - 1,
               onChanged: (double value) {
-                setState(() {
-                  _selectedHoraireIndex = value.round();
-                });
-                _computeRadarData();
+                if (mounted) {
+                  setState(() {
+                    _selectedHoraireIndex = value.round();
+                  });
+                  _computeRadarData();
+                }
               },
             ),
           ] else ...[

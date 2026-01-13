@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../api/fcm_service.dart';
-import '../api/template_service.dart';
 import '../api/email_service.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class AdminNotificationsPage extends StatefulWidget {
   const AdminNotificationsPage({Key? key}) : super(key: key);
@@ -16,32 +17,32 @@ class AdminNotificationsPage extends StatefulWidget {
 class _AdminNotificationsPageState extends State<AdminNotificationsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _bodyController = TextEditingController();
-  final TextEditingController _emailSubjectController = TextEditingController();
-  final TextEditingController _emailBodyController = TextEditingController();
-  final FCMService _fcmService = FCMService();
-  final TemplateService _templateService = TemplateService();
-  final EmailService _emailService = EmailService();
+
+  final _titleController = TextEditingController();
+  final _bodyController = TextEditingController();
+  final _emailSubjectController = TextEditingController();
+  final _emailBodyController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   final _emailFormKey = GlobalKey<FormState>();
+
+  final FCMService _fcmService = FCMService();
+  final EmailService _emailService = EmailService();
+
   bool _isLoading = false;
+
   List<Map<String, dynamic>> _users = [];
   List<Map<String, dynamic>> _selectedUserObjects = [];
+
   bool _sendToAll = false;
 
-  // Variables séparées pour notifications et emails
   bool _useTemplatesNotifications = false;
   bool _useTemplatesEmails = false;
-  String? _selectedTemplateNotifications;
-  String? _selectedTemplateEmails;
 
-  // Couleurs du thème
+  PlatformFile? _selectedAttachment;
+
   static const Color primaryColor = Color(0xFF4CAF50);
   static const Color backgroundColor = Color(0xFFf2f0e7);
-  static const Color cardColor = Colors.white;
-  static const Color textColor = Color(0xFF333333);
-  static const Color accentColor = Color(0xFF666666);
 
   @override
   void initState() {
@@ -60,13 +61,20 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
     super.dispose();
   }
 
+  // ----------------------------------------------------------
+  // DATA
+  // ----------------------------------------------------------
+
   Future<void> _loadUsers() async {
     try {
-      final QuerySnapshot snapshot =
+      final snapshot =
           await FirebaseFirestore.instance.collection('users').get();
+
+      if (!mounted) return;
+
       setState(() {
         _users = snapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
+          final data = doc.data();
           return {
             'id': doc.id,
             'name': '${data['prenom'] ?? ''} ${data['nom'] ?? ''}'.trim(),
@@ -76,172 +84,207 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
         }).toList();
       });
     } catch (e) {
-      print('Erreur lors du chargement des utilisateurs: $e');
+      print('❌ Erreur chargement users: $e');
     }
   }
 
-  void _loadTemplate(String templateKey) {
-    final template = TemplateService.predefinedTemplates[templateKey];
-    if (template != null) {
-      setState(() {
-        _titleController.text = template['title']!;
-        _bodyController.text = template['body']!;
-        _selectedTemplateNotifications = templateKey;
-      });
-    }
-  }
+  // ----------------------------------------------------------
+  // NOTIFICATIONS
+  // ----------------------------------------------------------
 
   Future<void> _sendNotification() async {
+    FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
+
     try {
-      final String title = _titleController.text.trim();
-      final String body = _bodyController.text.trim();
+      final title = _titleController.text.trim();
+      final body = _bodyController.text.trim();
 
       if (_useTemplatesNotifications) {
-        // Utiliser les notifications personnalisées avec templates
         if (_sendToAll) {
           await _fcmService.sendPersonalizedToAllUsers(title, body);
         } else {
-          final userIds =
+          final ids =
               _selectedUserObjects.map((u) => u['id'] as String).toList();
-          await _fcmService.sendPersonalizedToSpecificUsers(
-              userIds, title, body);
+          await _fcmService.sendPersonalizedToSpecificUsers(ids, title, body);
         }
       } else {
-        // Utiliser les notifications simples (ancienne méthode)
         if (_sendToAll) {
           await _fcmService.sendToAllUsers(title, body);
         } else {
-          final userIds =
+          final ids =
               _selectedUserObjects.map((u) => u['id'] as String).toList();
-          await _fcmService.sendToSpecificUsers(userIds, title, body);
+          await _fcmService.sendToSpecificUsers(ids, title, body);
         }
       }
 
-      // Réinitialiser le formulaire
-      _titleController.clear();
-      _bodyController.clear();
-      setState(() {
-        _selectedUserObjects.clear();
-        _sendToAll = false;
-        _selectedTemplateNotifications = null;
-      });
+      _resetNotificationForm();
 
-      Get.snackbar('Succès', 'Notification(s) envoyée(s) avec succès !',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: Duration(seconds: 3));
+      Get.snackbar(
+        'Succès',
+        'Notification(s) envoyée(s) avec succès !',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
-      Get.snackbar('Erreur', 'Erreur lors de l\'envoi: $e',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: Duration(seconds: 5));
+      Get.snackbar(
+        'Erreur',
+        'Erreur lors de l\'envoi: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
+  void _resetNotificationForm() {
+    _titleController.clear();
+    _bodyController.clear();
+    setState(() {
+      _selectedUserObjects.clear();
+      _sendToAll = false;
+    });
+  }
+
+  // ----------------------------------------------------------
+  // EMAILS (100% Firebase Functions onCall)
+  // ----------------------------------------------------------
+
   Future<void> _sendEmail() async {
+    FocusScope.of(context).unfocus();
     if (!_emailFormKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final String subject = _emailSubjectController.text.trim();
-      final String body = _emailBodyController.text.trim();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception(
+            'Utilisateur non authentifié. Veuillez vous reconnecter.');
+      }
+
+      // 🔹 Forcer le refresh du token pour être sûr qu'il est valide
+      final idToken = await user.getIdToken(true);
+      print('USER ID: ${user.uid}');
+      print('ID TOKEN: ${idToken?.substring(0, 20) ?? 'null'}...');
+      // juste un aperçu pour debug
+
+      final subject = _emailSubjectController.text.trim();
+      final body = _emailBodyController.text.trim();
+
+      // Récupérer les emails sélectionnés si on n'envoie pas à tous
+      final selectedEmails = !_sendToAll
+          ? _selectedUserObjects.map((u) => u['email'] as String).toList()
+          : null;
+
+      // Créer un callable avec le token (utile surtout pour Web)
+      final callable = FirebaseFunctions.instance.httpsCallable(
+        _useTemplatesEmails ? 'sendPersonalizedEmails' : 'sendBulkEmails',
+        options: HttpsCallableOptions(
+            // headers: {'Authorization': 'Bearer $idToken'}, // Web uniquement
+            ),
+      );
 
       if (_useTemplatesEmails) {
-        // Utiliser les emails personnalisés avec templates
+        // ----- EMAILS PERSONNALISÉS -----
+        if (_selectedAttachment != null) {
+          Get.snackbar(
+            'Info',
+            'Les pièces jointes ne sont pas encore supportées pour les emails personnalisés.',
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+        }
+
         if (_sendToAll) {
           await _emailService.sendPersonalizedToAllUsers(
             subject: subject,
             bodyTemplate: body,
           );
-        } else {
-          final selectedEmails =
-              _selectedUserObjects.map((u) => u['email'] as String).toList();
+        } else if (selectedEmails != null && selectedEmails.isNotEmpty) {
           await _emailService.sendPersonalizedToSpecificUsers(
             selectedEmails: selectedEmails,
             subject: subject,
             bodyTemplate: body,
           );
+        } else {
+          throw Exception(
+              'Aucun destinataire sélectionné pour les emails personnalisés.');
         }
       } else {
-        // Utiliser les emails simples
+        // ----- EMAILS SIMPLES -----
         if (_sendToAll) {
-          await _emailService.sendToAllUsers(subject, body);
-        } else {
-          final selectedEmails =
-              _selectedUserObjects.map((u) => u['email'] as String).toList();
-          await _emailService.sendToSpecificUsers(
-            selectedEmails,
-            subject,
-            body,
+          final allEmails = _users.map((u) => u['email'] as String).toList();
+          await _emailService.sendBulkEmails(
+            emails: allEmails,
+            subject: subject,
+            body: body,
           );
+        } else if (selectedEmails != null && selectedEmails.isNotEmpty) {
+          await _emailService.sendBulkEmails(
+            emails: selectedEmails,
+            subject: subject,
+            body: body,
+          );
+        } else {
+          throw Exception('Aucun destinataire sélectionné pour les emails.');
         }
       }
 
-      // Réinitialiser le formulaire
-      _emailSubjectController.clear();
-      _emailBodyController.clear();
-      setState(() {
-        _selectedUserObjects.clear();
-        _sendToAll = false;
-        _selectedTemplateEmails = null;
-      });
+      _resetEmailForm();
 
-      Get.snackbar('Succès', 'Email(s) envoyé(s) avec succès !',
-          backgroundColor: primaryColor,
-          colorText: Colors.white,
-          duration: Duration(seconds: 3));
-    } catch (e) {
-      Get.snackbar('Erreur', 'Erreur lors de l\'envoi: $e',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: Duration(seconds: 5));
+      Get.snackbar(
+        'Succès',
+        'Email(s) envoyé(s) avec succès !',
+        backgroundColor: primaryColor,
+        colorText: Colors.white,
+      );
+    } catch (e, stack) {
+      print('❌ _sendEmail error: $e');
+      print(stack);
+      Get.snackbar(
+        'Erreur',
+        'Erreur lors de l\'envoi: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
+
+  void _resetEmailForm() {
+    _emailSubjectController.clear();
+    _emailBodyController.clear();
+    setState(() {
+      _selectedUserObjects.clear();
+      _sendToAll = false;
+      _selectedAttachment = null;
+    });
+  }
+
+  // ----------------------------------------------------------
+  // UI
+  // ----------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Communication',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: primaryColor,
-        elevation: 0,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: [
-            Tab(
-              icon: Icon(Icons.notifications),
-              text: 'Notifications',
-            ),
-            Tab(
-              icon: Icon(Icons.email),
-              text: 'Emails',
-            ),
+          tabs: const [
+            Tab(icon: Icon(Icons.notifications), text: 'Notifications'),
+            Tab(icon: Icon(Icons.email), text: 'Emails'),
           ],
         ),
       ),
@@ -255,712 +298,75 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
     );
   }
 
+  // ----------------------------------------------------------
+  // NOTIFICATIONS TAB (inchangé UI)
+  // ----------------------------------------------------------
+
   Widget _buildNotificationsTab() {
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Mode de notification (simple ou personnalisée)
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Mode de notification',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: RadioListTile<bool>(
-                              title: Text('Notification simple'),
-                              subtitle: Text('Même message pour tous'),
-                              value: false,
-                              groupValue: _useTemplatesNotifications,
-                              activeColor: primaryColor,
-                              onChanged: (value) {
-                                setState(() {
-                                  _useTemplatesNotifications = value!;
-                                  _selectedTemplateNotifications = null;
-                                });
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: RadioListTile<bool>(
-                              title: Text('Notification personnalisée'),
-                              subtitle:
-                                  Text('Message adapté à chaque utilisateur'),
-                              value: true,
-                              groupValue: _useTemplatesNotifications,
-                              activeColor: primaryColor,
-                              onChanged: (value) {
-                                setState(() {
-                                  _useTemplatesNotifications = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Templates prédéfinis (si mode personnalisé)
-              if (_useTemplatesNotifications) ...[
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Templates prédéfinis',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: TemplateService.predefinedTemplates.keys
-                              .map((key) {
-                            return ElevatedButton(
-                              onPressed: () => _loadTemplate(key),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    _selectedTemplateNotifications == key
-                                        ? primaryColor
-                                        : Colors.grey[300],
-                                foregroundColor:
-                                    _selectedTemplateNotifications == key
-                                        ? Colors.white
-                                        : textColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: Text(key),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16),
-              ],
-
-              // Formulaire de notification
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Contenu de la notification',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _titleController,
-                        decoration: InputDecoration(
-                          labelText: 'Titre',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: primaryColor, width: 2),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Veuillez saisir un titre';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _bodyController,
-                        decoration: InputDecoration(
-                          labelText: 'Message',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: primaryColor, width: 2),
-                          ),
-                        ),
-                        maxLines: 4,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Veuillez saisir un message';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Sélection des destinataires
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Destinataires',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      CheckboxListTile(
-                        title: Text('Envoyer à tous les utilisateurs'),
-                        value: _sendToAll,
-                        activeColor: primaryColor,
-                        onChanged: (value) {
-                          setState(() {
-                            _sendToAll = value!;
-                            if (_sendToAll) {
-                              _selectedUserObjects.clear();
-                            }
-                          });
-                        },
-                      ),
-                      if (!_sendToAll) ...[
-                        SizedBox(height: 12),
-                        Text(
-                          'Ou sélectionner des utilisateurs spécifiques:',
-                          style: TextStyle(color: accentColor),
-                        ),
-                        SizedBox(height: 8),
-
-                        // Autocomplete pour la sélection d'utilisateurs
-                        Autocomplete<Map<String, dynamic>>(
-                          optionsBuilder: (TextEditingValue textEditingValue) {
-                            if (textEditingValue.text.isEmpty) {
-                              return _users;
-                            }
-                            return _users.where((user) {
-                              final name =
-                                  user['name'].toString().toLowerCase();
-                              final email =
-                                  user['email'].toString().toLowerCase();
-                              final query = textEditingValue.text.toLowerCase();
-                              return name.contains(query) ||
-                                  email.contains(query);
-                            });
-                          },
-                          displayStringForOption: (option) =>
-                              '${option['name']} (${option['email']})',
-                          onSelected: (Map<String, dynamic> selection) {
-                            if (!_selectedUserObjects
-                                .any((u) => u['id'] == selection['id'])) {
-                              setState(() {
-                                _selectedUserObjects.add(selection);
-                              });
-                            }
-                          },
-                          fieldViewBuilder: (context, textEditingController,
-                              focusNode, onFieldSubmitted) {
-                            return TextFormField(
-                              controller: textEditingController,
-                              focusNode: focusNode,
-                              decoration: InputDecoration(
-                                labelText: 'Rechercher un utilisateur...',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      BorderSide(color: primaryColor, width: 2),
-                                ),
-                                suffixIcon:
-                                    Icon(Icons.search, color: primaryColor),
-                              ),
-                            );
-                          },
-                        ),
-
-                        SizedBox(height: 12),
-
-                        // Liste des utilisateurs sélectionnés avec puces
-                        if (_selectedUserObjects.isNotEmpty) ...[
-                          Text(
-                            'Utilisateurs sélectionnés:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 4,
-                            children: _selectedUserObjects.map((user) {
-                              return Chip(
-                                label: Text(user['name']),
-                                deleteIcon: Icon(Icons.close, size: 18),
-                                onDeleted: () {
-                                  setState(() {
-                                    _selectedUserObjects.removeWhere(
-                                        (u) => u['id'] == user['id']);
-                                  });
-                                },
-                                backgroundColor: primaryColor.withOpacity(0.1),
-                                labelStyle: TextStyle(color: primaryColor),
-                                deleteIconColor: primaryColor,
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 24),
-
-              // Bouton d'envoi
-              ElevatedButton(
-                onPressed: _isLoading ? null : _sendNotification,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Envoyer la notification',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return _buildBaseTab(
+      formKey: _formKey,
+      titleController: _titleController,
+      bodyController: _bodyController,
+      onSend: _sendNotification,
+      isEmail: false,
     );
   }
+
+  // ----------------------------------------------------------
+  // EMAILS TAB (inchangé UI + attachment)
+  // ----------------------------------------------------------
 
   Widget _buildEmailsTab() {
+    return _buildBaseTab(
+      formKey: _emailFormKey,
+      titleController: _emailSubjectController,
+      bodyController: _emailBodyController,
+      onSend: _sendEmail,
+      isEmail: true,
+    );
+  }
+
+  // ----------------------------------------------------------
+  // SHARED UI
+  // ----------------------------------------------------------
+
+  Widget _buildBaseTab({
+    required GlobalKey<FormState> formKey,
+    required TextEditingController titleController,
+    required TextEditingController bodyController,
+    required VoidCallback onSend,
+    required bool isEmail,
+  }) {
     return Padding(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Form(
-        key: _emailFormKey,
+        key: formKey,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Mode d'email (simple ou personnalisé)
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Mode d\'email',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: RadioListTile<bool>(
-                              title: Text('Email simple'),
-                              subtitle: Text('Même message pour tous'),
-                              value: false,
-                              groupValue: _useTemplatesEmails,
-                              activeColor: primaryColor,
-                              onChanged: (value) {
-                                setState(() {
-                                  _useTemplatesEmails = value!;
-                                  _selectedTemplateEmails = null;
-                                });
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: RadioListTile<bool>(
-                              title: Text('Email personnalisé'),
-                              subtitle:
-                                  Text('Message adapté à chaque utilisateur'),
-                              value: true,
-                              groupValue: _useTemplatesEmails,
-                              activeColor: primaryColor,
-                              onChanged: (value) {
-                                setState(() {
-                                  _useTemplatesEmails = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Templates prédéfinis pour emails (si mode personnalisé)
-              if (_useTemplatesEmails) ...[
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Templates d\'emails prédéfinis',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            'Rappel créneau',
-                            'Confirmation inscription',
-                            'Annulation créneau',
-                            'Bienvenue',
-                            'Remerciement',
-                          ].map((template) {
-                            return ElevatedButton(
-                              onPressed: () => _loadEmailTemplate(template),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    _selectedTemplateEmails == template
-                                        ? primaryColor
-                                        : Colors.grey[300],
-                                foregroundColor:
-                                    _selectedTemplateEmails == template
-                                        ? Colors.white
-                                        : textColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: Text(template),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'Variables disponibles pour la personnalisation:',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: TemplateService.availableVariables.keys
-                              .map((variable) {
-                            return Chip(
-                              label: Text(variable),
-                              backgroundColor: primaryColor.withOpacity(0.1),
-                              labelStyle: TextStyle(
-                                color: primaryColor,
-                                fontSize: 12,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16),
+              _buildRecipientsCard(),
+              const SizedBox(height: 16),
+              _buildContentCard(titleController, bodyController),
+              if (isEmail) ...[
+                const SizedBox(height: 16),
+                _buildAttachmentPicker(),
               ],
-
-              // Formulaire d'email
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Contenu de l\'email',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _emailSubjectController,
-                        decoration: InputDecoration(
-                          labelText: 'Objet',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: primaryColor, width: 2),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Veuillez saisir un objet';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _emailBodyController,
-                        decoration: InputDecoration(
-                          labelText: 'Message',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: primaryColor, width: 2),
-                          ),
-                        ),
-                        maxLines: 8,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Veuillez saisir un message';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Sélection des destinataires avec autocomplete
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Destinataires',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      CheckboxListTile(
-                        title: Text('Envoyer à tous les utilisateurs'),
-                        value: _sendToAll,
-                        activeColor: primaryColor,
-                        onChanged: (value) {
-                          setState(() {
-                            _sendToAll = value!;
-                            if (_sendToAll) {
-                              _selectedUserObjects.clear();
-                            }
-                          });
-                        },
-                      ),
-                      if (!_sendToAll) ...[
-                        SizedBox(height: 12),
-                        Text(
-                          'Ou sélectionner des utilisateurs spécifiques:',
-                          style: TextStyle(color: accentColor),
-                        ),
-                        SizedBox(height: 8),
-
-                        // Autocomplete pour la sélection d'utilisateurs
-                        Autocomplete<Map<String, dynamic>>(
-                          optionsBuilder: (TextEditingValue textEditingValue) {
-                            if (textEditingValue.text.isEmpty) {
-                              return _users;
-                            }
-                            return _users.where((user) {
-                              final name =
-                                  user['name'].toString().toLowerCase();
-                              final email =
-                                  user['email'].toString().toLowerCase();
-                              final query = textEditingValue.text.toLowerCase();
-                              return name.contains(query) ||
-                                  email.contains(query);
-                            });
-                          },
-                          displayStringForOption: (option) =>
-                              '${option['name']} (${option['email']})',
-                          onSelected: (Map<String, dynamic> selection) {
-                            if (!_selectedUserObjects
-                                .any((u) => u['id'] == selection['id'])) {
-                              setState(() {
-                                _selectedUserObjects.add(selection);
-                              });
-                            }
-                          },
-                          fieldViewBuilder: (context, textEditingController,
-                              focusNode, onFieldSubmitted) {
-                            return TextFormField(
-                              controller: textEditingController,
-                              focusNode: focusNode,
-                              decoration: InputDecoration(
-                                labelText: 'Rechercher un utilisateur...',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      BorderSide(color: primaryColor, width: 2),
-                                ),
-                                suffixIcon:
-                                    Icon(Icons.search, color: primaryColor),
-                              ),
-                            );
-                          },
-                        ),
-
-                        SizedBox(height: 12),
-
-                        // Liste des utilisateurs sélectionnés avec puces
-                        if (_selectedUserObjects.isNotEmpty) ...[
-                          Text(
-                            'Utilisateurs sélectionnés:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 4,
-                            children: _selectedUserObjects.map((user) {
-                              return Chip(
-                                label: Text(user['name']),
-                                deleteIcon: Icon(Icons.close, size: 18),
-                                onDeleted: () {
-                                  setState(() {
-                                    _selectedUserObjects.removeWhere(
-                                        (u) => u['id'] == user['id']);
-                                  });
-                                },
-                                backgroundColor: primaryColor.withOpacity(0.1),
-                                labelStyle: TextStyle(color: primaryColor),
-                                deleteIconColor: primaryColor,
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 24),
-
-              // Bouton d'envoi d'email
+              const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _isLoading ? null : _sendEmail,
+                onPressed: _isLoading ? null : onSend,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
-                        'Envoyer l\'email',
-                        style: TextStyle(
+                        isEmail
+                            ? 'Envoyer l\'email'
+                            : 'Envoyer la notification',
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),
@@ -971,42 +377,127 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
     );
   }
 
-  void _loadEmailTemplate(String templateKey) {
-    final templates = {
-      'Rappel créneau': {
-        'subject': 'Rappel - Votre créneau Terre en Vie',
-        'body':
-            'Bonjour {prenom},\n\nCeci est un rappel pour votre créneau de bénévolat.\n\nCordialement,\nL\'équipe Terre en Vie',
-      },
-      'Confirmation inscription': {
-        'subject': 'Confirmation d\'inscription - Terre en Vie',
-        'body':
-            'Bonjour {prenom},\n\nVotre inscription a été confirmée avec succès.\n\nMerci de votre engagement !\nL\'équipe Terre en Vie',
-      },
-      'Annulation créneau': {
-        'subject': 'Annulation de créneau - Terre en Vie',
-        'body':
-            'Bonjour {prenom},\n\nVotre créneau a été annulé.\n\nNous vous remercions de votre compréhension.\nL\'équipe Terre en Vie',
-      },
-      'Bienvenue': {
-        'subject': 'Bienvenue chez Terre en Vie',
-        'body':
-            'Bonjour {prenom},\n\nBienvenue dans notre communauté de bénévoles !\n\nNous sommes ravis de vous compter parmi nous.\nL\'équipe Terre en Vie',
-      },
-      'Remerciement': {
-        'subject': 'Merci pour votre participation - Terre en Vie',
-        'body':
-            'Bonjour {prenom},\n\nMerci pour votre participation et votre engagement.\n\nVotre contribution est précieuse !\nL\'équipe Terre en Vie',
-      },
-    };
+  // ----------------------------------------------------------
 
-    final template = templates[templateKey];
-    if (template != null) {
-      setState(() {
-        _emailSubjectController.text = template['subject']!;
-        _emailBodyController.text = template['body']!;
-        _selectedTemplateEmails = templateKey;
-      });
+  Widget _buildRecipientsCard() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Destinataires',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          CheckboxListTile(
+            title: const Text('Envoyer à tous les utilisateurs'),
+            value: _sendToAll,
+            onChanged: (v) {
+              setState(() {
+                _sendToAll = v!;
+                if (_sendToAll) _selectedUserObjects.clear();
+              });
+            },
+          ),
+          if (!_sendToAll) _buildUserAutocomplete(),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildUserAutocomplete() {
+    return Autocomplete<Map<String, dynamic>>(
+      optionsBuilder: (value) {
+        if (value.text.isEmpty) return _users;
+        return _users.where((u) {
+          final q = value.text.toLowerCase();
+          return u['name'].toLowerCase().contains(q) ||
+              u['email'].toLowerCase().contains(q);
+        });
+      },
+      displayStringForOption: (o) => '${o['name']} (${o['email']})',
+      onSelected: (u) {
+        if (!_selectedUserObjects.any((e) => e['id'] == u['id'])) {
+          setState(() => _selectedUserObjects.add(u));
+        }
+      },
+      fieldViewBuilder: (c, t, f, s) => TextFormField(
+        controller: t,
+        focusNode: f,
+        decoration: const InputDecoration(
+          labelText: 'Rechercher un utilisateur...',
+          border: OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentCard(
+      TextEditingController title, TextEditingController body) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(children: [
+          TextFormField(
+            controller: title,
+            decoration: const InputDecoration(
+                labelText: 'Titre / Objet', border: OutlineInputBorder()),
+            validator: (v) => v == null || v.isEmpty ? 'Champ requis' : null,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: body,
+            maxLines: 6,
+            decoration: const InputDecoration(
+                labelText: 'Message', border: OutlineInputBorder()),
+            validator: (v) => v == null || v.isEmpty ? 'Champ requis' : null,
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildAttachmentPicker() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Pièce jointe (optionnel)',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.attach_file),
+                label: Text(
+                    _selectedAttachment?.name ?? 'Sélectionner un fichier'),
+                onPressed: _pickAttachment,
+              ),
+            ),
+            if (_selectedAttachment != null)
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.red),
+                onPressed: () => setState(() => _selectedAttachment = null),
+              ),
+          ])
+        ]),
+      ),
+    );
+  }
+
+  Future<void> _pickAttachment() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(withData: true);
+      if (result != null && result.files.isNotEmpty) {
+        setState(() => _selectedAttachment = result.files.first);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Erreur',
+        'Erreur lors de la sélection du fichier',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }

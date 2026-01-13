@@ -64,10 +64,7 @@ class WebEmailService {
               ]
             }
           ],
-          'from': {
-            'email': 'communication.terreenvie@gmail.com',
-            'name': 'Terre en Vie'
-          },
+          'from': {'email': 'benevole@terreenvie.com', 'name': 'Terre en Vie'},
           'subject': subject,
           'content': [
             {'type': 'text/plain', 'value': body}

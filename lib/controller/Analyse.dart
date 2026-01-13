@@ -88,39 +88,62 @@ class _AnalyseState extends State<Analyse> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _loadAllData() async {
+    if (!mounted) return;
+
     setState(() {
       isLoading = true;
     });
-    final posHorSnapshot = await FirebaseFirestore.instance
-        .collection('pos_hor')
-        .where('jour', isEqualTo: groupValue)
-        .get();
-    posHorData = posHorSnapshot.docs.map((d) => d.data()).toList();
 
-    final posBenSnapshot =
-        await FirebaseFirestore.instance.collection('pos_ben').get();
-    posBenData = posBenSnapshot.docs.map((d) => d.data()).toList();
+    try {
+      final posHorSnapshot = await FirebaseFirestore.instance
+          .collection('pos_hor')
+          .where('jour', isEqualTo: groupValue)
+          .get();
 
-    final usersSnapshot =
-        await FirebaseFirestore.instance.collection('users').get();
-    usersData = usersSnapshot.docs.map((d) => d.data()).toList();
+      if (!mounted) return;
 
-    // Debug: Afficher la structure des données
-    print('📊 Données chargées:');
-    print('  - posBenData: ${posBenData.length} éléments');
-    print('  - usersData: ${usersData.length} éléments');
-    if (usersData.isNotEmpty) {
-      print('  - Clés dans usersData[0]: ${usersData.first.keys.toList()}');
-      print('  - Exemple user: ${usersData.first}');
+      posHorData = posHorSnapshot.docs.map((d) => d.data()).toList();
+
+      final posBenSnapshot =
+          await FirebaseFirestore.instance.collection('pos_ben').get();
+
+      if (!mounted) return;
+
+      posBenData = posBenSnapshot.docs.map((d) => d.data()).toList();
+
+      final usersSnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+
+      if (!mounted) return;
+
+      usersData = usersSnapshot.docs.map((d) => d.data()).toList();
+
+      // Debug: Afficher la structure des données
+      if (mounted) {
+        print('📊 Données chargées:');
+        print('  - posBenData: ${posBenData.length} éléments');
+        print('  - usersData: ${usersData.length} éléments');
+        if (usersData.isNotEmpty) {
+          print('  - Clés dans usersData[0]: ${usersData.first.keys.toList()}');
+          print('  - Exemple user: ${usersData.first}');
+        }
+        if (posBenData.isNotEmpty) {
+          print(
+              '  - Clés dans posBenData[0]: ${posBenData.first.keys.toList()}');
+          print('  - Exemple posBen: ${posBenData.first}');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        print('❌ Erreur lors du chargement des données: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
-    if (posBenData.isNotEmpty) {
-      print('  - Clés dans posBenData[0]: ${posBenData.first.keys.toList()}');
-      print('  - Exemple posBen: ${posBenData.first}');
-    }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   @override

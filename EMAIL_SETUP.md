@@ -29,7 +29,7 @@
    # Configuration Email - Terre en Vie
    EMAIL_SMTP_SERVER=smtp.gmail.com
    EMAIL_SMTP_PORT=587
-   EMAIL_USERNAME=communication.terreenvie@gmail.com
+   EMAIL_USERNAME=benevole@terreenvie.com
    EMAIL_PASSWORD=votre_vrai_mot_de_passe_d_application
    EMAIL_SENDER_NAME=Terre en Vie
    ```
