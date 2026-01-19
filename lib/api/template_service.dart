@@ -19,6 +19,7 @@ class TemplateService {
     '{role}': 'Rôle de l\'utilisateur',
     '{date}': 'Date actuelle',
     '{heure}': 'Heure actuelle',
+    '{creneaux}': 'Liste des créneaux de l\'utilisateur',
   };
 
   // Remplacer les variables dans un template
@@ -42,6 +43,8 @@ class TemplateService {
       result =
           result.replaceAll('{debut}', creneauData['debut']?.toString() ?? '');
       result = result.replaceAll('{fin}', creneauData['fin']?.toString() ?? '');
+      result =
+          result.replaceAll('{creneaux}', creneauData['creneaux']?.toString() ?? '');
     }
 
     // Variables de date/heure

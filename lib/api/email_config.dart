@@ -52,5 +52,10 @@ class EmailConfig {
       'body':
           'Bonjour {prenom},\n\nMerci pour votre engagement et votre dévouement.\n\nVotre contribution est précieuse pour notre association.\nL\'équipe Terre en Vie',
     },
+    'Résumé inscriptions': {
+      'subject': 'Résumé de vos inscriptions - Terre en Vie',
+      'body':
+          'Bonjour {prenom},\n\nVoici le résumé de vos inscriptions :\n{creneaux}\n\nÀ bientôt,\nL\'équipe Terre en Vie',
+    },
   };
 }

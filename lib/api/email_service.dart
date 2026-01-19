@@ -10,8 +10,8 @@ class EmailService {
   EmailService._internal();
 
   final TemplateService _templateService = TemplateService();
-
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
+  static const int _whereInLimit = 10;
 
   /* ----------------------------------------------------
      1) EMAIL SIMPLE
@@ -21,6 +21,7 @@ class EmailService {
     required String to,
     required String subject,
     required String body,
+    Map<String, dynamic>? attachment, // ⚡ pièce jointe optionnelle
   }) async {
     try {
       final callable = _functions.httpsCallable('sendEmail');
@@ -29,6 +30,7 @@ class EmailService {
         'to': to,
         'subject': subject,
         'body': body,
+        'attachment': attachment,
       });
 
       return result.data['success'] == true;
@@ -46,17 +48,13 @@ class EmailService {
     required List<String> emails,
     required String subject,
     required String body,
+    Map<String, dynamic>? attachment,
   }) async {
     try {
-      // Vérifier l'authentification avant l'appel
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        throw Exception(
-            'Utilisateur non authentifié. Veuillez vous connecter.');
+        throw Exception('Utilisateur non authentifié.');
       }
-
-      print('📧 Appel de sendBulkEmails avec ${emails.length} emails');
-      print('📧 Utilisateur authentifié: ${user.uid}');
 
       final callable = _functions.httpsCallable('sendBulkEmails');
 
@@ -64,19 +62,12 @@ class EmailService {
         'emails': emails,
         'subject': subject,
         'body': body,
+        'attachment': attachment,
       });
 
-      print('📧 Résultat reçu: ${result.data}');
       return result.data['success'] == true;
-    } on FirebaseFunctionsException catch (e) {
-      print('❌ Firebase Functions error:');
-      print('❌ Code: ${e.code}');
-      print('❌ Message: ${e.message}');
-      print('❌ Details: ${e.details}');
-      throw Exception('Erreur Firebase Functions (${e.code}): ${e.message}');
     } catch (e) {
       print('❌ sendBulkEmails error: $e');
-      print('❌ Error type: ${e.runtimeType}');
       rethrow;
     }
   }
@@ -89,6 +80,7 @@ class EmailService {
     required String subject,
     required String bodyTemplate,
     Map<String, dynamic>? creneauData,
+    Map<String, dynamic>? attachment,
   }) async {
     try {
       final usersSnapshot =
@@ -112,6 +104,7 @@ class EmailService {
         'subject': subject,
         'bodyTemplate': bodyTemplate,
         'creneauData': creneauData,
+        'attachment': attachment,
       });
 
       return result.data['success'] == true;
@@ -130,6 +123,7 @@ class EmailService {
     required String subject,
     required String bodyTemplate,
     Map<String, dynamic>? creneauData,
+    Map<String, dynamic>? attachment,
   }) async {
     try {
       final usersSnapshot = await FirebaseFirestore.instance
@@ -155,6 +149,7 @@ class EmailService {
         'subject': subject,
         'bodyTemplate': bodyTemplate,
         'creneauData': creneauData,
+        'attachment': attachment,
       });
 
       return result.data['success'] == true;
@@ -165,13 +160,150 @@ class EmailService {
   }
 
   /* ----------------------------------------------------
-     5) EMAIL DE BIENVENUE
+     5) RÉSUMÉ D'INSCRIPTIONS - SÉLECTION
+  ---------------------------------------------------- */
+
+  Future<bool> sendRegistrationSummaryToSpecificUsers({
+    required List<String> userIds,
+    required String subject,
+    required String bodyTemplate,
+    Map<String, dynamic>? attachment,
+  }) async {
+    try {
+      final users = await _getUsersByIds(userIds);
+      if (users.isEmpty) return false;
+
+      final usersJson = <Map<String, dynamic>>[];
+      for (final user in users) {
+        final userId = user['id'] as String;
+        final creneaux = await _templateService.getUserCreneaux(userId);
+        final creneauxText = _buildCreneauxText(creneaux);
+
+        usersJson.add({
+          'email': user['email'] ?? '',
+          'prenom': user['prenom'] ?? '',
+          'nom': user['nom'] ?? '',
+          'profil': user['profil'] ?? '',
+          'creneauxText': creneauxText,
+        });
+      }
+
+      final callable = _functions.httpsCallable('sendPersonalizedEmails');
+      final result = await callable.call({
+        'users': usersJson,
+        'subject': subject,
+        'bodyTemplate': bodyTemplate,
+        'attachment': attachment,
+      });
+
+      return result.data['success'] == true;
+    } catch (e) {
+      print('❌ sendRegistrationSummaryToSpecificUsers error: $e');
+      return false;
+    }
+  }
+
+  /* ----------------------------------------------------
+     6) RÉSUMÉ D'INSCRIPTIONS - TOUS
+  ---------------------------------------------------- */
+
+  Future<bool> sendRegistrationSummaryToAllUsers({
+    required String subject,
+    required String bodyTemplate,
+    Map<String, dynamic>? attachment,
+  }) async {
+    try {
+      final usersSnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+
+      final users = usersSnapshot.docs
+          .map((doc) => {
+                'id': doc.id,
+                ...doc.data(),
+              })
+          .toList();
+
+      final usersJson = <Map<String, dynamic>>[];
+      for (final user in users) {
+        final userId = user['id'] as String;
+        final creneaux = await _templateService.getUserCreneaux(userId);
+        final creneauxText = _buildCreneauxText(creneaux);
+
+        usersJson.add({
+          'email': user['email'] ?? '',
+          'prenom': user['prenom'] ?? '',
+          'nom': user['nom'] ?? '',
+          'profil': user['profil'] ?? '',
+          'creneauxText': creneauxText,
+        });
+      }
+
+      final callable = _functions.httpsCallable('sendPersonalizedEmails');
+      final result = await callable.call({
+        'users': usersJson,
+        'subject': subject,
+        'bodyTemplate': bodyTemplate,
+        'attachment': attachment,
+      });
+
+      return result.data['success'] == true;
+    } catch (e) {
+      print('❌ sendRegistrationSummaryToAllUsers error: $e');
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _getUsersByIds(List<String> userIds) async {
+    final List<Map<String, dynamic>> users = [];
+    if (userIds.isEmpty) return users;
+
+    for (var i = 0; i < userIds.length; i += _whereInLimit) {
+      final chunk =
+          userIds.sublist(i, (i + _whereInLimit).clamp(0, userIds.length));
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+
+      for (final doc in snapshot.docs) {
+        users.add({
+          'id': doc.id,
+          ...doc.data(),
+        });
+      }
+    }
+
+    return users;
+  }
+
+  String _buildCreneauxText(List<Map<String, dynamic>> creneaux) {
+    if (creneaux.isEmpty) {
+      return 'Aucun créneau enregistré.';
+    }
+    final lines = creneaux.map((c) {
+      final jour = c['jour'] ?? '';
+      final poste = c['poste'] ?? '';
+      final debut = c['debut'] ?? '';
+      final fin = c['fin'] ?? '';
+      final horaires =
+          (debut.toString().isNotEmpty || fin.toString().isNotEmpty)
+              ? '$debut - $fin'
+              : '';
+      return '- $jour | $poste | $horaires';
+    }).toList();
+
+    return lines.join('\n');
+  }
+
+  /* ----------------------------------------------------
+     7) EMAIL DE BIENVENUE
   ---------------------------------------------------- */
 
   Future<bool> sendWelcomeEmail({
     required String email,
     required String prenom,
     required String nom,
+    Map<String, dynamic>? attachment,
   }) async {
     try {
       final template = TemplateService.predefinedTemplates['bienvenue'];
@@ -193,6 +325,7 @@ class EmailService {
         to: email,
         subject: subject,
         body: body,
+        attachment: attachment,
       );
     } catch (e) {
       print('❌ sendWelcomeEmail error: $e');

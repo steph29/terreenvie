@@ -5,7 +5,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../api/fcm_service.dart';
 import '../api/email_service.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'dart:convert'; // pour base64Encode
+import '../api/email_config.dart';
 
 class AdminNotificationsPage extends StatefulWidget {
   const AdminNotificationsPage({Key? key}) : super(key: key);
@@ -33,11 +34,14 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
 
   List<Map<String, dynamic>> _users = [];
   List<Map<String, dynamic>> _selectedUserObjects = [];
+  TextEditingController? _userSearchController;
+  FocusNode? _userSearchFocusNode;
 
   bool _sendToAll = false;
 
   bool _useTemplatesNotifications = false;
   bool _useTemplatesEmails = false;
+  String? _selectedEmailTemplateKey;
 
   PlatformFile? _selectedAttachment;
 
@@ -166,68 +170,90 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
             'Utilisateur non authentifié. Veuillez vous reconnecter.');
       }
 
-      // 🔹 Forcer le refresh du token pour être sûr qu'il est valide
+      // 🔹 Refresh token pour debug / web
       final idToken = await user.getIdToken(true);
       print('USER ID: ${user.uid}');
-      print('ID TOKEN: ${idToken?.substring(0, 20) ?? 'null'}...');
-      // juste un aperçu pour debug
+      if (idToken != null) {
+        print('ID TOKEN: ${idToken.substring(0, 20)}...');
+      }
 
       final subject = _emailSubjectController.text.trim();
       final body = _emailBodyController.text.trim();
 
-      // Récupérer les emails sélectionnés si on n'envoie pas à tous
+      // Préparer la pièce jointe si présente
+      Map<String, dynamic>? attachmentMap;
+      if (_selectedAttachment != null && _selectedAttachment!.bytes != null) {
+        attachmentMap = {
+          'content': base64Encode(_selectedAttachment!.bytes!),
+          'filename': _selectedAttachment!.name,
+          'type': _selectedAttachment!.extension == null
+              ? 'application/octet-stream'
+              : 'application/${_selectedAttachment!.extension}',
+        };
+      }
+
+      // Destinataires
       final selectedEmails = !_sendToAll
           ? _selectedUserObjects.map((u) => u['email'] as String).toList()
           : null;
 
-      // Créer un callable avec le token (utile surtout pour Web)
-      final callable = FirebaseFunctions.instance.httpsCallable(
-        _useTemplatesEmails ? 'sendPersonalizedEmails' : 'sendBulkEmails',
-        options: HttpsCallableOptions(
-            // headers: {'Authorization': 'Bearer $idToken'}, // Web uniquement
-            ),
-      );
-
       if (_useTemplatesEmails) {
         // ----- EMAILS PERSONNALISÉS -----
-        if (_selectedAttachment != null) {
-          Get.snackbar(
-            'Info',
-            'Les pièces jointes ne sont pas encore supportées pour les emails personnalisés.',
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
-          );
-        }
+        if (_selectedEmailTemplateKey == 'Résumé inscriptions') {
+          final selectedUserIds =
+              _selectedUserObjects.map((u) => u['id'] as String).toList();
 
-        if (_sendToAll) {
-          await _emailService.sendPersonalizedToAllUsers(
-            subject: subject,
-            bodyTemplate: body,
-          );
-        } else if (selectedEmails != null && selectedEmails.isNotEmpty) {
-          await _emailService.sendPersonalizedToSpecificUsers(
-            selectedEmails: selectedEmails,
-            subject: subject,
-            bodyTemplate: body,
-          );
+          if (_sendToAll) {
+            await _emailService.sendRegistrationSummaryToAllUsers(
+              subject: subject,
+              bodyTemplate: body,
+              attachment: attachmentMap,
+            );
+          } else if (selectedUserIds.isNotEmpty) {
+            await _emailService.sendRegistrationSummaryToSpecificUsers(
+              userIds: selectedUserIds,
+              subject: subject,
+              bodyTemplate: body,
+              attachment: attachmentMap,
+            );
+          } else {
+            throw Exception('Aucun destinataire sélectionné pour le résumé.');
+          }
         } else {
-          throw Exception(
-              'Aucun destinataire sélectionné pour les emails personnalisés.');
+          if (_sendToAll) {
+            await _emailService.sendPersonalizedToAllUsers(
+              subject: subject,
+              bodyTemplate: body,
+              attachment: attachmentMap,
+            );
+          } else if (selectedEmails != null && selectedEmails.isNotEmpty) {
+            await _emailService.sendPersonalizedToSpecificUsers(
+              selectedEmails: selectedEmails,
+              subject: subject,
+              bodyTemplate: body,
+              attachment: attachmentMap,
+            );
+          } else {
+            throw Exception(
+                'Aucun destinataire sélectionné pour les emails personnalisés.');
+          }
         }
       } else {
-        // ----- EMAILS SIMPLES -----
+        // ----- EMAILS SIMPLES / EN MASSE -----
         if (_sendToAll) {
           final allEmails = _users.map((u) => u['email'] as String).toList();
           await _emailService.sendBulkEmails(
             emails: allEmails,
             subject: subject,
             body: body,
+            attachment: attachmentMap,
           );
         } else if (selectedEmails != null && selectedEmails.isNotEmpty) {
           await _emailService.sendBulkEmails(
             emails: selectedEmails,
             subject: subject,
             body: body,
+            attachment: attachmentMap,
           );
         } else {
           throw Exception('Aucun destinataire sélectionné pour les emails.');
@@ -263,6 +289,8 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
       _selectedUserObjects.clear();
       _sendToAll = false;
       _selectedAttachment = null;
+      _useTemplatesEmails = false;
+      _selectedEmailTemplateKey = null;
     });
   }
 
@@ -345,9 +373,13 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildRecipientsCard(),
+              _buildRecipientsCard(isEmail: isEmail),
               const SizedBox(height: 16),
-              _buildContentCard(titleController, bodyController),
+              _buildContentCard(
+                titleController,
+                bodyController,
+                isEmail: isEmail,
+              ),
               if (isEmail) ...[
                 const SizedBox(height: 16),
                 _buildAttachmentPicker(),
@@ -379,13 +411,13 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
 
   // ----------------------------------------------------------
 
-  Widget _buildRecipientsCard() {
+  Widget _buildRecipientsCard({required bool isEmail}) {
     return Card(
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Destinataires',
+          Text(isEmail ? 'Destinataires (sélection multiple)' : 'Destinataires',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           CheckboxListTile(
             title: const Text('Envoyer à tous les utilisateurs'),
@@ -397,8 +429,72 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
               });
             },
           ),
-          if (!_sendToAll) _buildUserAutocomplete(),
+          if (!_sendToAll)
+            isEmail ? _buildUserMultiSelect() : _buildUserAutocomplete(),
         ]),
+      ),
+    );
+  }
+
+  Widget _buildUserMultiSelect() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_selectedUserObjects.isNotEmpty) _buildSelectedUsersChips(),
+        Autocomplete<Map<String, dynamic>>(
+          optionsBuilder: (value) {
+            final query = value.text.toLowerCase();
+            final candidates = _users.where((u) {
+              if (_selectedUserObjects.any((s) => s['id'] == u['id'])) {
+                return false;
+              }
+              if (query.isEmpty) return true;
+              return u['name'].toLowerCase().contains(query) ||
+                  u['email'].toLowerCase().contains(query);
+            }).toList();
+            return candidates;
+          },
+          displayStringForOption: (o) => '${o['name']} (${o['email']})',
+          onSelected: (u) {
+            if (!_selectedUserObjects.any((e) => e['id'] == u['id'])) {
+              setState(() => _selectedUserObjects.add(u));
+              _userSearchController?.clear();
+              _userSearchFocusNode?.requestFocus();
+            }
+          },
+          fieldViewBuilder: (c, t, f, s) {
+            _userSearchController ??= t;
+            _userSearchFocusNode ??= f;
+            return TextFormField(
+              controller: t,
+              focusNode: f,
+              decoration: const InputDecoration(
+                labelText: 'Ajouter un utilisateur...',
+                border: OutlineInputBorder(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectedUsersChips() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: _selectedUserObjects.map((u) {
+          return InputChip(
+            label: Text('${u['name']}'),
+            onDeleted: () {
+              setState(() {
+                _selectedUserObjects.removeWhere((e) => e['id'] == u['id']);
+              });
+            },
+          );
+        }).toList(),
       ),
     );
   }
@@ -431,12 +527,56 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
   }
 
   Widget _buildContentCard(
-      TextEditingController title, TextEditingController body) {
+    TextEditingController title,
+    TextEditingController body, {
+    required bool isEmail,
+  }) {
     return Card(
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(children: [
+          if (isEmail) ...[
+            SwitchListTile(
+              title: const Text('Utiliser un template d’email'),
+              value: _useTemplatesEmails,
+              onChanged: (v) {
+                setState(() {
+                  _useTemplatesEmails = v;
+                  if (!_useTemplatesEmails) {
+                    _selectedEmailTemplateKey = null;
+                  }
+                });
+              },
+            ),
+            if (_useTemplatesEmails)
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'Template d’email',
+                  border: OutlineInputBorder(),
+                ),
+                value: _selectedEmailTemplateKey,
+                items: EmailConfig.emailTemplates.keys
+                    .map((key) => DropdownMenuItem(
+                          value: key,
+                          child: Text(key),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedEmailTemplateKey = value;
+                  });
+                  _applyEmailTemplate(value, title, body);
+                },
+                validator: (value) {
+                  if (_useTemplatesEmails && value == null) {
+                    return 'Veuillez sélectionner un template';
+                  }
+                  return null;
+                },
+              ),
+            const SizedBox(height: 16),
+          ],
           TextFormField(
             controller: title,
             decoration: const InputDecoration(
@@ -454,6 +594,19 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage>
         ]),
       ),
     );
+  }
+
+  void _applyEmailTemplate(
+    String? templateKey,
+    TextEditingController title,
+    TextEditingController body,
+  ) {
+    if (templateKey == null) return;
+    final template = EmailConfig.emailTemplates[templateKey];
+    if (template == null) return;
+
+    title.text = template['subject'] ?? '';
+    body.text = template['body'] ?? '';
   }
 
   Widget _buildAttachmentPicker() {
